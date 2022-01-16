@@ -1,0 +1,9 @@
+city,exp,node,cycle,ro,id,type_cod,name_exp
+cps,n01,1,1,1.33,31,a,Plant 1
+cps,n02,2,1,1.33,42,a,Plant 2
+cps,n03,1,2,1.33,31,a,Plant 3
+cps,n04,2,2,1.33,42,a,Plant 4
+cps,n05,1,3,1.33,31,a,Plant 5
+cps,n06,2,3,1.33,42,a,Plant 6
+cps,n07,1,4,2.22,30,a,Plant 7
+cps,n08,2,4,2.22,54,a,Plant 8

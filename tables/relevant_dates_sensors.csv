@@ -1,0 +1,66 @@
+cycle,node,sensor_id,type,event,date,comment
+1,both,,mass,zeroing_start,2019-02-01,
+1,both,,mass,zeroing_end,2019-02-15,
+1,both,,mass,ref_zero,2019-02-01,
+2,both,,mass,ref_zero,2019-07-13,
+3,both,,mass,ref_zero,2020-11-05,
+4,both,,mass,ref_zero,2021-03-13,
+1,both,,wc,lag_start,2019-02-22,1
+1,both,,wc,lag_end,2019-04-05,1
+1,2,,pi,lead_start,2019-02-17,1
+1,2,,pi,lead_end,2019-02-25,1
+1,both,,mass,lead_start,2019-07-12,1
+,both,,mass,lead_end,2020-10-19,1
+,both,,mass,lead_start,2021-03-09,2
+,both,,mass,lead_end,2021-06-15,2
+,both,,radio,lead_start,2019-10-20,0
+,both,,radio,lead_end,2019-10-28,0
+1,1,,mass,mass_inclusion,2019-03-08,camera
+1,2,,mass,mass_inclusion,2019-02-28,camera
+1,both,,mass,mass_inclusion,2019-02-01,bucket
+1,both,,mass,mass_inclusion,2019-02-02,bucket
+1,both,,mass,mass_inclusion,2019-02-03,bucket
+1,both,,mass,mass_inclusion,2019-02-04,bucket
+1,both,,mass,mass_inclusion,2019-02-05,bucket
+1,both,,mass,mass_inclusion,2019-02-06,bucket
+1,both,,mass,mass_inclusion,2019-02-07,bucket
+1,both,,mass,mass_inclusion,2019-02-08,bucket
+1,both,,mass,mass_inclusion,2019-02-09,bucket
+1,both,,mass,mass_inclusion,2019-02-10,bucket
+1,both,,mass,mass_inclusion,2019-02-11,bucket
+1,both,,mass,mass_inclusion,2019-02-12,bucket
+1,both,,mass,mass_inclusion,2019-02-13,bucket
+1,both,,mass,mass_inclusion,2019-02-14,bucket
+1,both,,mass,mass_inclusion,2019-02-15,bucket
+,both,,mass,calibration_start,2019-05-06,no bucket and no plastic vase
+,both,,mass,calibration_end,2019-05-13,no bucket and no plastic vase
+,1,,mass,calibration_start,2019-05-13,bucket and no plastic vase - wrong eval
+,2,,mass,calibration_start,2019-05-13,standard - wrong eval
+,both,,mass,calibration_end,2019-05-23,
+,1,,mass,calibration_start,2019-05-23,bucket and no plastic vase
+,2,,mass,calibration_start,2019-05-23,standard
+,both,,mass,calibration_end,2019-06-03,
+,both,,wc,calibration_start,2019-06-04,"mass refers only to substrate, plus water and sensor"
+,both,,wc,calibration_end,2019-06-04,"mass refers only to substrate, plus water and sensor"
+2,2,,radio,down_start,2019-07-12,0
+2,2,,radio,down_end,2019-07-23,0
+3,1,,radio,down_start,2021-01-09,1
+3,1,,radio,down_end,2021-01-12,1
+3,1,,radio,lead_start,2020-10-18,1
+3,1,,radio,lead_end,2020-11-23,1
+3,2,,radio,lead_start,2020-10-18,2
+3,2,,radio,lead_end,2020-11-23,2
+3,1,,radio,down_start,2021-02-04,2
+3,1,,radio,down_end,2021-02-04,2
+3,2,,radio,down_start,2021-02-04,3
+3,2,,radio,down_end,2021-02-04,3
+4,1,,radio,down_start,2021-04-29,4
+4,1,,radio,down_end,2021-04-29,4
+4,2,,radio,down_start,2021-04-29,5
+4,2,,radio,down_end,2021-04-29,5
+4,2,,radio,down_start,2021-04-07,6
+4,2,,radio,down_end,2021-04-08,6
+4,2,17,radio,down_start,2021-03-19,7
+4,2,17,radio,down_end,2021-04-09,7
+4,2,17,radio,down_start,2021-04-22,8
+4,2,17,radio,down_end,2021-04-23,8

@@ -1,0 +1,119 @@
+param,value,cultivar,source,type
+HI,0.5,agriset761,Zhao et al 2018,cultivar
+I50_maxH,100,agriset761,Zhao et al 2018,species
+I50_maxW,5,agriset761,Zhao et al 2018,species
+I50A,550,agriset761,Zhao et al 2018,cultivar
+I50B,300,agriset761,Zhao et al 2018,cultivar
+RUE,1,agriset761,Zhao et al 2018,species
+S_CO2,0.07,agriset761,Zhao et al 2018,species
+S_water,2.5,agriset761,Zhao et al 2018,species
+T_base,6,agriset761,Zhao et al 2018,species
+T_ext,45,agriset761,Zhao et al 2018,species
+T_heat,32,agriset761,Zhao et al 2018,species
+T_opt,26,agriset761,Zhao et al 2018,species
+T_sum,2300,agriset761,Zhao et al 2018,cultivar
+HI,0.68,sunnysd,Zhao et al 2018,cultivar
+I50_maxH,100,sunnysd,Zhao et al 2018,species
+I50_maxW,5,sunnysd,Zhao et al 2018,species
+I50A,520,sunnysd,Zhao et al 2018,cultivar
+I50B,400,sunnysd,Zhao et al 2018,cultivar
+K,0.8,sunnysd,Zhao et al 2018,species
+K,0.8,sunnysd,Zhao et al 2018,species
+RUE,1,sunnysd,Zhao et al 2018,species
+S_CO2,0.07,sunnysd,Zhao et al 2018,species
+S_water,2.5,sunnysd,Zhao et al 2018,species
+T_base,6,sunnysd,Zhao et al 2018,species
+T_ext,45,sunnysd,Zhao et al 2018,species
+T_heat,32,sunnysd,Zhao et al 2018,species
+T_opt,26,sunnysd,Zhao et al 2018,species
+T_sum,2800,sunnysd,Zhao et al 2018,cultivar
+,,,,
+HI,0.68,fixed,Zhao et al 2018,cultivar
+I50_maxH,100,fixed,Zhao et al 2018,species
+I50_maxW,5,fixed,Zhao et al 2018,species
+I50A,520,fixed,Zhao et al 2018,cultivar
+I50B,400,fixed,Zhao et al 2018,cultivar
+K,0.8,fixed,Zhao et al 2018,species
+RUE,1,fixed,Zhao et al 2018,species
+S_CO2,0.07,fixed,Zhao et al 2018,species
+S_water,2.5,fixed,Zhao et al 2018,species
+T_base,6,fixed,Zhao et al 2018,species
+T_ext,45,fixed,Zhao et al 2018,species
+T_heat,32,fixed,Zhao et al 2018,species
+T_opt,26,fixed,Zhao et al 2018,species
+T_sum,2800,fixed,Zhao et al 2018,cultivar
+,,,,
+K,0.58,all,,
+HI,0.3,gnvMod,changeable,cultivar
+I50_maxH,100,gnvMod,fixed,species
+I50_maxW,5,gnvMod,fixed,species
+I50A,520,gnvMod,changeable,cultivar
+I50B,400,gnvMod,changeable,cultivar
+RUE,1,gnvMod,fixed,species
+S_CO2,0.07,gnvMod,fixed,species
+S_water,2.5,gnvMod,fixed,species
+T_base,6,gnvMod,fixed,species
+T_ext,45,gnvMod,fixed,species
+T_heat,32,gnvMod,fixed,species
+T_opt,26,gnvMod,fixed,species
+T_sum,8000,gnvMod,changeable,cultivar
+,,,,
+K,0.58,gnv,,species
+HI,0.3,gnv,,cultivar
+I50_maxH,100,gnv,,species
+I50_maxW,5,gnv,,species
+I50A,1200,gnv,,cultivar
+I50B,400,gnv,,cultivar
+RUE,2,gnv,,species
+S_CO2,0.07,gnv,,species
+S_water,2.5,gnv,,species
+T_base,6,gnv,,species
+T_ext,45,gnv,,species
+T_heat,32,gnv,,species
+T_opt,26,gnv,,species
+T_sum,8000,gnv,,cultivar
+,,,,
+HI,0.35,cps4,,cultivar
+I50_maxH,100,cps4,,species
+I50_maxW,5,cps4,,species
+I50A,950,cps4,,cultivar
+I50B,400,cps4,,cultivar
+K,0.58,cps4,,species
+RUE,2,cps4,,species
+S_CO2,0.07,cps4,,species
+S_water,2.5,cps4,,species
+T_base,6,cps4,,species
+T_ext,45,cps4,,species
+T_heat,32,cps4,,species
+T_opt,25,cps4,,species
+T_sum,5000,cps4,,cultivar
+,,,,
+K,0.58,gnvopt,,species
+HI,0.155441995,gnvopt,,cultivar
+I50_maxH,100,gnvopt,,species
+I50_maxW,5,gnvopt,,species
+I50A,629.3819352,gnvopt,,cultivar
+I50B,400,gnvopt,,cultivar
+RUE,0.906404288,gnvopt,,species
+S_CO2,0.07,gnvopt,,species
+S_water,2.5,gnvopt,,species
+T_base,9.442901167,gnvopt,,species
+T_ext,49.49621283,gnvopt,,species
+T_heat,31.13669136,gnvopt,,species
+T_opt,26,gnvopt,,species
+T_sum,4692.712433,gnvopt,,cultivar
+,,,,
+K,0.58,cpsopt,,species
+HI,0.345309715,cpsopt,,cultivar
+I50_maxH,100,cpsopt,,species
+I50_maxW,5,cpsopt,,species
+I50A,737.3518871,cpsopt,,cultivar
+I50B,400,cpsopt,,cultivar
+RUE,2,cpsopt,,species
+S_CO2,0.07,cpsopt,,species
+S_water,2.5,cpsopt,,species
+T_base,6.654167785,cpsopt,,species
+T_ext,49.99878696,cpsopt,,species
+T_heat,34,cpsopt,,species
+T_opt,26,cpsopt,,species
+T_sum,4876.195493,cpsopt,,cultivar

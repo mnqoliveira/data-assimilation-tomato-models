@@ -1,0 +1,43 @@
+meas_var,state_var,name_plot,var_plot,order,unit,lang
+w,w,Aboveground Dry Biomass,Aboveground biomass,8,[g D.M./m² soil],en
+w_fm,w,Aboveground Fresh Biomass,Aboveground biomass,9,[g F.M./m² soil],en
+w_fm_full,w,Fresh Biomass System,Aboveground biomass,10,[g F.M./m² soil],en
+lai_lat,w,Green Cover Side Images,Aboveground biomass,11,[m²],en
+height,w,Plant height,Aboveground biomass,12,[m],en
+wf,wf,Fruit Dry Mass,Fruit biomass,12,[g D.M./m² soil],en
+wf_fm,wf,Fruit Fresh Mass,Fruit biomass,13,[g F.M./m² soil],en
+wf_lat,wf,Fruit Side Images,Fruit biomass,14,[m²],en
+wf_lat_calib,wf,Calibration Samples - Fruit Side Images,Fruit biomass,15,[m²],en
+wm,wm,Mature Fruit Dry Mass,Mature fruit biomass,16,[g D.M./m² soil],en
+wm_fm,wm,Mature Fruit Fresh Mass,Mature fruit biomass,17,[g F.M./m² soil],en
+wm_lat,wm,Mature Fruit Side Images,Mature fruit biomass,18,[m²],en
+wm_lat_calib,wm,Calibration Samples - Mature Fruit Side Images,Mature fruit biomass,19,[m²],en
+lai,lai,Leaf Area Index,Leaf area index,3,[m² leaves/m² soil],en
+lai_lat,lai,Green Cover Side Images,Leaf area index,4,[m²],en
+lai_abv,lai,Green Cover Above Images,Leaf area index,5,[m²],en
+n,n,Number of Nodes,Number of nodes,1,[number of nodes],en
+n_lat,n,Number of Nodes Side Images,Number of nodes,2,[m²],en
+lai_lat_calib,lai,Calibration Samples - Green Cover Side Images,Leaf area index,6,[m²],en
+lai_abv_calib,lai,Calibration Samples - Green Cover Above Images,Leaf area index,7,[m²],en
+"lai_lat,lai_abv",lai,Green Cover Both Images,Leaf area index,20,[m²],en
+w,w,Biomassa seca da parte aérea,Biomassa seca da parte aérea,,[g M.S./m² solo],pt
+w_fm,w,Biomassa fresca da parte aérea,Biomassa seca da parte aérea,,[g M.F./m² solo],pt
+w_fm_full,w,Biomassa do sistema de pesagem,Biomassa seca da parte aérea,,[g M.F./m² solo],pt
+lai_lat,w,Área verde (visada lateral),Biomassa seca da parte aérea,,[m²],pt
+height,w,Altura,Biomassa seca da parte aérea,,[m],pt
+wf,wf,Biomassa seca de frutos,Biomassa seca de frutos,,[g M.S./m² solo],pt
+wf_fm,wf,Biomassa fresca de frutos,Biomassa seca de frutos,,[g M.F./m² solo],pt
+wf_lat,wf,Área de frutos total,Biomassa seca de frutos,,[m²],pt
+wf_lat_calib,wf,Área de frutos total - Amostras de Calibração,Biomassa seca de frutos,,[m²],pt
+wm,wm,Biomassa seca de frutos maduros,Biomassa seca de frutos maduros,,[g M.S./m² solo],pt
+wm_fm,wm,Biomassa fresca de frutos maduros,Biomassa seca de frutos maduros,,[g M.F./m² solo],pt
+wm_lat,wm,Área de frutos maduros,Biomassa seca de frutos maduros,,[m²],pt
+wm_lat_calib,wm,Área de frutos maduros - Amostras de Calibração,Biomassa seca de frutos maduros,,[m²],pt
+lai,lai,Índice de área foliar,Índice de área foliar,,[m² folhas/m² solo],pt
+lai_lat,lai,Área verde (visada lateral),Índice de área foliar,,[m²],pt
+lai_abv,lai,Área verde (visada superior),Índice de área foliar,,[m²],pt
+n,n,Número de nós,Número de nós,,[número de nós],pt
+n_lat,n,Número de nós - Imagens,Número de nós,,[m²],pt
+lai_lat_calib,lai,Área verde (visada lateral) - Amostras de calibração,Índice de área foliar,,[m²],pt
+lai_abv_calib,lai,Área verde (visada superior) - Amostras de calibração,Índice de área foliar,,[m²],pt
+"lai_lat,lai_abv",lai,Área verde (ambas visadas),Índice de área foliar,,[m²],pt
