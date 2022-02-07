@@ -17,20 +17,20 @@ library(zoo)
 
 # Load files --------------------------------------------------------------
 # Enquanto nao sei o que fazer com a agua, carrego os dados sem processamento
-scales_proc_mv <- read.csv("../data/observations/monitoring/scales_proc_mv.csv")
+scales_proc_mv <- read.csv("./data/observations/monitoring/scales_proc_mv.csv")
 
 # Images
-lai_lat <- read.csv("../data/observations/monitoring/lai/lai_lat_ids.csv")
-lai_abv <- read.csv("../data/observations/monitoring/lai/lai_abv_ids.csv")
-wf_lat <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_ids.csv")
-wm_lat <- read.csv("../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_ids.csv")
-height <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_ids.csv")
-n <- read.csv("../data/observations/monitoring/nodes/n_lat_ids.csv")
+lai_lat <- read.csv("./data/observations/monitoring/lai/lai_lat_ids.csv")
+lai_abv <- read.csv("./data/observations/monitoring/lai/lai_abv_ids.csv")
+wf_lat <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_ids.csv")
+wm_lat <- read.csv("./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_ids.csv")
+height <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_ids.csv")
+n <- read.csv("./data/observations/monitoring/nodes/n_lat_ids.csv")
 
 # Additional data
-codes_exp <- read.csv("../tables/codes_exp.csv")
-dates_exp <- read.csv("../data/cycle_dates.csv")
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
+dates_exp <- read.csv("./data/cycle_dates.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
 
 # Preprocess fruit images -------------------------------------------------
 # While, differently from calibration, in this case there are pictures from 
@@ -79,7 +79,7 @@ wf_lat_mod <- wf_lat %>%
 #   arrange(node, date, hour) %>%
 #   filter(hour == 4)
 
-#write.csv(dataset_assim, file = "../data/dataset_hourly.csv", row.names=FALSE)
+#write.csv(dataset_assim, file = "./data/dataset_hourly.csv", row.names=FALSE)
 
 # Version 2: Include harvested fruits and pruning days --------------------
 dataset_assim_mod <- dates_exp %>%
@@ -99,6 +99,6 @@ dataset_assim_mod <- dates_exp %>%
   mutate(doy = yday(date))
 
 write.csv(dataset_assim_mod, 
-          file = "../data/observations/monitoring/monitoring_cps.csv", 
+          file = "./data/observations/monitoring/monitoring_cps.csv", 
           row.names=FALSE)
 

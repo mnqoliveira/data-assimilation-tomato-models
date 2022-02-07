@@ -15,61 +15,69 @@ library("RColorBrewer")
 # Source functions --------------------------------------------------------
 
 # Update results
-# source("./07a-orgSimOut.R")
-# source("./07b-orgObs_plot.R")
-# source("./07c-orgAssim.R")
+# source("./data_analyses/07a-orgSimOut.R")
+# source("./data_analyses/07b-orgObs_plot.R")
+# source("./data_analyses/07c-orgAssim.R")
 
 # Load data ---------------------------------------------------------------
-load("../data/plot_theme_horiz.RData")
+load("./data/plot_theme_horiz.RData")
 
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+# Simulations
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
 # Measured
-obs_summ <- read.csv("../data/observations/monitoring/observations_proc.csv")
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv")
+obs_summ <- read.csv("./data/observations/monitoring/observations_proc.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv")
 
-#errors_filt <- read.csv("../tables/results_DA/aux_files/all_errors.csv")
-load("../tables/results_DA/aux_files/all_errors.RData")
+# Load errors
+load("./tables/results_DA/aux_files/all_errors.RData")
 errors_filt <- all_err %>%
   mutate(config = as.numeric(config))
   
-errors_simul <- read.csv("../tables/results_simul/all_errors.csv")
-info_runs <- read.csv("../tables/runs_Filter2.csv") %>%
-  rbind(read.csv("../tables/runs_Filter.csv"))
+errors_simul <- read.csv("./tables/results_simul/all_errors.csv")
+info_runs <- read.csv("./tables/runs_Filter2.csv") %>%
+  rbind(read.csv("./tables/runs_Filter.csv"))
 
-load("../tables/results_DA/aux_files/all_states.RData")
-load("../tables/results_DA/aux_files/upd_states.RData")
+#Load assimilation results
+load("./tables/results_DA/aux_files/all_states.RData")
+load("./tables/results_DA/aux_files/upd_states.RData")
 
-all_files_si <- read.csv("../tables/info_Si_org.csv")
-outputs_extreme <- read.csv("../tables/results_SA/outputs_SA.csv")
+# Load SI results
+all_files_si <- read.csv("./tables/info_Si_org.csv")
+outputs_extreme <- read.csv("./tables/results_SA/outputs_SA.csv")
 
 # Errors simul ------------------------------------------------------------
 # Calculated with observations as reference value
 errors_models <- errors_simul %>%
   filter(variable == "w" | variable == "wf" | variable == "lai" | variable == "wm") %>%
-  group_by(model, das, exp, city, calib, variable) %>%
+  group_by(model, das, exp, city, calib, variable, sensor) %>%
+  #arrange(model, city, variable, calib, exp, sensor, das) 
   mutate(se = error*error) %>%
   ungroup() %>%
-  group_by(model, exp, city, calib, variable) %>%
+  group_by(model, exp, city, calib, variable, sensor) %>%
   summarise(rmse = sqrt(mean(se)),
             me = mean(error),
             mae = mean(abs_error),
             sd_mae = sd(abs_error)
          ) %>%
   ungroup() %>%
-  arrange(model, city, variable, calib, exp) 
+  arrange(model, city, variable, calib, exp, sensor) 
 # %>%
 #   filter(variable == "wm" | variable == "wf", 
 #          model == "tomgro" | model == "vanthoor", 
 #          calib == "gnvMod" | calib == "cps4",
 #          exp == "n07")
 
+# temp <- filter(errors_simul, model == "tomgro", 
+#                calib == "gnvMod" | calib == "cpsopt", exp == "n07", variable == "wm")
+  
+# All
 tomgro_gnvMod <- errors_models %>%
   filter(model == "tomgro", calib == "gnvMod", city == "cps") %>%
   gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
-write.csv(tomgro_gnvMod, file = "../tables/metrics/simul/metrics_gnvMod.csv", 
+write.csv(tomgro_gnvMod, file = "./tables/metrics/simul/metrics_gnvMod.csv", 
           row.names = FALSE)
 
 
@@ -82,9 +90,10 @@ tomgro_calib <- errors_models %>%
   gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
-write.csv(tomgro_calib, file = "../tables/metrics/simul/metrics_calib.csv", 
+write.csv(tomgro_calib, file = "./tables/metrics/simul/metrics_calib.csv", 
           row.names = FALSE)
 
+# Last
 last_gnvMod <- errors_simul %>%
   filter(model == "tomgro", calib == "gnvMod", city == "cps") %>%
   group_by(exp) %>%
@@ -92,7 +101,7 @@ last_gnvMod <- errors_simul %>%
   ungroup() %>%
   arrange(exp, variable)
 
-write.csv(last_gnvMod, file = "../tables/metrics/simul/last_gnvMod.csv", 
+write.csv(last_gnvMod, file = "./tables/metrics/simul/last_gnvMod.csv", 
           row.names = FALSE)
 
 last_calib <- errors_simul %>%
@@ -105,20 +114,59 @@ last_calib <- errors_simul %>%
   ungroup() %>%
   arrange(exp, variable)
 
-write.csv(last_calib, file = "../tables/metrics/simul/last_calib.csv", 
+write.csv(last_calib, file = "./tables/metrics/simul/last_calib.csv", 
+          row.names = FALSE)
+
+# No zeros
+errors_models_nozero <- errors_simul %>%
+  filter(variable == "w" | variable == "wf" | variable == "lai" | variable == "wm",
+         obs > 0) %>%
+  group_by(model, das, exp, city, calib, variable) %>%
+  mutate(se = error*error) %>%
+  ungroup() %>%
+  group_by(model, exp, city, calib, variable, sensor) %>%
+  summarise(rmse = sqrt(mean(se)),
+            me = mean(error),
+            mae = mean(abs_error),
+            sd_mae = sd(abs_error)) %>%
+  ungroup() %>%
+  arrange(model, city, variable, calib, exp) 
+
+tomgro_gnvMod <- errors_models_nozero %>%
+  filter(model == "tomgro", calib == "gnvMod", city == "cps") %>%
+  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  spread(exp, measurement)
+
+write.csv(tomgro_gnvMod, file = "./tables/metrics/simul/metrics_gnvMod_nozero.csv", 
+          row.names = FALSE)
+
+
+tomgro_calib <- errors_models_nozero %>%
+  filter(model == "tomgro", city == "cps",
+         ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
+            (calib == "cps3" & (exp == "n05" | exp == "n06")) |
+            (calib == "cpsopt" & (exp == "n07" | exp == "n08")))) %>%
+  select(-calib) %>%
+  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  spread(exp, measurement)
+
+write.csv(tomgro_calib, file = "./tables/metrics/simul/metrics_calib_nozero.csv", 
           row.names = FALSE)
 
 # Errors Assim Artif ------------------------------------------------------
+# Calculated with simulations as references of truth
 simulations <- models_all %>%
   filter(city == "cps", model == "tomgro",
          variable != "dw", variable != "rm", variable != "pg",
-         calib == "gnvMod" | calib == "cps4",
+         calib == "gnvMod" | (calib == "cps4" & sensor == "A"),
          exp == "n01" | exp == "n03" | exp == "n05" | exp == "n07")
 
 error_notCalib <- simulations %>%
   spread(calib, measurement) %>%
   group_by(das, model, exp, variable) %>%
-  summarise(error = cps4 - gnvMod,
+  mutate(cps4 = mean(cps4, na.rm = TRUE)) %>%
+  group_by(das, model, exp, variable, sensor) %>%
+  summarise(error = cps4 - gnvMod, 
             abs_error = abs(error),
             rel_err = if_else(cps4 != 0, abs_error/cps4, 0)) %>%
   ungroup() %>%
@@ -140,7 +188,7 @@ errors_filt_artif <- errors_filt %>%
 
 metrics <- errors_filt_artif %>%
   group_by(model, calib, variable, filt, exp, frequency, state_var, N, case,
-           id, config, Q, R) %>%
+           id, config, Q, R, sensor_type, sensor) %>%
   summarise(me = mean(error),
             rmse = sqrt(mean(error*error)),
             mae = mean(abs_error),
@@ -164,7 +212,7 @@ for (it in configs){
 
 error <- Reduce(rbind, errors_l)
 
-write.csv(error, file = "../tables/metrics/assim/artif/metrics_wm.csv", 
+write.csv(error, file = "./tables/metrics/assim/artif/metrics_wm.csv", 
           row.names = FALSE)
 
 
@@ -239,7 +287,7 @@ ks_all <- combinations %>%
   separate(id_out, into = c("frequency", "filt_", "exp"), sep = "_") %>%
   separate(filt_, into = c("filt", "meas_var"), sep = "\n")
 
-write.csv(ks_all, file = "../tables/metrics/assim/ks.csv", row.names = FALSE)
+write.csv(ks_all, file = "./tables/metrics/assim/ks.csv", row.names = FALSE)
 
 
 # KS Assim Artif Vanthoor - v2 - 50 and 100 -------------------------------
@@ -316,7 +364,7 @@ ks_all <- combinations %>%
   separate(id_out, into = c("filt_", "exp", "config2"), sep = "_") %>%
   separate(filt_, into = c("filt", "meas_var"), sep = "\n")
 
-write.csv(ks_all, file = "../tables/metrics/assim/ks2.csv", row.names = FALSE)
+write.csv(ks_all, file = "./tables/metrics/assim/ks2.csv", row.names = FALSE)
 
 # KS Assim Artif Controlled -----------------------------------------------
 errors_filt_artif <- all_err %>%
@@ -379,7 +427,7 @@ for (it in 1:nrow(combinations)){
 ks_all <- combinations %>%
   separate(id_out, into = c("frequency", "filt", "meas_var", "exp", "config_"), sep = "_")
 
-write.csv(ks_all, file = "../tables/metrics/assim/ks_controlled.csv", row.names = FALSE)
+write.csv(ks_all, file = "./tables/metrics/assim/ks_controlled.csv", row.names = FALSE)
 
 
 # KS Assim Artif Controlled 50 vs 100 -------------------------------------
@@ -444,7 +492,7 @@ for (it in 1:nrow(combinations)){
 ks_all <- combinations %>%
   separate(id_out, into = c("filt", "meas_var", "exp", "config_"), sep = "_")
 
-write.csv(ks_all, file = "../tables/metrics/assim/ks_controlled2.csv", row.names = FALSE)
+write.csv(ks_all, file = "./tables/metrics/assim/ks_controlled2.csv", row.names = FALSE)
 
 
 
@@ -462,7 +510,7 @@ errors_filt_mod <- errors_filt %>%
   summarise(rmse = sqrt(mean(error*error))) %>%
   spread(exp, rmse)
 
-write.csv(errors_filt_mod, file = "../tables/metrics/assim/rmse_real.csv", 
+write.csv(errors_filt_mod, file = "./tables/metrics/assim/rmse_real.csv", 
           row.names = FALSE)
 
 error_last <- errors_filt %>%
@@ -478,7 +526,7 @@ error_last <- errors_filt %>%
          calib, frequency) %>%
   spread(exp, error)
 
-write.csv(error_last, file = "../tables/metrics/assim/last_real.csv", 
+write.csv(error_last, file = "./tables/metrics/assim/last_real.csv", 
           row.names = FALSE)
 
 # Errors - real - yield ---------------------------------------------------
@@ -500,7 +548,29 @@ rmse <- errors_filt %>%
   gather(rmse_min, rmse_max, key = "metric", value = "rmse") %>%
   spread(exp, rmse)
 
-write.csv(rmse, file = "../tables/metrics/assim/metrics_real_wm.csv", 
+write.csv(rmse, file = "./tables/metrics/assim/rmse_real_wm.csv", 
+          row.names = FALSE)
+
+metrics_nozero <- errors_filt %>%
+  filter(id < 500) %>%
+  left_join(info_runs) %>%
+  select(dat, variable, obs, pred, exp, id, config, rep,
+         filt, state_var, meas_var, frequency) %>%
+  filter(variable == "wm", obs > 0) %>%
+  mutate(error = obs - pred,
+         rel_error = (obs - pred)/obs,
+         se = error * error) %>%
+  group_by(variable, exp, frequency, config, filt, state_var, meas_var, rep) %>%
+  summarise(rmse = sqrt(mean(se)),
+            rel_err = rel_error) %>%
+  ungroup() %>%
+  group_by(variable, exp, frequency, config, filt, state_var, meas_var) %>%
+  summarise(rmse_max = max(rmse),
+            rmse_min = min(rmse),
+            rel_error_max = max(rel_err),
+            min_error_max = min(rel_err))
+
+write.csv(metrics_nozero, file = "./tables/metrics/assim/metrics_real_wm_nozero.csv", 
           row.names = FALSE)
 
 # Error consistency index -------------------------------------------------
@@ -576,9 +646,9 @@ gain <- upd_states_out %>%
 # }
 # 
 # all_si <- rbindlist(all_si_l, fill = TRUE)
-# save(all_si, file = "../tables/results_SA/all_si.RData")
+# save(all_si, file = "./tables/results_SA/all_si.RData")
 
-load("../tables/results_SA/all_si.RData")
+load("./tables/results_SA/all_si.RData")
 
 all_si_avg <- all_si %>%
   filter(index == "ST", n_samples == 5000) %>%
@@ -593,7 +663,7 @@ all_si_avg <- all_si %>%
   mutate(rank = row_number()) %>%
   filter(rank <= 2)
   
-write.csv(all_si_avg, file = "../tables/results_SA/case1_highest_indices.csv")
+write.csv(all_si_avg, file = "./tables/results_SA/case1_highest_indices.csv")
 
 
 # SA Case 0 ---------------------------------------------------------------
@@ -657,9 +727,9 @@ write.csv(all_si_avg, file = "../tables/results_SA/case1_highest_indices.csv")
 # }
 # 
 # all_results_plot_ext <- Reduce(bind_rows, all_results_plot_l)
-# save(all_results_plot_ext, file = "../tables/results_SA/all_curves_weather.RData")
+# save(all_results_plot_ext, file = "./tables/results_SA/all_curves_weather.RData")
 
-load("../tables/results_SA/all_curves_weather.RData")
+load("./tables/results_SA/all_curves_weather.RData")
 
 ranges_unc_weather <- all_results_plot_ext %>%
   gather(-c("das", "it_fac", "id",
@@ -679,5 +749,5 @@ ranges_unc_weather <- all_results_plot_ext %>%
   filter(variable == "wm")
 
 write.csv(ranges_unc_weather,
-          file = "../tables/results_SA/ranges_unc_weather.csv",
+          file = "./tables/results_SA/ranges_unc_weather.csv",
           row.names = FALSE)

@@ -1,3 +1,23 @@
+"""
+
+Visualization used in
+
+@inproceedings{sbiagro,
+ author = {Monique Oliveira and Luiz Rodrigues},
+ title = {Monitoramento de plantas em casas de vegetação para assimilação de dados},
+ booktitle = {Anais do XIII Congresso Brasileiro de Agroinformática},
+ location = {Evento Online},
+ year = {2021},
+ keywords = {},
+ issn = {0000-0000},
+ pages = {215--224},
+ publisher = {SBC},
+ address = {Porto Alegre, RS, Brasil},
+ url = {https://sol.sbc.org.br/index.php/sbiagro/article/view/18393}
+}
+
+"""
+
 rm(list = ls())
 options(stringsAsFactors = FALSE)
 Sys.setenv(LANG = "En")
@@ -11,30 +31,30 @@ library(lubridate)
 library(GGally)
 
 # Load theme --------------------------------------------------------------
-load("../data/plot_theme_vert.RData")
+load("./data/plot_theme_vert.RData")
 
 
 # Load data ---------------------------------------------------------------
 # Dates
-cycle_dates <- read.csv("../data/cycle_dates.csv")
-codes_exp <- read.csv("../tables/codes_exp.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
 
 # Harvests
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
 
 # Calibration ids
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv")
 
 # Full monitoring and experiment
-obs_all <- read.csv("../data/observations/full_set_obs.csv") %>%
+obs_all <- read.csv("./data/observations/full_set_obs.csv") %>%
   filter(city == "cps")
 
 # Cover lat data
-cover_lat_calib <- read.csv("../data/observations/monitoring/lai/lai_lat_calib_ids.csv")
-cover_abv_calib <- read.csv("../data/observations/monitoring/lai/lai_abv_calib_ids.csv")
-height_calib <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
-wf_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
-wm_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
+cover_lat_calib <- read.csv("./data/observations/monitoring/lai/lai_lat_calib_ids.csv")
+cover_abv_calib <- read.csv("./data/observations/monitoring/lai/lai_abv_calib_ids.csv")
+height_calib <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
+wf_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
+wm_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
 
 
 # From the first harvest on, the data will be ignored
@@ -64,10 +84,10 @@ wf_lat <- wf_lat_calib %>%
 
 
 # Weather: no missing values, no outliers, hourly
-weather_hourly <- read.csv("../data/weather/monitoring/weather_hourly.csv")
+weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
 
 # External radiation
-rad_power <- read.csv("../data/weather/unc/cps_POWER_SinglePoint_Daily_19870101_20210103_22d82S_47d60W.csv",
+rad_power <- read.csv("./data/weather/unc/cps_POWER_SinglePoint_Daily_19870101_20210103_22d82S_47d60W.csv",
                       skip = 17)
 
 my_colors <- RColorBrewer::brewer.pal(11, "RdYlBu")[c(1, 3, 11)]
@@ -75,24 +95,24 @@ my_colors4 <- RColorBrewer::brewer.pal(11, "RdYlBu")[c(1, 3, 10, 11)]
 my_colors2 <- RColorBrewer::brewer.pal(4, "RdBu")[c(1, 3:4)]
 
 # Assimilation results
-all_states_out <- read.csv("../tables/results_DA/aux_files/all_states.csv")
-assim_out <- read.csv("../tables/results_DA/aux_files/upd_states.csv")
+all_states_out <- read.csv("./tables/results_DA/aux_files/all_states.csv")
+assim_out <- read.csv("./tables/results_DA/aux_files/upd_states.csv")
 
 # Assimilation
-info_runs <- read.csv("../tables/runs_Filter.csv") %>%
+info_runs <- read.csv("./tables/runs_Filter.csv") %>%
   mutate(exp_int = exp,
          exp = paste0("n0", exp_int)) %>%
   select(-it, -comment)
 
 # Load dictionary of measurement
-dict <- read.csv("../tables/dictionary_paramsFilter.csv")
+dict <- read.csv("./tables/dictionary_paramsFilter.csv")
 
 # Simulations
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
 # Observations
-obs <- read.csv("../data/observations/monitoring/observations_proc.csv")
-obs_last <- read.csv( "../data/observations/monitoring/observations_last.csv")
+obs <- read.csv("./data/observations/monitoring/observations_proc.csv")
+obs_last <- read.csv( "./data/observations/monitoring/observations_last.csv")
 
 
 # SBIAgro - Figura 1 ------------------------------------------------------

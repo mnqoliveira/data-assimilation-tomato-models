@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
-import f_aux as aux
+import auxiliary_functions.f_aux as aux
 
 
 # %%
@@ -41,7 +41,8 @@ def calc_conv_fact(cycle, camera, img_leaves):
     else:
         pos = "abv"
 
-    if cycle == "ciclo02":
+    if cycle == "cycle01":
+    #if cycle == "ciclo02":
         # Filter ref based on RGB. Bucket height was marked in pink.
         lower_thresh = np.array([255, 0, 255])
         upper_thresh = np.array([255, 0, 255])
@@ -138,10 +139,12 @@ def calc_conv_fact(cycle, camera, img_leaves):
 # =============================================================================
 
 cycle_l = ["ciclo02", "ciclo03", "ciclo04"]
+cycle_l = ["cycle01", "cycle02", "cycle03"]
 camera_l = ["camerapi01", "camerapi03", "camerapi02", "camerapi04"]
 
-path_base_in = 'E:/drive_unicamp/SISDA/projetoModelagemTomateiro/'
-path_base_out = '../data/observations/monitoring/'
+#path_base_in = 'E:/drive_unicamp/SISDA/projetoModelagemTomateiro/'
+path_base_in = './data/'
+path_base_out = './data/observations/monitoring/'
 it_exp = 0
 
 for cycle in cycle_l:
@@ -156,12 +159,12 @@ for cycle in cycle_l:
     for camera in camera_l:
         print(camera)
 
-        path = path_base_in + 'fotos_rotulos/' + cycle + '/' + camera + "/"
+        path = path_base_in + 'masks/' + cycle + '/' + camera + "/"
         orig_imgs = os.listdir(path)
         nodes = [s for s in orig_imgs if "nodes" in s]
         leaves = [s for s in orig_imgs if "leaves" in s]
 
-        path_save = path_base_in + 'imgs_proc/cover/' + cycle + '/' + camera + '/'
+        #path_save = path_base_in + 'imgs_proc/cover/' + cycle + '/' + camera + '/'
 
         if (len(leaves) > 0):
 
@@ -290,7 +293,7 @@ for cycle in cycle_l:
         outputs.to_csv(output_file_name, index=False)
 
     outputs = pd.DataFrame(nodes_file, columns=['filename', 'count', 'camera'])
-    output_file_name = '../data/observations/monitoring/nodes/raw_n' + end
+    output_file_name = './data/observations/monitoring/nodes/raw_n' + end
     outputs.to_csv(output_file_name, index=False)
 
     end = 'ref_monit_' + cycle + '.csv'

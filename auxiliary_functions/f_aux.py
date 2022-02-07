@@ -105,19 +105,21 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
     if type_output == "simul":
         x['das'] = list(range(x.shape[0]))
 
-        path_file = '../tables/results_simul/exp/'
-        output_file_name = path_file + conf + '-' + exp_n + '.csv'
+        path_file = './tables/results_simul/exp/'
+        output_file_name = path_file + conf + '-' + exp_n + '-sensor_' + \
+            rep + '.csv'
 
     elif type_output == "error_simul":
-        path_file = '../tables/results_simul/errors/'
-        output_file_name = path_file + conf + '-' + exp_n + '.csv'
+        path_file = './tables/results_simul/errors/'
+        output_file_name = path_file + conf + '-' + exp_n + '-sensor_' + \
+            rep + '.csv'
 
     elif type_output == "error_assim":
 
         prefix = conf['filt'] + '-' + conf['model'] + '-'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
-        path_save = '../tables/results_DA/errors/'
+        path_save = './tables/results_DA/errors/'
         output_file_name = path_save + prefix + suffix
 
     elif type_output == "updState":
@@ -134,12 +136,12 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
         prefix = conf['filt'] + '-' + conf['model'] + '-updState-'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
-        path_save = '../tables/results_DA/'
+        path_save = './tables/results_DA/'
         output_file_name = path_save + prefix + suffix
 
     elif type_output == "allState":
         prefix = conf['filt'] + '-' + conf['model'] + '-allStates-'
-        path_save = '../tables/results_DA/'
+        path_save = './tables/results_DA/'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
 
@@ -149,7 +151,7 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
 
     elif type_output == "sigmas":
         prefix = conf['filt'] + '-' + conf['model'] + '-sigmas-'
-        path_save = '../tables/results_DA/ensembles/'
+        path_save = './tables/results_DA/ensembles/'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
 
@@ -189,7 +191,7 @@ def retrieve_limits(filename: str, model_name: str) -> dict:
     dist = []
     sd2 = []
 
-    # filename = "../tables/parameters_inputs/params_limits_case1.csv"
+    # filename = "./tables/parameters_inputs/params_limits_case1.csv"
     # model_name = "simple"
 
     with open(filename, mode='r') as infile:
@@ -400,7 +402,7 @@ def gen_perturb(config_it, x):
     # applied in the prediction of state particles
     elif case == "case3":
         for h in x:
-            e = np.random.multivariate_normal(z, np.eye(1)*h*0.1, N)
+            e = np.random.multivariate_normal(z, np.eye(1)*h*0.3, N)
             # Particles in lines, hours in columns
             x_mod = np.hstack((x_mod, (h + e)))
         x_mod = x_mod[:, 1:]
@@ -465,17 +467,17 @@ def load_data(model, weather, sensor, experiment, calib, config_obs):
 
     # Parameters
     filename = model + "_p"
-    filename = "../tables/parameters_inputs/" + filename + ".csv"
+    filename = "./tables/parameters_inputs/" + filename + ".csv"
     params_all = dictFromCSV(filename, calib)
 
     # Inputs
     filename = model + "_i"
-    filename = "../tables/parameters_inputs/" + filename + ".csv"
+    filename = "./tables/parameters_inputs/" + filename + ".csv"
     info_all = dictFromCSV(filename, exp_n)
 
     # Initial states
     filename = model + "_s0"
-    filename = "../tables/parameters_inputs/" + filename + ".csv"
+    filename = "./tables/parameters_inputs/" + filename + ".csv"
     states0_all = dictFromCSV(filename, exp_n)
 
     # Weather dataset
@@ -484,21 +486,21 @@ def load_data(model, weather, sensor, experiment, calib, config_obs):
     else:
         temp = "hourly_"
 
-    weather_file_name = "../data/weather/" + temp + weather_suffix
+    weather_file_name = "./data/weather/" + temp + weather_suffix
     weather_all = pd.read_csv(weather_file_name)
 
     # Observations
-    filename = "../data/observations/full_set_obs.csv"
+    filename = "./data/observations/full_set_obs.csv"
     if config_obs == "summ":
-        filename = "../data/observations/full_set_obs.csv"
+        filename = "./data/observations/full_set_obs.csv"
     elif config_obs == "monit":
-        filename = "../data/observations/full_set_obs.csv"
+        filename = "./data/observations/full_set_obs.csv"
     elif config_obs == "ids":
-        filename = "../data/observations/monitoring/obs_exp_all_ids.csv"
+        filename = "./data/observations/monitoring/obs_exp_all_ids.csv"
     elif config_obs == "artif_obs":
-        filename = "../data/synthetic/obs_artif_all.csv"
+        filename = "./data/synthetic/obs_artif_all.csv"
     elif config_obs == "artif_truth":
-        filename = "../data/synthetic/truth_tomgro.csv"
+        filename = "./data/synthetic/truth_tomgro.csv"
 
     obs_temp = pd.read_csv(filename)
 
@@ -978,25 +980,25 @@ def easyleafarea(cycle, leaves):
 
     ratGB = 1.04
     minG = 30
-    if cycle == "ciclo02caseA":
+    if cycle == "cycle01caseA":
         ratGR = 0.98
         ratGB = 1.2
         minG = 10
-    elif cycle == "ciclo02caseB":
+    elif cycle == "cycle01caseB":
         ratGR = 1.02
         ratGB = 1.04
         minG = 10
-    elif cycle == "ciclo02caseC":
+    elif cycle == "cycle01caseC":
         ratGR = 1.10
         ratGB = 1.04
         minG = 10
-    elif cycle == "ciclo02caseD":
+    elif cycle == "cycle01caseD":
         ratGR = 0.9
         ratGB = 1.04
         minG = 10
-    elif cycle == "ciclo03":
+    elif cycle == "cycle02":
         ratGR = 1.02
-    elif cycle == "ciclo04":
+    elif cycle == "cycle03":
         ratGR = 1.0
 
     test = (r*ratGR < g) & (b*ratGB < g) & (g > minG)
@@ -1219,7 +1221,7 @@ def calc_height(img_it, contour_height, conv, list_save):
 
 #     pipe = create_pipeline()
 
-#     X, y, weights, le = build_training_data('../data/train', constants['encoding'])
+#     X, y, weights, le = build_training_data('./data/train', constants['encoding'])
 
 #     pipe.fit(X, y, classif__sample_weight=np.log10(weights + 1))
 
@@ -1245,7 +1247,7 @@ def calc_height(img_it, contour_height, conv, list_save):
 #         # ax[1].imshow(mask, cmap='gray')
 #         # plt.show()
 
-#         cv2.imwrite(os.path.join('../data/pmasks', img_path), mask)
+#         cv2.imwrite(os.path.join('./data/pmasks', img_path), mask)
 
 
 

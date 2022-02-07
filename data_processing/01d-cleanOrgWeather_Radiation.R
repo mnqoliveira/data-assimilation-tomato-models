@@ -12,7 +12,7 @@ Sys.setenv(LANG = "En")
 
 # Functions ---------------------------------------------------------------
 
-source("./01d-cleanOrgWeather_Radiation_functions.R")
+source("./data_processing/01d-cleanOrgWeather_Radiation_functions.R")
 
 orgSensorData <- function(x){
   
@@ -29,15 +29,15 @@ orgSensorData <- function(x){
 
 # Load files --------------------------------------------------------------
 
-rad_files <- c(list.files("../data/weather/monitoring/raw/li1400/", full.names = T, 
+rad_files <- c(list.files("./data/weather/monitoring/raw/li1400/", full.names = T, 
                         pattern = "*.txt"),
-               list.files("../data/weather/monitoring/raw/li1400/01-manually_cleaned/", 
+               list.files("./data/weather/monitoring/raw/li1400/01-manually_cleaned/", 
                           full.names = T, 
                           pattern = "*.txt"))
 
-if (file.exists("../data/weather/monitoring/raw/rad_raw.csv")){
+if (file.exists("./data/weather/monitoring/raw/rad_raw.csv")){
   
-  unlink("../data/weather/monitoring/raw/rad_raw.csv")
+  unlink("./data/weather/monitoring/raw/rad_raw.csv")
   
 }
 
@@ -58,7 +58,7 @@ for (i in rad_files){
     filter(!is.na(measurement)) 
   
   #print(summary(temp_df))
-  write.table(temp_df, file = "../data/weather/monitoring/raw/rad_raw.csv",
+  write.table(temp_df, file = "./data/weather/monitoring/raw/rad_raw.csv",
               sep = ",",
               append = TRUE,
               row.names = FALSE,
@@ -69,7 +69,7 @@ for (i in rad_files){
 
 head_csv <- c("dateFull", "node", "measurement")
 
-rad <- read.csv("../data/weather/monitoring/raw/rad_raw.csv", dec = ".",
+rad <- read.csv("./data/weather/monitoring/raw/rad_raw.csv", dec = ".",
                 header = FALSE)
 colnames(rad) <- head_csv
 
@@ -77,6 +77,6 @@ colnames(rad) <- head_csv
 
 rad_full <- orgSensorData(rad)
 write.csv(rad_full, 
-          file = "../data/weather/monitoring/weather_radiation_org.csv", 
+          file = "./data/weather/monitoring/weather_radiation_org.csv", 
           row.names=FALSE)
 

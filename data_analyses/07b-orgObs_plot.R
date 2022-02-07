@@ -11,15 +11,15 @@ library(tidyverse)
 
 # Load files --------------------------------------------------------------
 
-obs_all <- read.csv("../data/observations/full_set_obs.csv")
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv") %>%
+obs_all <- read.csv("./data/observations/full_set_obs.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv") %>%
   mutate(hi = wm/w)
 
 #plot(obs_ids$dat, obs_ids$hi)
 
 # Load dictionary of measurement and observations
-cycle_dates <- read.csv("../data/cycle_dates.csv")
-codes_exp <- read.csv("../tables/codes_exp.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
 
 # Process observations ----------------------------------------------------
 obs_sd <- obs_all %>%
@@ -64,7 +64,7 @@ obs_last <- obs_ids %>%
   left_join(codes_exp) %>%
   filter(!is.na(node))
 
-write.csv(obs, "../data/observations/monitoring/observations_proc.csv", 
+write.csv(obs, "./data/observations/monitoring/observations_proc.csv", 
           row.names=FALSE)
-write.csv(obs_last, "../data/observations/monitoring/observations_last.csv", 
+write.csv(obs_last, "./data/observations/monitoring/observations_last.csv", 
           row.names=FALSE)

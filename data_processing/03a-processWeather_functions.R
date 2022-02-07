@@ -10,7 +10,7 @@ library(zoo)
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 
 testNA <- function(x){
@@ -212,7 +212,7 @@ fillNAs <- function(x, cycles_dates){
 fillNAs_external <- function(x, cycles_dates){
   # Retrieve daily data from NASA Power and interpolate using theoretical
   # functions
-  pathfiles <- "../data/weather/unc/"
+  pathfiles <- "./data/weather/unc/"
   full_weather_files <- list.files(pathfiles, recursive = FALSE, 
                                    pattern = "*.csv", full.names = TRUE)
   

@@ -1,4 +1,4 @@
-rm(list = ls())
+#rm(list = ls())
 options(stringsAsFactors = FALSE)
 Sys.setenv(LANG = "En")
 #Sys.setlocale("LC_TIME", "Portuguese")
@@ -14,38 +14,38 @@ library(patchwork)
 library(paletteer)
 
 # Source functions --------------------------------------------------------
-source("./07a-orgSimOut.R")
-source("./07b-orgObs_plot.R")
+source("./data_analyses/07a-orgSimOut.R")
+source("./data_analyses/07b-orgObs_plot.R")
 
 # Load theme --------------------------------------------------------------
-load("../data/plot_theme_vert.RData")
+load("./data/plot_theme_vert.RData")
 
 theme_vert <- theme_vert +
   theme(panel.background = element_rect(fill = "grey99"))
 
 # Load data ---------------------------------------------------------------
 # Dates
-cycle_dates <- read.csv("../data/cycle_dates.csv")
-codes_exp <- read.csv("../tables/codes_exp.csv")
-plant_dates <- read.csv("../tables/relevant_dates_plants.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
+plant_dates <- read.csv("./tables/relevant_dates_plants.csv")
 colnames(plant_dates)[1] <- "cycle"
 
 # Harvests
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
 
 # Calibration ids
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv")
 
 # Full monitoring and experiment
-obs_all <- read.csv("../data/observations/full_set_obs.csv") %>%
+obs_all <- read.csv("./data/observations/full_set_obs.csv") %>%
   filter(city == "cps")
 
 # Cover lat data
-cover_lat_calib <- read.csv("../data/observations/monitoring/lai/lai_lat_calib_ids.csv")
-cover_abv_calib <- read.csv("../data/observations/monitoring/lai/lai_abv_calib_ids.csv")
-height_calib <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
-wf_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
-wm_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
+cover_lat_calib <- read.csv("./data/observations/monitoring/lai/lai_lat_calib_ids.csv")
+cover_abv_calib <- read.csv("./data/observations/monitoring/lai/lai_abv_calib_ids.csv")
+height_calib <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
+wf_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
+wm_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
 
 
 # From the first harvest on, the data will be ignored
@@ -75,46 +75,46 @@ wf_lat <- wf_lat_calib %>%
 
 
 # Weather: no missing values, no outliers, hourly
-weather_hourly <- read.csv("../data/weather/monitoring/weather_hourly.csv")
+weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
 
 # External radiation
-rad_power <- read.csv("../data/weather/unc/cps_POWER_SinglePoint_Daily_19870101_20210103_22d82S_47d60W.csv",
+rad_power <- read.csv("./data/weather/unc/cps_POWER_SinglePoint_Daily_19870101_20210103_22d82S_47d60W.csv",
                       skip = 17)
 
 # Simulations
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
 # Observations
-obs <- read.csv("../data/observations/monitoring/observations_proc.csv")
-obs_last <- read.csv( "../data/observations/monitoring/observations_last.csv")
-obs_artif <- read.csv("../data/synthetic/obs_artif_all.csv")
+obs <- read.csv("./data/observations/monitoring/observations_proc.csv")
+obs_last <- read.csv( "./data/observations/monitoring/observations_last.csv")
+obs_artif <- read.csv("./data/synthetic/obs_artif_all.csv")
 
 # Scales semi-proc
-scales_proc_full <- read.csv("../data/observations/monitoring/scales_proc_full.csv")
+scales_proc_full <- read.csv("./data/observations/monitoring/scales_proc_full.csv")
 
 # Uncertainty outputs
-load("../tables/results_SA/all_curves_params.RData")
-load("../tables/results_SA/all_curves_weather.RData")
+load("./tables/results_SA/all_curves_params.RData")
+load("./tables/results_SA/all_curves_weather.RData")
 
-load("../tables/results_SA/all_si_weather.RData")
+load("./tables/results_SA/all_si_weather.RData")
 all_si_weather <- all_si
-load("../tables/results_SA/all_si.RData")
+load("./tables/results_SA/all_si.RData")
 
-case1_hi <- read.csv("../tables/results_SA/case1_highest_indices.csv")
+case1_hi <- read.csv("./tables/results_SA/case1_highest_indices.csv")
 
 # Assimilation results
-load("../tables/results_DA/aux_files/all_states.RData")
-#load("../tables/results_DA/aux_files/upd_states.RData")
+load("./tables/results_DA/aux_files/all_states.RData")
+#load("./tables/results_DA/aux_files/upd_states.RData")
 
 # Assimilation
-info_runs <- read.csv("../tables/runs_Filter.csv") %>% 
-  rbind(read.csv("../tables/runs_Filter2.csv")) %>%
+info_runs <- read.csv("./tables/runs_Filter.csv") %>% 
+  rbind(read.csv("./tables/runs_Filter2.csv")) %>%
   mutate(exp_int = exp,
          exp = paste0("n0", exp_int)) %>%
   select(-it, -comment)
 
 # Load dictionary of measurement
-dict <- read.csv("../tables/dictionary_paramsFilter.csv")
+dict <- read.csv("./tables/dictionary_paramsFilter.csv")
 
 # Additional variables ----------------------------------------------------
 
@@ -146,7 +146,7 @@ plot_states_1L <- c("lai" = "LAI",
 
 
 plot_vars = c("leaf_area" = "Leaf area [m² leaves/plant]",
-              "lai_lat" = "Green cover area \n(side view) [m²/plant]",
+              "lai_lat" = "Green cover area \n(lateral view) [m²/plant]",
               "lai_abv" = "Green cover area \n(above view) [m²/plant]",
               "height" = "Height [m]",
               "wf_lat" = "Total area of fruits \n[m²/plant]",
@@ -157,6 +157,19 @@ plot_vars = c("leaf_area" = "Leaf area [m² leaves/plant]",
               "wf" = "Fruit dry mass\n[g DM/m² soil]",
               "w" = "Aboveground dry mass\n[g D.M./m² soil]",
               "wm" = "Mature fruit dry mass\n[g D.M./m² soil]")
+
+plot_vars_1l = c("leaf_area" = "Leaf area [m² leaves/plant]",
+                 "lai_lat" = "Green cover area (lateral view) [m²/plant]",
+                 "lai_abv" = "Green cover area (above view) [m²/plant]",
+                 "height" = "Height [m]",
+                 "wf_lat" = "Total area of fruits [m²/plant]",
+                 "w_fm_full" = "System wet mass [g]",
+                 "wf_plant" = "Fruit dry mass [g DM/plant]",
+                 "w_plant" = "Aboveground dry mass [g D.M./plant]",
+                 "w_plant_fm" = "Aboveground fresh mass [g F.M./plant]",
+                 "wf" = "Fruit dry mass [g DM/m² soil]",
+                 "w" = "Aboveground dry mass [g D.M./m² soil]",
+                 "wm" = "Mature fruit dry mass [g D.M./m² soil]")
 
 factors_weather <- c("co2" = "Carbon Dioxide",
                  "rad" = "Solar Radiation",
@@ -192,8 +205,12 @@ simulations_artif <- models_all %>%
          exp != "n02", exp != "n04", exp != "n06", exp != "n08",
          variable != "dw", variable != "rm", variable != "pg")
 
+assim_artif <- all_assim %>%
+  mutate(id = as.integer(id)) %>%
+  filter(id > 500) %>%
+  right_join(info_runs)
 
-# Fig XX - Jones 1999 - Gainesville ---------------------------------------
+# Fig 07 - Jones 1999 - Gainesville ---------------------------------------
 obs_mod <- obs %>%
   filter(variable %in% names(plot_states))
 
@@ -235,12 +252,12 @@ ggplot() +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig01_tomgro-gnv.png')
+                         'Fig07_tomgro-gnv.png')
 ggsave(plot_file_name,
        width = 15, height = 18, units = "cm",
        family = "serif")
 
-# Fig XX - Jones 1999 - Avignon -------------------------------------------
+# Fig 08 - Jones 1999 - Avignon -------------------------------------------
 obs_mod <- obs %>%
   filter(variable %in% names(plot_states))
 
@@ -269,12 +286,12 @@ ggplot() +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig02_tomgro-av.png')
+                         'Fig08_tomgro-av.png')
 ggsave(plot_file_name,
        width = 15, height = 18, units = "cm",
        family = "serif")
 
-# Fig XX - Jones 1999 - Lake City -----------------------------------------
+# Fig 09 - Jones 1999 - Lake City -----------------------------------------
 obs_mod <- obs %>%
   filter(variable %in% names(plot_states))
 
@@ -303,19 +320,19 @@ ggplot() +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig03_tomgro-lc.png')
+                         'Fig09_tomgro-lc.png')
 ggsave(plot_file_name,
        width = 15, height = 18, units = "cm",
        family = "serif")
 
 
-# Fig XX - Weather after processing ---------------------------------------
+# Fig 10 - Weather after processing ---------------------------------------
 
 # Aggregated
 weather_mod <- weather_hourly %>%
   separate(stat_sensor_var, sep = "_", into = c("stat", "sensor", "var")) %>%
   filter(!is.na(cycle), value < 3000, 
-         sensor != "pi", node == 1, cycle != 1) %>%
+         sensor != "pi", cycle != 1) %>%
   mutate(stat_var = str_c(var, stat, sep = "_"), date = as.Date(date)) %>%
   filter((stat == "mean" & var == "radiation") | 
            (var == "temperature" & stat != "med") |
@@ -338,7 +355,8 @@ weather_mod <- weather_hourly %>%
                                "humidity",
                                "temperature")),
          stat = if_else(variable == "rad", "sum", 
-                        substring(variable, 2, nchar(variable))))
+                        substring(variable, 2, nchar(variable))),
+         measurement = if_else(variable == "rad", measurement*0.5/555.6, measurement))
 
 rad_ext <- rad_power %>% 
   rename_all(tolower) %>%
@@ -347,7 +365,8 @@ rad_ext <- rad_power %>%
   select(date, rad_ext_d) %>%
   mutate(date = as.character(date)) %>%
   right_join(cycle_dates) %>%
-  mutate(rad = rad_ext_d * 555.6,
+  mutate(#rad = rad_ext_d * 555.6,
+    rad = rad_ext_d*0.5,
          date = as.Date(date),
          var = "radiation",
          stat = "sum") %>%
@@ -356,7 +375,7 @@ rad_ext <- rad_power %>%
 weather_mod <- weather_mod %>%
   mutate(var_ = factor(var,
                        levels = c("radiation", "temperature", "humidity"),
-                       labels = c("PAR~(µmol~m^{-2}~s^{-1})",
+                       labels = c("PAR~(MJ~m^{-2}~day^{-1})",
                                   "Temperature~('°C')", "Humidity~('%')")),
          cycle_ = factor(cycle,
                          levels = names(cycles),
@@ -365,7 +384,7 @@ weather_mod <- weather_mod %>%
 rad_ext <- rad_ext %>%
   mutate(var_ = factor(var,
                        levels = c("radiation", "temperature", "humidity"),
-                       labels = c("PAR~(µmol~m^{-2}~s^{-1})",
+                       labels = c("PAR~(MJ~m^{-2}~day^{-1})",
                                   "Temperature~('°C')", "Humidity~('%')")),
          cycle_ = factor(cycle,
                          levels = names(cycles),
@@ -383,13 +402,14 @@ ggplot() +
              space = "free_x") +
   geom_line(data=weather_mod, 
             aes(x = date, y = measurement,  
-                colour = stat), size = 0.5) +
-  geom_line(data=rad_ext, aes(x = date, y = rad,
+                colour = stat, lty = as.factor(node)), size = 0.5) +
+  geom_point(data=rad_ext, aes(x = date, y = rad,
                               colour = stat), 
-            size = 0.5, linetype = 2) +
+            size = 0.5) +
   geom_vline(data=plant_dates, aes(xintercept=as.Date(date))) + 
   labs(x = "",
-       y = "") +
+       y = "",
+       lty = "Node") +
   scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(1, 3, 2, 4)],
                       name = "Summary",
                       breaks=c("max", "min", "mean", "sum"),
@@ -404,13 +424,13 @@ ggplot() +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig04_weather-final.png')
+                         'Fig10_weather-final.png')
 ggsave(plot_file_name,
-       width = 17.0, height = 16, units = "cm", 
+       width = 18, height = 16, units = "cm", 
        family = "serif", dpi = 320)
 
 
-# Fig XX and Fig XX - Map imputations -------------------------------------
+# Fig 11 and Fig 12 - Map imputations -------------------------------------
 flags <- weather_hourly %>%
   separate(stat_sensor_var, into = c("stat", "sensor", "var")) %>%
   filter(stat == "mean", var != "humidity") %>%
@@ -446,7 +466,7 @@ ggplot(flags_mod) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig05_weather-imputations1.png')
+                         'Fig11_weather-imputations1.png')
 ggsave(plot_file_name,
        width = 20, height = 14, units = "cm", 
        family = "serif", dpi = 320)
@@ -472,13 +492,13 @@ ggplot(flags_mod) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig06_weather-imputations2.png')
+                         'Fig12_weather-imputations2.png')
 ggsave(plot_file_name,
        width = 20, height = 14, units = "cm", 
        family = "serif", dpi = 320)
 
 
-# Fig XX - Correlation - Sensor Rad ---------------------------------------
+# Fig 13 - Correlation - Sensor Rad ---------------------------------------
 dataset <- weather_hourly %>%
   filter(flag_case2 == 0, flag_case4 == 0) %>%
   select(-starts_with("flag")) %>%
@@ -511,12 +531,12 @@ ggplot(dataset, na.rm = TRUE) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig07_weather-correl_rad.png')
+                         'Fig13_weather-correl_rad.png')
 ggsave(plot_file_name,
-       width = 18, height = 8, units = "cm", 
+       width = 17, height = 8, units = "cm", 
        family = "serif", dpi = 320)
 
-# Fig XX - Correlation - Temperature --------------------------------------
+# Fig 14 - Correlation - Temperature --------------------------------------
 
 dataset <- weather_hourly %>%
   filter(flag_case2 == 0, flag_case3 == 0, flag_case4 == 0) %>%
@@ -549,18 +569,12 @@ ggplot(dataset, na.rm = TRUE) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig08_weather-correl_temp.png')
+                         'Fig14_weather-correl_temp.png')
 ggsave(plot_file_name,
        width = 18, height = 8, units = "cm", 
        family = "serif", dpi = 320)
 
-
-# Fig XX - Substrate moisture ---------------------------------------------
-
-
-
-
-# Fig XX - Biomass - Different hours of the day ---------------------------
+# Fig 16 - Biomass - Different hours of the day ---------------------------
 scales <- scales_proc_full %>%
   mutate(dateFull = ymd_hms(dateFull),
          date = date(dateFull)) %>%
@@ -591,13 +605,13 @@ ggplot(scales) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig10_biomass-hours.png')
+                         'Fig16_biomass-hours.png')
 ggsave(plot_file_name,
        width = 12, height = 18, units = "cm",
        family = "serif", dpi = 320)
 
 
-# Fig XX - Green area - Calibration ---------------------------------------
+# Fig 17 - Green area - Calibration ---------------------------------------
 dataset <- obs_ids %>%
   full_join(cover_lat_calib) %>%
   full_join(cover_abv_calib)
@@ -605,7 +619,7 @@ dataset <- obs_ids %>%
 # Lai and lai_lat in separate scatterplots
 plot_vars = c("lai" = "LAI [m² leaves/m² soil]",
               "leaf_area" = "Leaf area [m² leaves/plant]",
-              "lai_lat" = "Green cover area (side view) [m²/plant]",
+              "lai_lat" = "Green cover area (lateral view) [m²/plant]",
               "lai_abv" = "Green cover area (above view) [m²/plant]")
 
 dataset_plot <- dataset %>%
@@ -616,7 +630,7 @@ ggplot(data = dataset_plot) +
   facet_wrap("variable", scales = "free",
              labeller = labeller(variable = plot_vars)) +
   geom_point(aes(dat, measurement, colour = as.factor(cycle)), size = 1.5) +
-  geom_text(aes(x=dat, y=measurement, label=id),hjust=-0.4, vjust=0, size=3) +
+  #geom_text(aes(x=dat, y=measurement, label=id),hjust=-0.4, vjust=0, size=3) +
   labs(x = "Days after transplanting",
        y = "",
        colour = "Cycle") +
@@ -629,13 +643,13 @@ ggplot(data = dataset_plot) +
                       palette = "Set1", type = "qual")
 
 plot_file_name <- paste0(path_figures,
-                         'Fig11_calib-LAI.png')
+                         'Fig17_calib-LAI.png')
 ggsave(plot_file_name,
        width = 18, height = 14, units = "cm",
        family = "serif")
 
 
-# Fig XX - Biomass - Calibration ------------------------------------------
+# Fig 18 - Biomass - Calibration ------------------------------------------
 
 dataset <- obs_ids %>%
   filter(!is.na(cycle), cycle != 1) %>%
@@ -648,10 +662,9 @@ dataset_mod <- dataset %>%
   mutate(type = if_else(grepl("fm", variable), "fm", "dm"),
          variable_mod = variable,
          variable_mod = gsub("_fm", "", variable_mod)) %>%
-  filter(variable_mod == "w_plant" | 
+  filter(variable_mod == "w_plant" |
            variable_mod == "wf_plant" |
            variable_mod == "wm_plant")
-
 
 plot_part = c("w_plant" = "Aboveground biomass [g/plant]", 
               "wf_plant" = "Fruit weight [g/plant]", 
@@ -662,8 +675,9 @@ plot_cond = c("dm" = "Dry mass [g DM/plant]",
 
 ggplot(data = dataset_mod) +
   facet_grid(type ~ variable_mod, scales = "free",
-             labeller = labeller(type = plot_cond,
-                                 variable_mod = plot_part)) +
+             labeller = labeller(type = plot_cond
+                                 #variable_mod = plot_part
+                                 )) +
   geom_point(aes(x = dat, y = measurement,
                  colour = as.factor(cycle)), size = 1) +
   labs(x = "Days after transplanting",
@@ -677,14 +691,12 @@ ggplot(data = dataset_mod) +
                       palette = "Set1", type = "qual")
 
 plot_file_name <- paste0(path_figures,
-                         'Fig12_calib-biomass.png')
+                         'Fig18_calib-biomass.png')
 ggsave(plot_file_name,
        width = 25.0, height = 10.0, units = "cm",
        family = "serif", dpi = 320)
 
-
-
-# Fig XX - Green area - Monitoring ----------------------------------------
+# Fig 19 - Green area - Monitoring ----------------------------------------
 calib <- obs_ids %>%
   full_join(cover_lat_calib) %>%
   full_join(cover_abv_calib) %>%
@@ -729,150 +741,66 @@ ggplot() +
   scale_x_continuous(breaks=seq(0,110,15)) +
   theme_vert
 plot_file_name <- paste0(path_figures,
-                         'Fig13_monit.png')
+                         'Fig19_monit.png')
 ggsave(plot_file_name,
        width = 18, height = 21, units = "cm",
        family = "serif")
 
-# Fig XX - Calibs - Gnv ---------------------------------------------------
 
-obs_mod <- obs %>%
-  filter(variable %in% names(plot_states))
+# Fig 20 - SI - Params ----------------------------------------------------
+dataset_plot <- all_si %>%
+  filter(city == "cps", model == "tomgro") %>%
+  rename(type = index) %>%
+  filter(type == "ST") %>%
+  gather(n, lai, w, wf, wm,
+         key = "variable", value = index) %>%
+  mutate(index = if_else(is.na(index) | is.nan(index), 0., index)) %>%
+  filter(index > 0.0, index <= 10,
+         !((dat < 40) & (variable == "wm" | variable == "wf"))
+         # factors != "N_b", factors != "N_FF", factors != "N_max",
+         # factors != "LAI_max", factors != "alpha_F",
+         # factors != "T_crit"
+  ) %>%
+  group_by(factors, variable, type, dat, city, model) %>%
+  mutate(index_avg = mean(index, na.rm = TRUE),
+         index_min = quantile(index, 0.1, na.rm = TRUE),
+         index_max = quantile(index, 0.9, na.rm = TRUE)) %>%
+  ungroup() %>%
+  filter(index_avg > 0.05) %>%
+  arrange(variable, factors) %>%
+  mutate(test1 = index_min + index_avg,
+         test2 = index_max - index_avg)
 
-model_plot <- models %>%
-  filter(city == "gnv", calib == "gnv" | calib == "gnvopt",
-         exp == "n04" | exp == "n05" | exp == "n06") %>%
-  filter(model == "tomgro") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
-  mutate(type = if_else(exp == "n01" | exp == "n04", "Cool",
-                        if_else(exp == "n02" | exp == "n05", "Warm", "Hot")),
-         type_ = factor(type,
-                        levels = c("Cool", "Warm", "Hot"),
-                        ordered = TRUE),
-         calib_ = if_else(calib == "gnvopt", "Optimization", "Original"))
-
-obs_plot <- obs_mod %>%
-  filter(city == "gnv",
-         exp == "n04" | exp == "n05" | exp == "n06") %>%
-  select(-model) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
-  mutate(year = if_else(exp == "n01" | exp == "n02" | exp == "n03", 1993, 1994),
-         type = if_else(exp == "n01" | exp == "n04", "Cool",
-                        if_else(exp == "n02" | exp == "n05", "Warm", "Hot")),
-         type_ = factor(type,
-                        levels = c("Cool", "Warm", "Hot"),
-                        ordered = TRUE))
-
-ggplot() +
-  facet_grid(variable ~ type_,
-             labeller = labeller(variable = plot_states),
-             scales = "free",
-             space = "free_x") +
-  geom_line(data = model_plot, aes(das, measurement, col = calib_),
-            size = 0.8) +
-  geom_point(data = obs_plot, aes(das, measurement),
-             size = 1.5, shape = 15) +
-  labs(x = "Days after simulation started",
-       y = "",
-       colour = "Calibration") +
-  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(2, 3, 1)]) +
-  theme_vert
-
-plot_file_name <- paste0(path_figures,
-                         'Fig14_tomgro-gnv-opt.png')
-ggsave(plot_file_name,
-       width = 15, height = 18, units = "cm",
-       family = "serif")
-
-
-# Fig XX - Calibs - Cps ---------------------------------------------------
-
-obs_mod <- obs %>%
-  filter(variable %in% names(plot_states))
-
-model_plot <- models %>%
-  filter(city == "cps", calib == "cpsman" | calib == "cpsopt",
-         exp == "n08") %>%
-  filter(model == "tomgro") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
-  mutate(calib_ = if_else(calib == "cpsopt", "Optimization", "Manual"))
-
-obs_plot <- obs_mod %>%
-  filter(city == "cps",
-         exp == "n08") %>%
-  select(-model) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
-
-ggplot() +
+ggplot(dataset_plot) +
   facet_wrap("variable", nrow = 3,
-             labeller = labeller(variable = plot_states),
-             scales = "free") +
-  geom_line(data = model_plot, aes(das, measurement, col = calib_),
-            size = 0.8) +
-  geom_point(data = obs_plot, aes(das, measurement),
-             size = 1.5, shape = 15) +
-  labs(x = "Days after simulation started",
-       y = "",
-       colour = "Calibration") +
-  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(2, 3, 1)]) +
+             labeller = labeller(variable = plot_states_1L)) +
+  geom_line(data = dataset_plot,
+            aes(x=dat, y=index_avg,
+                col = factors),
+            size = 1)   +
+  geom_point(data = dataset_plot,
+             aes(x=dat, y=index, color = factors), alpha = 0.5) +
+  labs(x = "Days after transplanting",
+       y = "ST",
+       colour = "Parameters") +
+  ylim(0, 1.2) +
+  scale_discrete_manual(values = paletteer_d("ggthemes::stata_s1color"),
+                        aesthetics = c("colour", "fill"),
+                        name = "Parameters",
+                        guide=guide_legend(nrow = 2,
+                                           keywidth = 0.7,
+                                           keyheight = 0.7)) +
+  labs(x = "Days after transplanting",
+       y = "") +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig15_tomgro-cps-opt.png')
+                         'Fig20_si-param.png')
 ggsave(plot_file_name,
-       width = 15, height = 18, units = "cm",
+       width = 15, height = 19, units = "cm",
        family = "serif")
 
-
-# Fig XX - Calib Opt All - Cps --------------------------------------------
-
-obs_mod <- obs %>%
-  filter(variable %in% names(plot_states))
-
-model_plot <- models %>%
-  filter(city == "cps", 
-         (((calib == "cps3" | calib == "gnvMod") & (exp == "n05" | exp == "n06")) |
-            ((calib == "cps4" | calib == "gnvMod") & (exp == "n07" | exp == "n08")) | 
-            ((calib == "cps2" | calib == "gnvMod") & (exp == "n03" | exp == "n04")) ),
-         model == "tomgro") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
-  left_join(codes_exp) %>%
-  mutate(cycle = as.factor(cycle),
-         node = as.factor(node),
-         calib_ = if_else(calib == "gnvMod", "Not Calibrated", "Calibrated"))
-
-obs_plot <- obs_mod %>%
-  filter(city == "cps",
-         exp == "n03" | exp == "n04" | exp == "n05" |
-           exp == "n06" | exp == "n07" | exp == "n08") %>%
-  select(-model) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
-
-ggplot() +
-  facet_grid(variable ~ cycle,
-             labeller = labeller(variable = plot_states,
-                                 cycle = cycles),
-             scales = "free") +
-  geom_line(data = model_plot, aes(das, measurement, 
-                                   col = calib_, lty = node),
-            size = 0.8) +
-  geom_point(data = obs_plot, aes(das, measurement),
-             size = 1, shape = 15) +
-  labs(x = "Days after simulation started",
-       y = "",
-       colour = "Calibration",
-       lty = "Plant") +
-  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(2, 3, 1)]) +
-  theme_vert
-
-plot_file_name <- paste0(path_figures,
-                         'Fig16_tomgro-cps-opt.png')
-ggsave(plot_file_name,
-       width = 15, height = 18, units = "cm",
-       family = "serif")
-
-
-# Fig XX - Unc - Params ---------------------------------------------------
+# Fig 21 - Unc - Params ---------------------------------------------------
 dataset_plot <- all_curves_params %>%
   gather(-c("das", "it_fac", "id",
             "case", "model", "city", "exp",
@@ -923,111 +851,12 @@ plot + plot_layout(guides = 'collect') &
   theme(legend.position='bottom')
 
 plot_file_name <- paste0(path_figures,
-                         'Fig17_unc-param.png')
+                         'Fig21_unc-param.png')
 ggsave(plot_file_name,
        width = 21, height = 18, units = "cm",
        family = "serif")
 
-# Fig XX - SI - Params ----------------------------------------------------
-dataset_plot <- all_si %>%
-  filter(city == "cps", model == "tomgro") %>%
-  rename(type = index) %>%
-  filter(type == "ST") %>%
-  gather(n, lai, w, wf, wm,
-         key = "variable", value = index) %>%
-  mutate(index = if_else(is.na(index) | is.nan(index), 0., index)) %>%
-  filter(index > 0.0, index <= 10,
-         !((dat < 40) & (variable == "wm" | variable == "wf"))
-         # factors != "N_b", factors != "N_FF", factors != "N_max",
-         # factors != "LAI_max", factors != "alpha_F",
-         # factors != "T_crit"
-  ) %>%
-  group_by(factors, variable, type, dat, city, model) %>%
-  mutate(index_avg = mean(index, na.rm = TRUE),
-         index_min = quantile(index, 0.1, na.rm = TRUE),
-         index_max = quantile(index, 0.9, na.rm = TRUE)) %>%
-  ungroup() %>%
-  filter(index_avg > 0.05) %>%
-  arrange(variable, factors) %>%
-  mutate(test1 = index_min + index_avg,
-         test2 = index_max - index_avg)
-
-ggplot(dataset_plot) +
-  facet_wrap("variable", nrow = 3,
-             labeller = labeller(variable = plot_states_1L)) +
-  geom_line(data = dataset_plot,
-            aes(x=dat, y=index_avg,
-                col = factors),
-            size = 1)   +
-  geom_point(data = dataset_plot,
-             aes(x=dat, y=index, color = factors), alpha = 0.5) +
-  labs(x = "Days after transplanting",
-       y = "ST",
-       colour = "Parameters") +
-  ylim(0, 1.2) +
-  scale_discrete_manual(values = paletteer_d("ggthemes::stata_s1color"),
-                        aesthetics = c("colour", "fill"),
-                        name = "Parameters",
-                        guide=guide_legend(nrow = 2,
-                                           keywidth = 0.7,
-                                           keyheight = 0.7)) +
-  labs(x = "Days after transplanting",
-       y = "") +
-  theme_vert
-
-plot_file_name <- paste0(path_figures,
-                         'Fig18_si-param.png')
-ggsave(plot_file_name,
-       width = 15, height = 19, units = "cm",
-       family = "serif")
-
-
-# Fig XX - Unc - Weather --------------------------------------------------
-dataset_plot <- all_results_plot_ext %>%
-  filter(model == "tomgro",
-         city == "cps") %>%
-  gather(-c("das", "it_fac", "id",
-            "case", "model", "city", "exp",
-            "param", "value"),
-         key = "variable", value = "measurement") %>%
-  group_by(das, param, variable) %>%
-  mutate(flag = if_else(value >= quantile(value, 0.9), "max", 
-                        if_else(value <= quantile(value, 0.1), "min", "none"))) %>%
-  ungroup() %>%
-  filter(flag != "none", !is.na(measurement)) 
-
-plots_all <- c("n", "lai", "w", "wf", "wm")
-plots_names <- c("Number of nodes", "LAI", "Aboveground biomass", 
-                 "Fruit biomass", "Mature fruit biomass")
-
-plots <- list()
-it <- 1
-lab_X <- "Days after simulation started"
-
-ggplot() +
-  facet_grid(variable ~ param, scales = "free",
-           labeller = labeller(variable = plot_states,
-                               param = factors_weather)) +
-  geom_line(data = dataset_plot, 
-          aes(das, measurement, group = it_fac, col = flag)) +
-  labs(x = lab_X, y = "") +
-  scale_colour_manual(values = c("firebrick3", "dodgerblue2"),
-                        breaks=c("max", "min"),
-                        labels=c("Largest values", "Smallest values"),
-                        name = "") +
-  theme_vert +
-  theme(plot.title = element_text(face = "bold"))
-  
-
-plot_file_name <- paste0(path_figures,
-                         'Fig19_unc-param.png')
-ggsave(plot_file_name,
-       width = 21, height = 21, units = "cm",
-       family = "serif")
-
-
-
-# Fig XX - SI - Weather ---------------------------------------------------
+# Fig 22 - SI - Weather ---------------------------------------------------
 all_si_plot <- all_si_weather %>%
   mutate(wm = na_if(wm, -99)) %>%
   filter(index == "ST", city == "cps")
@@ -1059,18 +888,387 @@ ggplot() +
   theme(panel.background = element_rect(fill = "grey99"))
 
 plot_file_name <- paste0(path_figures,
-                         'Fig20_si-weather.png')
+                         'Fig22_si-weather.png')
 ggsave(plot_file_name,
        width = 15, height = 19, units = "cm",
        family = "serif")
 
+# Fig 23 - Unc - Weather --------------------------------------------------
+dataset_plot <- all_results_plot_ext %>%
+  filter(model == "tomgro",
+         city == "cps") %>%
+  gather(-c("das", "it_fac", "id",
+            "case", "model", "city", "exp",
+            "param", "value"),
+         key = "variable", value = "measurement") %>%
+  group_by(das, param, variable) %>%
+  mutate(flag = if_else(value >= quantile(value, 0.9), "max", 
+                        if_else(value <= quantile(value, 0.1), "min", "none"))) %>%
+  ungroup() %>%
+  filter(flag != "none", !is.na(measurement))
 
-# Fig XX - Assim - Lai_lat ------------------------------------------------
+plots_all <- c("n", "lai", "w", "wf", "wm")
+plots_names <- c("Number of nodes", "LAI", "Aboveground biomass", 
+                 "Fruit biomass", "Mature fruit biomass")
+
+plots <- list()
+it <- 1
+lab_X <- "Days after simulation started"
+
+ggplot() +
+  facet_grid(variable ~ param, scales = "free",
+             labeller = labeller(variable = plot_states,
+                                 param = factors_weather)) +
+  geom_line(data = dataset_plot, 
+            aes(das, measurement, group = it_fac, col = flag)) +
+  labs(x = lab_X, y = "") +
+  scale_colour_manual(values = c("firebrick3", "dodgerblue2"),
+                      breaks=c("max", "min"),
+                      labels=c("Largest values", "Smallest values"),
+                      name = "") +
+  theme_vert +
+  theme(plot.title = element_text(face = "bold"))
+
+
+plot_file_name <- paste0(path_figures,
+                         'Fig23_unc-param.png')
+ggsave(plot_file_name,
+       width = 21, height = 21, units = "cm",
+       family = "serif")
+
+# Fig 24 - Calibs - Gnv ---------------------------------------------------
+
+obs_mod <- obs %>%
+  filter(variable %in% names(plot_states))
+
+model_plot <- models %>%
+  filter(city == "gnv", calib == "gnv" | calib == "gnvopt",
+         exp == "n04" | exp == "n05" | exp == "n06") %>%
+  filter(model == "tomgro") %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  mutate(type = if_else(exp == "n01" | exp == "n04", "Cool",
+                        if_else(exp == "n02" | exp == "n05", "Warm", "Hot")),
+         type_ = factor(type,
+                        levels = c("Cool", "Warm", "Hot"),
+                        ordered = TRUE),
+         calib_ = if_else(calib == "gnvopt", "Optimization", "Original"))
+
+obs_plot <- obs_mod %>%
+  filter(city == "gnv",
+         exp == "n04" | exp == "n05" | exp == "n06") %>%
+  select(-model) %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  mutate(year = if_else(exp == "n01" | exp == "n02" | exp == "n03", 1993, 1994),
+         type = if_else(exp == "n01" | exp == "n04", "Cool",
+                        if_else(exp == "n02" | exp == "n05", "Warm", "Hot")),
+         type_ = factor(type,
+                        levels = c("Cool", "Warm", "Hot"),
+                        ordered = TRUE))
+
+ggplot() +
+  facet_grid(variable ~ type_,
+             labeller = labeller(variable = plot_states),
+             scales = "free",
+             space = "free_x") +
+  geom_line(data = model_plot, aes(das, measurement, col = calib_),
+            size = 0.8) +
+  geom_point(data = obs_plot, aes(das, measurement),
+             size = 1.5, shape = 15) +
+  labs(x = "Days after simulation started",
+       y = "",
+       colour = "Calibration") +
+  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(2, 3, 1)]) +
+  theme_vert
+
+plot_file_name <- paste0(path_figures,
+                         'Fig24_tomgro-gnv-opt.png')
+ggsave(plot_file_name,
+       width = 15, height = 18, units = "cm",
+       family = "serif")
+
+
+# Fig 25 - Calibs - Cps ---------------------------------------------------
+
+obs_mod <- obs %>%
+  filter(variable %in% names(plot_states))
+
+model_plot <- models %>%
+  filter(city == "cps", calib == "cpsman" | calib == "cpsopt",
+         exp == "n08") %>%
+  filter(model == "tomgro") %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  mutate(calib_ = if_else(calib == "cpsopt", "Optimization", "Manual"))
+
+obs_plot <- obs_mod %>%
+  filter(city == "cps",
+         exp == "n08") %>%
+  select(-model) %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+
+ggplot() +
+  facet_wrap("variable", nrow = 3,
+             labeller = labeller(variable = plot_states),
+             scales = "free") +
+  geom_line(data = model_plot, aes(das, measurement, col = calib_),
+            size = 0.8) +
+  geom_point(data = obs_plot, aes(das, measurement),
+             size = 1.5, shape = 15) +
+  labs(x = "Days after simulation started",
+       y = "",
+       colour = "Calibration") +
+  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(3, 2, 1)]) +
+  theme_vert
+
+plot_file_name <- paste0(path_figures,
+                         'Fig25_tomgro-cps-opt.png')
+ggsave(plot_file_name,
+       width = 15, height = 18, units = "cm",
+       family = "serif")
+
+
+# Fig 26 - Calib Opt All - Cps --------------------------------------------
+
+obs_mod <- obs %>%
+  filter(variable %in% names(plot_states))
+
+model_plot <- models %>%
+  filter(city == "cps", 
+         (((calib == "cps3" | calib == "gnvMod") & (exp == "n05" | exp == "n06")) |
+            ((calib == "cps4" | calib == "gnvMod") & (exp == "n07" | exp == "n08")) | 
+            ((calib == "cps2" | calib == "gnvMod") & (exp == "n03" | exp == "n04")) ),
+         model == "tomgro") %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  left_join(codes_exp) %>%
+  mutate(cycle = as.factor(cycle),
+         node = as.factor(node),
+         calib_ = if_else(calib == "gnvMod", "Not Calibrated", "Calibrated"))
+
+obs_plot <- obs_mod %>%
+  filter(city == "cps",
+         exp == "n03" | exp == "n04" | exp == "n05" |
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  select(-model) %>%
+  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+
+ggplot() +
+  facet_grid(variable ~ cycle,
+             labeller = labeller(variable = plot_states,
+                                 cycle = cycles),
+             scales = "free") +
+  geom_line(data = model_plot, aes(das, measurement, 
+                                   col = calib_, lty = node),
+            size = 0.8) +
+  geom_point(data = obs_plot, aes(das, measurement),
+             size = 1, shape = 15) +
+  labs(x = "Days after simulation started",
+       y = "",
+       colour = "Calibration",
+       lty = "Plant") +
+  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(2, 3, 1)]) +
+  theme_vert
+
+plot_file_name <- paste0(path_figures,
+                         'Fig26_tomgro-cps-opt.png')
+ggsave(plot_file_name,
+       width = 15, height = 18, units = "cm",
+       family = "serif")
+
+
+# Fig 27 - Scatterplots - Obs model ---------------------------------------
+
+dataset <- obs_ids %>%
+  filter(!is.na(cycle), cycle != 1) %>%
+  full_join(cover_abv_calib) %>%
+  full_join(cover_lat_calib) %>%
+  full_join(wf_lat) %>%
+  full_join(wm_lat) %>%
+  mutate(cycle_mod = factor(cycle,
+                            levels = c(2, 3, 4),
+                            labels = c("Cycle 1", "Cycle 2", "Cycle 3"))) %>%
+  filter(!(((cycle == 2) | (cycle == 3)) & ((id == "42") | (id == "31"))),
+         !((cycle == 4) & ((id == "54") | (id == "30"))))
+
+
+comb <- data.frame(state = c("leaf_area", "leaf_area", "w_plant", "wf_plant"),
+                   meas_var = c("lai_lat",  "lai_abv", "w_plant_fm", "wf_lat"))
+
+# Scatter Lai_lat
+plot2a <- ggplot() +
+  geom_point(data = dataset,
+             aes(x = lai_lat, y = leaf_area, fill = cycle_mod),
+             shape=21, size=2) +
+  labs(x = plot_vars_1l[match("lai_lat", names(plot_vars_1l))],
+       y = plot_vars_1l[match("leaf_area", names(plot_vars_1l))]) +
+  scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
+                        aesthetics = c("fill"),
+                        name = "Cycle") +
+  theme_vert +
+  theme(panel.background = element_rect(fill = "gray99")) +
+  theme(legend.position = "none")
+
+# Scatter Lai_abv
+plot2b <- ggplot() +
+  geom_point(data = dataset,
+             aes(x = lai_abv, y = leaf_area, fill = cycle_mod),
+             shape=21, size=2) +
+  labs(x = plot_vars_1l[match("lai_abv", names(plot_vars_1l))],
+       y = plot_vars_1l[match("leaf_area", names(plot_vars_1l))]) +
+  scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
+                        aesthetics = c("fill"),
+                        name = "Cycle") +
+  theme_vert +
+  theme(panel.background = element_rect(fill = "gray99")) +
+  theme(legend.position = "none")
+
+# Scatter W
+plot3a <- ggplot() +
+  geom_point(data = dataset,
+             aes(x = w_plant_fm, y = w_plant, fill = cycle_mod),
+             shape=21, size=2) +
+  labs(x = plot_vars_1l[match("w_plant_fm", names(plot_vars_1l))],
+       y = plot_vars_1l[match("w_plant", names(plot_vars_1l))]) +
+  scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
+                        aesthetics = c("fill"),
+                        name = "Cycle") +
+  theme_vert +
+  theme(panel.background = element_rect(fill = "gray99"))  +
+  theme(legend.position = "none")
+
+# Scatter Wf
+plot3b <- ggplot() +
+  geom_point(data = dataset,
+             aes(x = wf_lat, y = wf_plant, fill = cycle_mod),
+             shape=21, size=2) +
+  labs(x = plot_vars_1l[match("wf_lat", names(plot_vars_1l))],
+       y = plot_vars_1l[match("wf_plant", names(plot_vars_1l))]) +
+  scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
+                        aesthetics = c("fill"),
+                        name = "Cycle") +
+  theme_vert +
+  theme(panel.background = element_rect(fill = "gray99")) +
+  theme(legend.position = "none")
+
+plot_all <- ((plot2a + plot2b) / (plot3a + plot3b))  +
+  plot_layout(guides = 'collect') &
+  theme(legend.position='bottom')
+
+plot_file_name <- paste0(path_figures,
+                         'Fig27_scatterplots_obs_calib.png')
+ggsave(plot_file_name,
+       width = 15, height = 16, units = "cm",
+       family = "serif")
+
+# Fig 28 - Assim - Wf_lat -------------------------------------------------
+
+upd <- allStates %>%
+  filter(das != 0) %>%
+  filter(meas_var == "wf_lat", sensor_type == "A",
+         frequency == 1,
+         calib == "gnvMod") %>%
+  mutate(model = filt) %>%
+  filter(filt != "pf")
+
+simul_calib <- simulations %>%
+  filter(model == "tomgro",
+         # Calibrated model
+         ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
+            (calib == "cps3" & (exp == "n05" | exp == "n06")) |
+            (calib == "cps4" & (exp == "n07" | exp == "n08"))),
+         city == "cps") %>%
+  select(-calib, -city)
+
+simul_NotCalib <- simulations %>%
+  filter(model == "tomgro",
+         # Not calibrated model
+         calib == "gnvMod",
+         city == "cps") %>%
+  mutate(model = "gnvMod") %>%
+  select(-calib, -city)
+
+simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
+  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"),
+         sensor == "A")
+
+assim <- upd %>%
+  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"))
+
+obs_plot <- obs %>%
+  filter(city == "cps") %>%
+  select(-model) %>%
+  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"))
+
+obs_last_i <- obs_last %>%
+  separate(city_exp, into = c("city", "exp")) %>%
+  rename(das = dat) %>%
+  filter(variable %in% c("lai", "w", "wf", "wm")) %>%
+  filter(exp == "n05" | exp == "n06" | exp == "n07" | exp == "n08")
+
+ggplot() +
+  facet_grid(variable ~ exp,
+             scales = "free",
+             space = "free_x",
+             drop = TRUE,
+             labeller = labeller(variable = plot_states,
+                                 exp = codes_plants)) +
+  geom_point(data = assim, aes(das, measurement, 
+                               fill = model), 
+             size = 0.9, shape=21, colour="black", stroke=0.2) +
+  geom_point(data = simuls, aes(das, measurement, 
+                                colour = model), 
+             size = 0.7, alpha = 0.9) +
+  geom_point(data = obs_last_i, aes(das, measurement),
+             size = 1.5) +
+  geom_point(data = obs_plot, aes(dat, measurement),
+             size = 0.5) +
+  geom_errorbar(data = obs_plot,
+                aes(dat,
+                    ymin=measurement-measurement_sd,
+                    ymax=measurement+measurement_sd),
+                width = 0.05) +
+  labs(x = "Days after simulation started", 
+       y = "") +
+  theme_vert +
+  scale_fill_manual(name="Approach",
+                    breaks=c("tomgro", "gnvMod", "ukf", "enkf"),
+                    labels=c("Open loop calibrated",
+                             "Open loop not calibrated",
+                             "UKF not calibrated",
+                             "EnKF not calibrated"),
+                    values = paletteer_d("RColorBrewer::Set1")[c(1, 4)],
+                    drop = FALSE) +
+  scale_colour_manual(name="",
+                      breaks=c("tomgro", "gnvMod", "ukf", "enkf"),
+                      labels=c("Open loop calibrated",
+                               "Open loop not calibrated",
+                               "UKF not calibrated",
+                               "EnKF not calibrated"),
+                      values = paletteer_d("RColorBrewer::Set1")[c(3, 2)],
+                      drop = FALSE) +
+  guides(fill=guide_legend(override.aes = list(size = 2), order=1,
+                           title.theme = element_text(face = "bold", size=9)),
+         colour=guide_legend(override.aes = list(size = 2), order=2,
+                             title.theme = element_text(face = "bold", size=9))) +
+  theme(panel.background = element_rect(fill = "gray99"))
+
+plot_file_name <- paste0(path_figures,
+                         'Fig28_assim_wflat.png')
+ggsave(plot_file_name,
+       width = 25, height = 18, units = "cm",
+       family = "serif")
+
+
+# Fig 29 - Assim - Lai_lat ------------------------------------------------
 
 upd <- allStates %>%
   filter(das != 0) %>%
   filter(meas_var == "lai_lat",
-         frequency == 1,
+         frequency == 1, sensor_type == "A",
          calib == "gnvMod") %>%
   mutate(model = filt) %>%
   filter(filt != "pf")
@@ -1095,23 +1293,25 @@ simul_NotCalib <- simulations %>%
 simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"),
+         sensor == "A")
 
 assim <- upd %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08")
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_plot <- obs %>%
   filter(city == "cps") %>%
   select(-model) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_last_i <- obs_last %>%
   separate(city_exp, into = c("city", "exp")) %>%
   rename(das = dat) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  filter(variable %in% c("lai", "w", "wf", "wm")) %>%
   filter(exp == "n05" | exp == "n06" | exp == "n07" | exp == "n08")
 
 ggplot() +
@@ -1162,17 +1362,17 @@ ggplot() +
   theme(panel.background = element_rect(fill = "gray99"))
 
 plot_file_name <- paste0(path_figures,
-                         'Fig21_assim_lailat.png')
+                         'Fig29_assim_lailat.png')
 ggsave(plot_file_name,
        width = 25, height = 18, units = "cm",
        family = "serif")
 
 
-# Fig XX - Assim - Lai_abv ------------------------------------------------
+# Fig 30 - Assim - Lai_abv ------------------------------------------------
 
 upd <- allStates %>%
   filter(das != 0) %>%
-  filter(meas_var == "lai_abv",
+  filter(meas_var == "lai_abv", sensor_type == "A",
          frequency == 1,
          calib == "gnvMod") %>%
   mutate(model = filt) %>%
@@ -1198,23 +1398,24 @@ simul_NotCalib <- simulations %>%
 simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"), sensor == "A")
 
 assim <- upd %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08")
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_plot <- obs %>%
   filter(city == "cps") %>%
   select(-model) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_last_i <- obs_last %>%
   separate(city_exp, into = c("city", "exp")) %>%
   rename(das = dat) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  filter(variable %in% c("lai", "w", "wf", "wm")) %>%
   filter(exp == "n05" | exp == "n06" | exp == "n07" | exp == "n08")
 
 ggplot() +
@@ -1265,16 +1466,16 @@ ggplot() +
   theme(panel.background = element_rect(fill = "gray99"))
 
 plot_file_name <- paste0(path_figures,
-                         'Fig22_assim_laiabv.png')
+                         'Fig30_assim_laiabv.png')
 ggsave(plot_file_name,
        width = 25, height = 18, units = "cm",
        family = "serif")
 
 
-# Fig XX - Assim - W_fm_full ----------------------------------------------
+# Fig 31 - Assim - W_fm_full ----------------------------------------------
 upd <- allStates %>%
   filter(das != 0) %>%
-  filter(meas_var == "w_fm_full",
+  filter(meas_var == "w_fm_full", sensor_type == "A",
          frequency == 1,
          calib == "gnvMod") %>%
   mutate(model = filt) %>%
@@ -1300,23 +1501,24 @@ simul_NotCalib <- simulations %>%
 simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"), sensor == "A")
 
 assim <- upd %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08")
+           exp == "n06" | exp == "n07" | exp == "n08") %>%
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_plot <- obs %>%
   filter(city == "cps") %>%
   select(-model) %>%
   filter(exp == "n03" | exp == "n04" | exp == "n05" | 
            exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
+  filter(variable %in% c("lai", "w", "wf", "wm"))
 
 obs_last_i <- obs_last %>%
   separate(city_exp, into = c("city", "exp")) %>%
   rename(das = dat) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
+  filter(variable %in% c("lai", "w", "wf", "wm")) %>%
   filter(exp == "n05" | exp == "n06" | exp == "n07" | exp == "n08")
 
 ggplot() +
@@ -1367,283 +1569,99 @@ ggplot() +
   theme(panel.background = element_rect(fill = "gray99"))
 
 plot_file_name <- paste0(path_figures,
-                         'Fig23_assim_w_fm_full.png')
+                         'Fig31_assim_w_fm_full.png')
 ggsave(plot_file_name,
        width = 25, height = 18, units = "cm",
        family = "serif")
 
+# Fig 32 - Assim - Low-cost Wf --------------------------------------------
+Pdata <- upd_assim %>%
+  filter(as.numeric(id) >= 916, as.numeric(id) <= 931) %>%
+  mutate(measurement = as.numeric(measurement),
+         das = as.numeric(das)) %>%
+  filter(!grepl("_s", variable),
+         !grepl("wm", variable),
+         !grepl("Resid", variable),
+         !grepl("Cov_pred", variable),
+         variable == "Gain" | 
+           variable == "R" | variable == "P_m") %>%
+  mutate(var_est = if_else(((as.numeric(id) >= 916) & (as.numeric(id) <= 919)) |  
+                             ((as.numeric(id) >= 924) & (as.numeric(id) <= 927)),
+                           "wm", "wf"),
+         noise =  if_else((as.numeric(id) >= 916) & (as.numeric(id) <= 923),
+                          "10 %", "30 %"))
 
-# Fig XX - Assim - Wf_lat -------------------------------------------------
-
-upd <- allStates %>%
-  filter(das != 0) %>%
-  filter(meas_var == "wf_lat",
-         frequency == 1,
-         calib == "gnvMod") %>%
-  mutate(model = filt) %>%
-  filter(filt != "pf")
-
-simul_calib <- simulations %>%
-  filter(model == "tomgro",
-         # Calibrated model
-         ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
-            (calib == "cps3" & (exp == "n05" | exp == "n06")) |
-            (calib == "cps4" & (exp == "n07" | exp == "n08"))),
-         city == "cps") %>%
-  select(-calib, -city)
-
-simul_NotCalib <- simulations %>%
-  filter(model == "tomgro",
-         # Not calibrated model
-         calib == "gnvMod",
-         city == "cps") %>%
-  mutate(model = "gnvMod") %>%
-  select(-calib, -city)
-
-simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
-  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
-
-assim <- upd %>%
-  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08")
-
-obs_plot <- obs %>%
-  filter(city == "cps") %>%
-  select(-model) %>%
-  filter(exp == "n03" | exp == "n04" | exp == "n05" | 
-           exp == "n06" | exp == "n07" | exp == "n08") %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm"))
-
-obs_last_i <- obs_last %>%
-  separate(city_exp, into = c("city", "exp")) %>%
-  rename(das = dat) %>%
-  filter(variable %in% c("lai", 'n', "w", "wf", "wm")) %>%
-  filter(exp == "n05" | exp == "n06" | exp == "n07" | exp == "n08")
+data_wf <- Pdata %>%
+  filter(var_est == "wf")
 
 ggplot() +
-  facet_grid(variable ~ exp,
-             scales = "free",
-             space = "free_x",
-             drop = TRUE,
-             labeller = labeller(variable = plot_states,
-                                 exp = codes_plants)) +
-  geom_point(data = assim, aes(das, measurement, 
-                               fill = model), 
-             size = 0.9, shape=21, colour="black", stroke=0.2) +
-  geom_point(data = simuls, aes(das, measurement, 
-                                colour = model), 
-             size = 0.7, alpha = 0.9) +
-  geom_point(data = obs_last_i, aes(das, measurement),
-             size = 1.5) +
-  geom_point(data = obs_plot, aes(dat, measurement),
-             size = 0.5) +
-  geom_errorbar(data = obs_plot,
-                aes(dat,
-                    ymin=measurement-measurement_sd,
-                    ymax=measurement+measurement_sd),
-                width = 0.05) +
-  labs(x = "Days after simulation started", 
-       y = "") +
-  theme_vert +
-  scale_fill_manual(name="Approach",
-                    breaks=c("tomgro", "gnvMod", "ukf", "enkf"),
-                    labels=c("Open loop calibrated",
-                             "Open loop not calibrated",
-                             "UKF not calibrated",
-                             "EnKF not calibrated"),
-                    values = paletteer_d("RColorBrewer::Set1")[c(1, 4)],
-                    drop = FALSE) +
-  scale_colour_manual(name="",
-                      breaks=c("tomgro", "gnvMod", "ukf", "enkf"),
-                      labels=c("Open loop calibrated",
-                               "Open loop not calibrated",
-                               "UKF not calibrated",
-                               "EnKF not calibrated"),
-                      values = paletteer_d("RColorBrewer::Set1")[c(3, 2)],
-                      drop = FALSE) +
-  guides(fill=guide_legend(override.aes = list(size = 2), order=1,
-                           title.theme = element_text(face = "bold", size=9)),
-         colour=guide_legend(override.aes = list(size = 2), order=2,
-                             title.theme = element_text(face = "bold", size=9))) +
-  theme(panel.background = element_rect(fill = "gray99"))
-
-plot_file_name <- paste0(path_figures,
-                         'Fig24_assim_wflat.png')
-ggsave(plot_file_name,
-       width = 25, height = 18, units = "cm",
-       family = "serif")
-
-
-# Fig XX - Assim - Low-cost Wf --------------------------------------------
-upd <- all_assim %>%
-  mutate(id = as.integer(id)) %>%
-  filter(id > 500) %>%
-  right_join(info_runs) %>%
-  filter((config >= 4 & config <= 6) | (config >= 11 & config <= 13),
-         (filt == "enkf" & case == "case3"), 
-         meas_var == "wf") %>%
-  unite("filt_sensor", filt, sensor_type, remove=FALSE) %>%
-  mutate(filt_ = factor(filt_sensor,
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")),
-         config_ = if_else(config == 11 | config == 4, "Noise: 10%",
-                           if_else(config == 12 | config == 5, "Noise: 30%", 
-                                   if_else(config == 13 | config == 6, 
-                                           "Noise: 50%", "0"))))
-
-simul_calib <- simulations_artif %>%
-  filter(model == "tomgro",
-         # Calibrated model
-         calib == "cps4") %>%
-  select(-calib) %>%
-  mutate(filt_ = factor("cps4",
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")))
-
-simul_NotCalib <- simulations_artif %>%
-  filter(model == "tomgro",
-         # Not calibrated model
-         calib == "gnvMod") %>%
-  mutate(model = "gnvMod") %>%
-  select(-calib) %>%
-  mutate(filt_ = factor("gnvMod",
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")))
-
-simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
-  filter(variable == "wm") 
-
-assim <- upd %>%
-  filter(variable == "wm") 
-
-obs_plot <- obs_artif %>%
-  gather(wf, wm, key = "variable", value = "measurement") %>%
-  filter(variable == "wm",
-         (config >= 4 & config <= 6) | (config >= 11 & config <= 13)) %>%
-  mutate(config_ = if_else(config == 11 | config == 4, "Noise: 10%",
-                           if_else(config == 12 | config == 5, "Noise: 30%", 
-                                   if_else(config == 13 | config == 6, 
-                                           "Noise: 50%", "0"))),
-         meas_var = variable)
-
-ggplot() +
-  facet_grid(config_ ~ exp, scales = "free",
-             labeller = labeller(meas_var = plot_vars,
+  facet_grid(variable ~ exp, scales = "free",
+             labeller = labeller(variable = c("Gain" = "Gain",
+                                              "R" = "Observation covariance",
+                                              "P_m" = "State covariance"),
                                  exp = c("n01" = "Cycle 0",
                                          "n03" = "Cycle 1",
                                          "n05" = "Cycle 2",
                                          "n07" = "Cycle 3"))) + 
-  # # Simulations
-  geom_point(data = simuls, aes(das, measurement,
-                                colour = filt_),
-             size = 1) +
-  # Assimilation
-  geom_point(data = assim, aes(das, measurement, group = rep, 
-                               colour = filt_), shape = 21,
-             size = 1) +
-  # # Observations
-  geom_point(data = obs_plot, aes(dat, measurement),
-             size = 0.5) +
+  geom_point(data = data_wf, 
+             aes(das, measurement,
+                 group = rep, col = as.factor(noise)),
+             alpha = 0.5) +
   labs(x = "Days after simulation started", 
        y = "",
-       colour = "") +
+       colour = "Noise level") +
   scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")) +
-  guides(colour=guide_legend(override.aes = list(size = 2),
-                             title.theme = element_text(face = "bold", size=9))) +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig25_assim_lowcost_wf.png')
+                         'Fig32_assim_lowcost_wf.png')
 ggsave(plot_file_name,
-       width = 25, height = 18, units = "cm",
+       width = 18, height = 15, units = "cm",
        family = "serif")
 
-# Fig XX - Assim - Low-cost Wm --------------------------------------------
-upd <- all_assim %>%
-  mutate(id = as.integer(id)) %>%
-  filter(id > 500) %>%
-  right_join(info_runs) %>%
-  filter((config >= 4 & config <= 6) | (config >= 11 & config <= 13),
-         (filt == "enkf" & case == "case3"), meas_var == "wm") %>%
-  unite("filt_sensor", filt, sensor_type, remove=FALSE) %>%
-  mutate(filt_ = factor(filt_sensor,
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")),
-         config_ = if_else(config == 11 | config == 4, "Noise: 10%",
-                           if_else(config == 12 | config == 5, "Noise: 30%", 
-                                   if_else(config == 13 | config == 6, 
-                                           "Noise: 50%", "0"))))
-simul_calib <- simulations_artif %>%
-  filter(model == "tomgro",
-         # Calibrated model
-         calib == "cps4") %>%
-  select(-calib) %>%
-  mutate(filt_ = factor("cps4",
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")))
+# Fig 33 - Assim - Low-cost Wm --------------------------------------------
 
-simul_NotCalib <- simulations_artif %>%
-  filter(model == "tomgro",
-         # Not calibrated model
-         calib == "gnvMod") %>%
-  mutate(model = "gnvMod") %>%
-  select(-calib) %>%
-  mutate(filt_ = factor("gnvMod",
-                        levels = c("enkf_A", "enkf_B", "gnvMod", "cps4"),
-                        labels = c("Quantum sensor", "Luxmeter", 
-                                   "OL, not calib.", "Sim. truth")))
+Pdata <- upd_assim %>%
+  filter(as.numeric(id) >= 916, as.numeric(id) <= 931) %>%
+  mutate(measurement = as.numeric(measurement),
+         das = as.numeric(das)) %>%
+  filter(!grepl("_s", variable),
+         !grepl("wm", variable),
+         !grepl("Resid", variable),
+         !grepl("Cov_pred", variable),
+         variable == "Gain" | 
+           variable == "R" | variable == "P_m") %>%
+  mutate(var_est = if_else(((as.numeric(id) >= 916) & (as.numeric(id) <= 919)) |  
+                             ((as.numeric(id) >= 924) & (as.numeric(id) <= 927)),
+                           "wm", "wf"),
+         noise =  if_else((as.numeric(id) >= 916) & (as.numeric(id) <= 923),
+                          "10 %", "30 %"))
 
-simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
-  filter(variable == "wm") 
-
-assim <- upd %>%
-  filter(variable == "wm") 
-
-obs_plot <- obs_artif %>%
-  gather(wf, wm, key = "variable", value = "measurement") %>%
-  filter(variable == "wm",
-         (config >= 4 & config <= 6) | (config >= 11 & config <= 13)) %>%
-  mutate(config_ = if_else(config == 11 | config == 4, "Noise: 10%",
-                           if_else(config == 12 | config == 5, "Noise: 30%", 
-                                   if_else(config == 13 | config == 6, 
-                                           "Noise: 50%", "0"))),
-         meas_var = variable)
+data_wm <- Pdata %>%
+  filter(var_est == "wm")
 
 ggplot() +
-  facet_grid(config_ ~ exp, scales = "free",
-             labeller = labeller(meas_var = plot_vars,
+  facet_grid(variable ~ exp, scales = "free",
+             labeller = labeller(variable = c("Gain" = "Gain",
+                                              "R" = "Observation covariance",
+                                              "P_m" = "State covariance"),
                                  exp = c("n01" = "Cycle 0",
                                          "n03" = "Cycle 1",
                                          "n05" = "Cycle 2",
                                          "n07" = "Cycle 3"))) + 
-  # # Simulations
-  geom_point(data = simuls, aes(das, measurement,
-                                colour = filt_),
-             size = 1) +
-  # Assimilation
-  geom_point(data = assim, aes(das, measurement, group = rep, 
-                               colour = filt_), shape = 21,
-             size = 1) +
-  # # Observations
-  geom_point(data = obs_plot, aes(dat, measurement),
-             size = 0.5) +
+  geom_point(data = data_wm, 
+             aes(das, measurement,
+                 group = rep, col = as.factor(noise)),
+             alpha = 0.5) +
   labs(x = "Days after simulation started", 
        y = "",
-       colour = "") +
+       colour = "Noise level") +
   scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")) +
-  guides(colour=guide_legend(override.aes = list(size = 2),
-                             title.theme = element_text(face = "bold", size=9))) +
   theme_vert
 
+
 plot_file_name <- paste0(path_figures,
-                         'Fig26_assim_lowcost_wm.png')
+                         'Fig33_assim_lowcost_wm.png')
 ggsave(plot_file_name,
-       width = 25, height = 18, units = "cm",
+       width = 18, height = 15, units = "cm",
        family = "serif")

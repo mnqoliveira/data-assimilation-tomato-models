@@ -13,7 +13,7 @@ Sys.setenv(LANG = "En")
 
 
 # Functions ---------------------------------------------------------------
-source("./01c-cleanOrgWeather_Pi_functions.R")
+source("./data_processing/01c-cleanOrgWeather_Pi_functions.R")
 
 orgSensorData <- function(x, sensor_dates){
   # The dataset has temperature, humidity and radiation 
@@ -33,7 +33,7 @@ orgSensorData <- function(x, sensor_dates){
 
 # Load files --------------------------------------------------------------
 
-weather_files <- list.files("../data/weather/monitoring/raw/sensorpi", full.names = T, 
+weather_files <- list.files("./data/weather/monitoring/raw/sensorpi", full.names = T, 
                             pattern = "sensor[0-9][0-9].csv")
 
 weather_list <- list()
@@ -55,11 +55,11 @@ for (i in weather_files){
 
 weather <- Reduce(rbind, weather_list)
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
 
 # Process data ------------------------------------------------------------
 
 pi_full <- orgSensorData(weather, sensor_dates)
 
-write.csv(pi_full, file = "../data/weather/monitoring/weather_pi_org.csv", row.names=FALSE)
+write.csv(pi_full, file = "./data/weather/monitoring/weather_pi_org.csv", row.names=FALSE)

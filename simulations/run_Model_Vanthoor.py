@@ -7,8 +7,8 @@ Created on Mon Jan 21 13:43:33 2019
 import numpy as np
 import pandas as pd
 
-import model_Vanthoor as model
-import f_aux as aux
+import models.model_Vanthoor as model
+import auxiliary_functions.f_aux as aux
 
 
 # %% Initial values

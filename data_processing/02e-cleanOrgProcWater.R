@@ -11,7 +11,7 @@ library(tidyverse)
 
 # Functions ---------------------------------------------------------------
 
-source("02e-cleanOrgProcWater_functions.R")
+source("./data_processing/02e-cleanOrgProcWater_functions.R")
 
 orgSensorData <- function(x, cycle_dates, sensor_dates){
   
@@ -28,7 +28,7 @@ orgSensorData <- function(x, cycle_dates, sensor_dates){
 
 # Load files --------------------------------------------------------------
 
-wc_files <- list.files("../data/moisture/", full.names = T, 
+wc_files <- list.files("./data/moisture/", full.names = T, 
                        pattern = "wc[0-9][0-9].csv")
 
 if(length(wc_files) == 1){
@@ -47,14 +47,14 @@ if(length(wc_files) == 1){
   
 }
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
 
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 # Process data ------------------------------------------------------------
 
 content_water <- orgSensorData(wc, cycle_dates, sensor_dates)
 
-write.csv(content_water, file = "../data/moisture/waterContent.csv", 
+write.csv(content_water, file = "./data/moisture/waterContent.csv", 
           row.names=FALSE)

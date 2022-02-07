@@ -13,7 +13,7 @@ library("tidyverse")
 
 # Functions ---------------------------------------------------------------
 
-source("./01b-cleanOrgMass_functions.R")
+source("./data_processing/01b-cleanOrgMass_functions.R")
 
 orgScales <- function(x, sensor_dates){
   
@@ -30,20 +30,20 @@ orgScales <- function(x, sensor_dates){
   
 }
 
-# sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+# sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 # colnames(sensor_dates)[1] <- "cycle"
 # 
-# x <- read.csv("../data/observations/monitoring/scales_raw.csv")
+# x <- read.csv("./data/observations/monitoring/scales_raw.csv")
 # type_s <- "mass"
 
 # Load files --------------------------------------------------------------
 
-scales_files <- list.files("../data/observations/monitoring/scales", full.names = T)
+scales_files <- list.files("./data/observations/monitoring/scales", full.names = T)
 scales_files <- grep("scales[0-9][0-9].csv", scales_files, value = TRUE)
 
-if (file.exists("../data/observations/monitoring/scales_raw.csv")){
+if (file.exists("./data/observations/monitoring/scales_raw.csv")){
   
-  unlink("../data/observations/monitoring/scales_raw.csv")
+  unlink("./data/observations/monitoring/scales_raw.csv")
   
 }
 
@@ -54,7 +54,7 @@ for (i in scales_files){
   
   head_csv <- colnames(temp)
   
-  write.table(temp, file = "../data/observations/monitoring/scales_raw.csv",
+  write.table(temp, file = "./data/observations/monitoring/scales_raw.csv",
               sep = ",",
               append = TRUE,
               row.names = FALSE,
@@ -63,11 +63,11 @@ for (i in scales_files){
   
 }
 
-scales <- read.csv("../data/observations/monitoring/scales_raw.csv", dec = ".",
+scales <- read.csv("./data/observations/monitoring/scales_raw.csv", dec = ".",
                    col.names = head_csv)
-#write.csv(head_csv, file = "../data/observations/monitoring/scales_raw_header.csv", row.names=FALSE)
+#write.csv(head_csv, file = "./data/observations/monitoring/scales_raw_header.csv", row.names=FALSE)
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
 
 # Process scales data -----------------------------------------------------
@@ -83,6 +83,6 @@ scales_org <- orgScales(scales_raw, sensor_dates)
 # Save file ---------------------------------------------------------------
 
 write.csv(scales_raw,
-          file = "../data/observations/monitoring/scales_raw.csv", row.names=FALSE)
+          file = "./data/observations/monitoring/scales_raw.csv", row.names=FALSE)
 write.csv(scales_org,
-          file = "../data/observations/monitoring/scales_org.csv", row.names=FALSE)
+          file = "./data/observations/monitoring/scales_org.csv", row.names=FALSE)

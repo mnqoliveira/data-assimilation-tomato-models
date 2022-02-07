@@ -7,7 +7,7 @@ Created on Mon Jan 21 13:43:33 2019
 import numpy as np
 import pandas as pd
 
-import models.model_ReducedTomgro as model
+import models.model_ReducedTomgro_oo as rt
 import auxiliary_functions.f_aux as aux
 
 #np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
@@ -84,33 +84,29 @@ def load_dataset(city, sensor, calib, treat, config_obs):
 
 def run_simul(info, params, rates, states, weather):
 
-    state_it = np.array(list(states.values()))[np.newaxis, :]
+    state_it = np.array(list(states.values())).reshape(1, -1)
     all_dat = [x for x in weather.dat.unique().tolist() if x > 0]
     pg = list()
     rm = list()
     dw = list()
 
     weather_l = list(weather.groupby("dat"))
+    tomgro = rt.tomgro(info, params, rates, states)
 
     for it, dat in enumerate(all_dat):
-        weather_d = weather_l[it][1]
-        model.tomgro(dat, info, params, rates, states, weather_d)
+        tomgro.weather_d = weather_l[it][1]
+        tomgro.integrate(1)
 
-        if len(list(states.values())) == 5:
-            current_tomgro = list(states.values())
-            # aux.print_state(current_tomgro)
-            state_it = np.vstack((state_it,
-                                  np.array(current_tomgro)[np.newaxis, :]))
-            dw.append(rates['dw_dt'].item())
-            pg.append(params['photo'])
-            rm.append(params['resp'])
+        current_tomgro = [tomgro.n, tomgro.lai,
+                          tomgro.w, tomgro.wf, tomgro.wm]
+        # aux.print_state(current_tomgro)
+        state_it = np.vstack((state_it,
+                              np.array(current_tomgro).reshape(1, -1)))
+        dw.append(tomgro.dw)
+        pg.append(tomgro.params['photo'])
+        rm.append(tomgro.params['resp'])
 
     return (state_it, pg, rm, dw)
-
-    # if len(list(states.values())) == 5:
-
-    # else:
-    #     return None
 
 
 # %%  Run model
@@ -118,16 +114,12 @@ def main():
     weather_loc = ['cps']
     sensor_type = ['A']
     experiments_int = [8]
-    calibrations = ['cpsman']
+    experiments_int = [1, 3, 5, 7]
+    #experiments_int = [1]
+    calibrations = ['gnvMod']
+    #calibrations = ['cps4', 'cpsopt', 'gnvMod']
     experiments = [str(s) for s in experiments_int]
     config_obs = "summ"
-
-    # weather_loc = ['cps']
-    # sensor_type = ['A']
-    # experiments_int = [4, 6]
-    # calibrations = ['cps4']
-    # experiments = [str(s) for s in experiments_int]
-    # config_obs = "summ"
 
     city = weather_loc[0]
     calib = calibrations[0]
@@ -163,11 +155,11 @@ def main():
                                  columns=['n', 'lai', 'w', 'wf', 'wm'])
         state_all['Pg'] = [0] + state_tup[1]
         state_all['Rm'] = [0] + state_tup[2]
-        state_all['dw'] = [0] + state_tup[3]
+        state_all['dw'] = [0] + [i[0][0] for i in state_tup[3]]
         state_all['das'] = list(range(state_all.shape[0]))
 
-        aux.save_output("tomgro", "simul", state_all, city, calib, treat,
-                        sensor)
+        aux.save_output("tomgro", "simul", state_all, city,
+                        calib, treat, sensor)
 
         if config_obs is not None:
             var_names = ['n', 'lai', 'w', 'wf', 'wm']

@@ -13,38 +13,42 @@ library("zoo")
 
 # Load data ---------------------------------------------------------------
 # vanthoor
-obs_vanthoor_path <- list.files("../tables/results_simul/exp/", 
+obs_vanthoor_path <- list.files("./tables/results_simul/exp/", 
                                pattern = "vanthoor",
                                include.dirs = FALSE, full.names = TRUE)
 
-obs_vanthoor <- list.files("../tables/results_simul/exp/", 
+obs_vanthoor <- list.files("./tables/results_simul/exp/", 
                           pattern = "vanthoor",
                           include.dirs = FALSE) %>%
   strsplit(split = "-")
 
 # tomgro
-obs_tomgro <- list.files("../tables/results_simul/exp/", 
+obs_tomgro <- list.files("./tables/results_simul/exp/", 
                         pattern = "tomgro",
                         include.dirs = FALSE) %>%
-  strsplit(split = "-")
+  strsplit(split = "-") %>%
+  lapply(matrix, nrow=1) %>%
+  lapply(data.frame)
 
-obs_tomgro_path <- list.files("../tables/results_simul/exp/", 
+obs_tomgro_path <- list.files("./tables/results_simul/exp/", 
                              pattern = "tomgro",
                              include.dirs = FALSE, full.names = TRUE)
 
 # tomgro truth
-truth_files_path <- list.files("../tables/results_simul/exp/", 
+truth_files_path <- list.files("./tables/results_simul/exp/", 
                              pattern = "tomgro",
                              include.dirs = FALSE, full.names = TRUE)
 
-truth_files <- list.files("../tables/results_simul/exp/", 
+truth_files <- list.files("./tables/results_simul/exp/", 
                         pattern = "tomgro",
                         include.dirs = FALSE) %>%
-  strsplit(split = "-")
+  strsplit(split = "-") %>%
+  lapply(matrix, nrow=1) %>%
+  lapply(data.frame)
 
-s0 <- read.csv("../tables/parameters_inputs/tomgro_s0.csv",
+s0 <- read.csv("./tables/parameters_inputs/tomgro_s0.csv",
                header = FALSE)
-# obs_summ <- read.csv("../data/observations/monitoring/observations_proc.csv") %>%
+# obs_summ <- read.csv("./data/observations/monitoring/observations_proc.csv") %>%
 #   filter(city == "cps", cycle == 4, exp == "n07", node == "calib",
 #          variable == "wf" | variable == "wm") %>%
 #   select(dat, variable, measurement_sd) %>%
@@ -52,7 +56,7 @@ s0 <- read.csv("../tables/parameters_inputs/tomgro_s0.csv",
 #   rename(wf_sd_md = wf,
 #          wm_sd_md = wm)
 
-errors_simul <- read.csv("../tables/results_simul/all_errors.csv") 
+errors_simul <- read.csv("./tables/results_simul/all_errors.csv") 
 
 
 
@@ -60,6 +64,7 @@ errors_simul <- read.csv("../tables/results_simul/all_errors.csv")
 errors_simul_mod <- errors_simul %>%
   filter(variable == "wf" | variable == "wm",
          model == "vanthoor" | model == "tomgro", 
+         sensor == "A" | is.na(sensor),
          calib == "cps4" | calib == "gnvMod", exp == "n07") %>%
   group_by(dat, model, exp, city, calib, variable) %>%
   mutate(se = error*error) %>%
@@ -71,6 +76,7 @@ errors_simul_mod <- errors_simul %>%
 rmse_all <- errors_simul %>%
   filter(variable == "wf" | variable == "wm",
          model == "vanthoor" | model == "tomgro", 
+         sensor == "A" | is.na(sensor),
          calib == "cps4" | calib == "gnvMod", exp == "n07") %>%
   group_by(model, exp, city, calib, variable) %>%
   mutate(se = error*error) %>%
@@ -168,26 +174,27 @@ simul_vant <- Reduce(bind_rows, all_results) %>%
          config = 200,
          city = "cps")
 
-write.csv(simul_vant, "../data/synthetic/obs_vanthoor.csv", 
+write.csv(simul_vant, "./data/synthetic/obs_vanthoor.csv", 
           row.names=FALSE)
 
 
-
 # Artificial observations - Tomgro + Perturbations ------------------------
-outputs <- data.frame(matrix(unlist(obs_tomgro),
-                             nrow = length(obs_tomgro),
-                             byrow = T)) %>%
+outputs <- do.call(bind_rows, obs_tomgro)%>%
   rename(model = X1,
          city = X2,
          exp = X3,
-         calib = X4) %>%
-  mutate(calib = gsub(".csv", "", calib)) %>%
+         calib = X4,
+         sensor = X5) %>%
+  mutate(calib = gsub(".csv", "", calib),
+         sensor = gsub(".csv", "", sensor)) %>%
   separate(calib, into=c("nope", "calib")) %>%
+  select(-nope) %>%
+  separate(sensor, into=c("nope", "sensor")) %>%
   select(-nope) %>%
   unite("city_exp", c("city", "exp"), remove=FALSE) %>%
   cbind(path = obs_tomgro_path) %>%
   filter(exp == "n01" | exp == "n03" | exp == "n05" | exp == "n07",
-         calib == "cps4")
+         calib == "cps4", sensor == "A")
 
 all_results <- list()
 it <- 1
@@ -238,8 +245,8 @@ for (it in 1:length(cv_list)){
            wf = if_else(wf < 0, 0, wf),
            wm = wm + rnorm(nrow(simul_tomgro), sd=cv_list[it]*wm),
            wm = if_else(wm < 0, 0, wm),
-           wm_sd = wf*cv_list[it],
-           wf_sd = wm*cv_list[it],
+           wf_sd = wf*cv_list[it],
+           wm_sd = wm*cv_list[it],
            config = config[it],
            city = "cps")
   
@@ -273,31 +280,34 @@ tomgro_noisy <- Reduce(bind_rows, all_results) %>%
          wm_sd = if_else(dat == min(dat) | wm_sd == 0, 10^-4, wm_sd),
          wm_sd = zoo::na.locf(wm_sd))
 
-write.csv(tomgro_noisy, "../data/synthetic/obs_tomgro_noisy.csv", 
+write.csv(tomgro_noisy, "./data/synthetic/obs_tomgro_noisy.csv", 
           row.names=FALSE)
 
 all_obs <- rbind(tomgro_noisy, simul_vant)
 
-write.csv(all_obs, "../data/synthetic/obs_artif_all.csv", 
+write.csv(all_obs, "./data/synthetic/obs_artif_all.csv", 
           row.names=FALSE)
 
 
 # Artificial truth --------------------------------------------------------
 
-outputs <- data.frame(matrix(unlist(truth_files),
-                             nrow = length(truth_files),
-                             byrow = T)) %>%
+outputs <- do.call(bind_rows, truth_files) %>%
   rename(model = X1,
          city = X2,
          exp = X3,
-         calib = X4) %>%
-  mutate(calib = gsub(".csv", "", calib)) %>%
+         calib = X4,
+         sensor = X5) %>%
+  mutate(calib = gsub(".csv", "", calib),
+         sensor = gsub(".csv", "", sensor)) %>%
   separate(calib, into=c("nope", "calib")) %>%
+  select(-nope) %>%
+  separate(sensor, into=c("nope", "sensor")) %>%
   select(-nope) %>%
   unite("city_exp", c("city", "exp"), remove=FALSE) %>%
   bind_cols(path = truth_files_path) %>%
   filter(calib == "cps4",
-         exp == "n01" | exp == "n03" | exp == "n05" | exp == "n07")
+         exp == "n01" | exp == "n03" | exp == "n05" | exp == "n07",
+         sensor == "A")
 
 all_results <- list()
 it <- 2
@@ -335,7 +345,7 @@ truth <- Reduce(bind_rows, all_results) %>%
   ungroup() %>%
   select(wf, wm, dat, exp, calib, stage)
 
-write.csv(truth, "../data/synthetic/truth_tomgro.csv", 
+write.csv(truth, "./data/synthetic/truth_tomgro.csv", 
           row.names=FALSE)
 
 

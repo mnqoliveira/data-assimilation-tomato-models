@@ -10,10 +10,10 @@ import os
 import numpy as np
 import pandas as pd
 
-import f_aux as aux
-import run_Model_Simple as simple
-import run_Model_ReducedTomgro as tomgro
-import run_Model_Vanthoor as vanthoor
+import auxiliary_functions.f_aux as aux
+import simulations.run_Model_Simple as simple
+import simulations.run_Model_ReducedTomgro as tomgro
+import simulations.run_Model_Vanthoor as vanthoor
 
 from SALib.sample import saltelli
 from SALib.analyze import sobol
@@ -38,7 +38,7 @@ def generateSplits(n_splits, len_weather):
 
 def loadOutSA(config, states_names):
 
-    path = ('../tables/results_SA/case_' + str(config.case) + '/')
+    path = ('./tables/results_SA/case_' + str(config.case) + '/')
 
     pq_files = os.listdir(path)
     pq_files = [s for s in pq_files if "outpart" in s]
@@ -66,7 +66,7 @@ def saveSI(x, problem, states, config, name, path, dat):
             np.hstack(problem['names'] * 4).reshape(-1, 1),
             x])
         out_pd = pd.DataFrame(x_mod, columns=["factors"] + states + ['index'])
-        path_out = ('../tables/results_SA/si/case' +
+        path_out = ('./tables/results_SA/si/case' +
                     str(config.case) + '/' +
                     config.model + '_' + name +
                     '_path' + str(int(path)).zfill(3) +
@@ -355,7 +355,7 @@ def prepMask(config, njobs, dataset, factors, problem):
 
     params_mask = factors[mask].reset_index(drop=True)
 
-    params_file_name = ('../tables/results_SA/case_' + str(config.case) + '/' +
+    params_file_name = ('./tables/results_SA/case_' + str(config.case) + '/' +
                         config.model + '_paramsMask_' + config.city +
                         "_id" + str(config.id).zfill(3) +
                         ".csv")
@@ -395,7 +395,7 @@ def runMask(config, njobs, dataset, params_mask, problem):
     for it in range(len(outMask)):
         outSim = outMask[it][1]
 
-        output_file_name = ('../tables/results_SA/mask_case_' +
+        output_file_name = ('./tables/results_SA/mask_case_' +
                             str(config.case) + '/' +
                             config.model + '_' + config.city +
                             "_it" + str(it) +
@@ -430,7 +430,7 @@ def prepSA(config, params_file, weather_filt):
                                config_obs=None)
         dataset['paths'] = weather_filt
 
-    params_file_name = ('../tables/results_SA/case_' + str(config.case) + '/' +
+    params_file_name = ('./tables/results_SA/case_' + str(config.case) + '/' +
                         config.model + '_factors_' + config.city +
                         "_id" + str(config.id).zfill(3) +
                         '.csv')
@@ -517,7 +517,7 @@ def runSA(config, njobs, problem, factors, dataset, row_ids):
                              np.repeat(0, outRuns.shape[0]).reshape(-1, 1)
                              ])
 
-        path_out = ('../tables/results_SA/case_' + str(config.case) + '/' +
+        path_out = ('./tables/results_SA/case_' + str(config.case) + '/' +
                     config.model + '_outpart_' + config.city +
                     "_id" + str(config.id).zfill(3) +
                     "_path" + str(0).zfill(3)+
@@ -558,7 +558,7 @@ def runSA(config, njobs, problem, factors, dataset, row_ids):
                                            outRuns.shape[0]).reshape(-1, 1)
                                  ])
 
-            path_out = ('../tables/results_SA/case_' + str(config.case) + '/' +
+            path_out = ('./tables/results_SA/case_' + str(config.case) + '/' +
                         config.model + '_outpart_' + config.city +
                         "_id" + str(config.id).zfill(3) +
                         "_path" + str(path_id).zfill(3)+
@@ -579,12 +579,12 @@ def runSA(config, njobs, problem, factors, dataset, row_ids):
 
 def main():
 
-    path_unc = '../data/weather/unc/all/'
+    path_unc = './data/weather/unc/all/'
     weather_files = os.listdir(path_unc)
 
     njobs = 6
 
-    config = pd.read_csv("../tables/runs_SA.csv")
+    config = pd.read_csv("./tables/runs_SA.csv")
     config_run = config.loc[config["run"] == 1].reset_index()
     #config_run = config_run.loc[0, :]
     it = 0
@@ -603,7 +603,7 @@ def main():
         #config = config_run
         #config.n_samples = 10
 
-        params_file = "../tables/parameters_inputs/params_limits_case" + \
+        params_file = "./tables/parameters_inputs/params_limits_case" + \
             str(config.case) + ".csv"
 
         if (config.model == "tomgro") or (config.model == "vanthoor"):
@@ -636,7 +636,7 @@ def main():
 
         # cols_outSA = states_names + ['dat'] + ['weather_id']
         # out_pd = pd.DataFrame(outSA, columns=cols_outSA)
-        # path_out = ('../tables/results_SA/case' +
+        # path_out = ('./tables/results_SA/case' +
         #             str(config.case) + '/' +
         #             config.model + '_outputs_' + config.city +
         #             "_id" + str(config.id).zfill(3) +

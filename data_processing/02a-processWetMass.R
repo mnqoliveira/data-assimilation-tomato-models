@@ -10,7 +10,7 @@ library(tidyverse)
 library(lubridate)
 
 # Source functions --------------------------------------------------------
-source("02a-processWetMass_functions.R")
+source("./data_processing/02a-processWetMass_functions.R")
 
 prepPlantDataset <- function(x, plant_dates, sensor_dates,
                              cycle_dates, harvest){
@@ -40,17 +40,17 @@ prepPlantDataset <- function(x, plant_dates, sensor_dates,
 
 # Load files --------------------------------------------------------------
 
-scales_org <- read.csv("../data/observations/monitoring/scales_org.csv")
+scales_org <- read.csv("./data/observations/monitoring/scales_org.csv")
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
-plant_dates <- read.csv("../tables/relevant_dates_plants.csv")
+plant_dates <- read.csv("./tables/relevant_dates_plants.csv")
 colnames(plant_dates)[1] <- "cycle"
 
-cycle_dates <- read.csv("../data/cycle_dates.csv") %>%
+cycle_dates <- read.csv("./data/cycle_dates.csv") %>%
   mutate(date = as.Date(date))
 
-harvest <- read.csv("../data/observations/monitoring/harvests.csv")
+harvest <- read.csv("./data/observations/monitoring/harvests.csv")
 
 
 # Process data ------------------------------------------------------------
@@ -62,9 +62,9 @@ data_growth <- scales_proc[["growth"]]
 add_data <- scales_proc[["cycle99"]]
 
 write.csv(data_growth, 
-          file = "../data/observations/monitoring/scales_proc.csv", 
+          file = "./data/observations/monitoring/scales_proc.csv", 
           row.names=FALSE)
 
 write.csv(add_data, 
-          file = "../data/observations/monitoring/scales_notGrowth.csv", 
+          file = "./data/observations/monitoring/scales_notGrowth.csv", 
           row.names=FALSE)

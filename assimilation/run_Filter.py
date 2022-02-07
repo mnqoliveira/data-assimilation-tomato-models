@@ -9,14 +9,15 @@ import pandas as pd
 import numpy as np
 from joblib import Parallel, delayed
 import itertools
+#import gc
 
-import filters2
-import run_Model_Simple as simple
-#import run_Model_ReducedTomgro as tomgro
-import run_Model_ReducedTomgro2 as tomgro
+import assimilation.filters as filters
+import simulations.run_Model_Simple as simple
+#import simulations.run_Model_ReducedTomgro as tomgro
+import simulations.run_Model_ReducedTomgro_oo as tomgro
 
-import measurementFunctions as hx
-import f_aux as aux
+import assimilation.measurementFunctions as hx
+import auxiliary_functions.f_aux as aux
 
 #import winsound
 # np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
@@ -111,22 +112,22 @@ def filter_state(model_obj, proc_func, meas_func,
                  dim_x, dim_z):
 
     if config_it['filt'] == "ukf":
-        filter_f = filters2.filter_ukf(model_obj, proc_func, meas_func,
-                                       dataset, config_it, dt,
-                                       dim_x, dim_z)
-    elif config_it['filt'] == "pf":
-        filter_f = filters2.filter_pf(model_obj, proc_func, meas_func,
-                                      dataset, config_it, dt,
+        filter_f = filters.filter_ukf(model_obj, proc_func,
+                                      meas_func, dataset, config_it, dt,
                                       dim_x, dim_z)
+    elif config_it['filt'] == "pf":
+        filter_f = filters.filter_pf(model_obj, proc_func, meas_func,
+                                     dataset, config_it, dt,
+                                     dim_x, dim_z)
     elif config_it['filt'] == "enkf":
-        filter_f = filters2.filter_enkf(model_obj, proc_func, meas_func,
-                                        dataset, config_it, dt,
-                                        dim_x, dim_z)
+        filter_f = filters.filter_enkf(model_obj, proc_func,
+                                       meas_func, dataset, config_it, dt,
+                                       dim_x, dim_z)
 
     elif config_it['filt'] == "ekf":
-        filter_f = filters2.filter_ekf(model_obj, proc_func, meas_func,
-                                       dataset, config_it, dt,
-                                       dim_x, dim_z)
+        filter_f = filters.filter_ekf(model_obj, proc_func,
+                                      meas_func, dataset, config_it, dt,
+                                      dim_x, dim_z)
 
     return filter_f
 
@@ -300,6 +301,7 @@ def run_filter(dataset, config_it):
 
         # Predict step
         # For Kalman Filters, this only modifies the state of interest
+        #print(dat)
         filter_f.predict(fx=proc_func,
                          dt=dt, dat=dat,
                          info=info, params=params, rates=rates, states=st,
@@ -345,7 +347,7 @@ def run_filter(dataset, config_it):
 rep = 1
 def main_real(rep):
 
-    config = pd.read_csv("../tables/runs_Filter.csv")
+    config = pd.read_csv("./tables/runs_Filter.csv")
     config_run = config.loc[config["run"] == 1].reset_index()
 
     it = 0
@@ -375,7 +377,7 @@ def main_real(rep):
 
         config_it["weather_pert"] = "rad"
 
-        errors_notCalib = pd.read_csv("../tables/results_simul/all_errors.csv")
+        errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
                 (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
@@ -430,10 +432,10 @@ def main_real(rep):
 
 def main_artif(rep):
 
-    config = pd.read_csv("../tables/runs_Filter2.csv")
+    config = pd.read_csv("./tables/runs_Filter2.csv")
     config_run = config.loc[config["run"] == 1].reset_index()
 
-    it = 0
+    it = 1
     rep = 1
     fail_list = list()
 
@@ -460,7 +462,7 @@ def main_artif(rep):
 
         config_it["weather_pert"] = "rad"
 
-        errors_notCalib = pd.read_csv("../tables/results_simul/all_errors.csv")
+        errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
                 (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
@@ -519,7 +521,84 @@ def main_artif(rep):
     print(fail_list)
 
 
-def run_artif(config_run, config_rep, it_out):
+def parallel_real(config_run, config_rep, it_out):
+
+        it = config_rep['it'][it_out]
+        rep = config_rep['rep'][it_out]
+        config_it = config_run.loc[it, :].to_dict()
+
+        city = config_it['city']
+        calib = config_it['calib']
+        exp = int(config_it['exp'])
+        sensor_type = config_it['sensor_type']
+        config_it['meas_var_j'] = config_it['meas_var']
+        config_it['meas_var'] = config_it['meas_var'].split(",")
+        config_it["rep"] = rep
+
+        if config_it["state_var"] == "lai":
+            config_it["param_pert"] = "delta"
+        elif config_it["state_var"] == "w":
+            config_it["param_pert"] = "Qe"
+        elif config_it["state_var"] == "wf":
+            config_it["param_pert"] = "alpha_F"
+        elif config_it["state_var"] == "wm":
+            config_it["param_pert"] = "DFmax"
+
+        config_it["weather_pert"] = "rad"
+
+        errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
+        mask = ((errors_notCalib.loc[:, "city"] == city) &
+                (errors_notCalib.loc[:, "calib"] == calib) &
+                (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
+                (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
+                (errors_notCalib.loc[:, "model"] == "tomgro")
+                )
+        config_it["model_err"] = errors_notCalib.loc[mask,
+                                                     ["dat", "variable",
+                                                      "abs_error"]].reset_index()
+
+        load_dataset, states_names, _, _ = choose_model(config_it)
+        config_it["states_names"] = states_names
+        dataset = load_dataset(city, sensor_type, calib, str(exp), "monit")
+
+        try:
+            assim, all_states_upd, sigmas = run_filter(dataset, config_it)
+
+            aux.save_output(conf=config_it, type_output="updState", x=assim,
+                            city=city, calib=calib, treat=exp,
+                            rep=rep)
+
+            aux.save_output(conf=config_it, type_output="allState",
+                            x=all_states_upd,
+                            city=city, calib=calib, treat=exp,
+                            rep=rep)
+
+            # aux.save_output(conf=config_it, type_output="sigmas",
+            #                 x=sigmas,
+            #                 city=city, calib=calib, treat=exp,
+            #                 rep=rep)
+
+            outputs = pd.DataFrame(all_states_upd,
+                                   columns=states_names + ['dat'])
+            outputs_ = (outputs.loc[:, states_names]
+                        .reset_index()
+                        .melt(id_vars=['index'])
+                        .rename(columns={"index": "dat"}))
+
+            dataset = load_dataset(city, sensor_type, calib, str(exp), "summ")
+            observations = aux.get_obs(dataset, states_names, [])
+            error = aux.calcError(observations, outputs_, states_names)
+            aux.save_output(config_it, "error_assim", error, city, calib, exp,
+                            rep=rep)
+
+            print(it)
+
+        except:
+            print(it, "fail")
+
+
+
+def parallel_artif(config_run, config_rep, it_out):
 
         it = config_rep['it'][it_out]
         rep = config_rep['rep'][it_out]
@@ -544,7 +623,7 @@ def run_artif(config_run, config_rep, it_out):
 
         config_it["weather_pert"] = "rad"
 
-        errors_notCalib = pd.read_csv("../tables/results_simul/all_errors.csv")
+        errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
                 (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
@@ -600,104 +679,29 @@ def run_artif(config_run, config_rep, it_out):
             print(it, "fail")
 
 
-def run_real(config_run, config_rep, it_out):
-
-        it = config_rep['it'][it_out]
-        rep = config_rep['rep'][it_out]
-        config_it = config_run.loc[it, :].to_dict()
-
-        city = config_it['city']
-        calib = config_it['calib']
-        exp = int(config_it['exp'])
-        sensor_type = config_it['sensor_type']
-        config_it['meas_var_j'] = config_it['meas_var']
-        config_it['meas_var'] = config_it['meas_var'].split(",")
-        config_it["rep"] = rep
-
-        if config_it["state_var"] == "lai":
-            config_it["param_pert"] = "delta"
-        elif config_it["state_var"] == "w":
-            config_it["param_pert"] = "Qe"
-        elif config_it["state_var"] == "wf":
-            config_it["param_pert"] = "alpha_F"
-        elif config_it["state_var"] == "wm":
-            config_it["param_pert"] = "DFmax"
-
-        config_it["weather_pert"] = "rad"
-
-        errors_notCalib = pd.read_csv("../tables/results_simul/all_errors.csv")
-        mask = ((errors_notCalib.loc[:, "city"] == city) &
-                (errors_notCalib.loc[:, "calib"] == calib) &
-                (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
-                (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
-                (errors_notCalib.loc[:, "model"] == "tomgro")
-                )
-        config_it["model_err"] = errors_notCalib.loc[mask,
-                                                     ["dat", "variable",
-                                                      "abs_error"]].reset_index()
-
-        load_dataset, states_names, _, _ = choose_model(config_it)
-        config_it["states_names"] = states_names
-        dataset = load_dataset(city, sensor_type, calib, str(exp), "monit")
-
-        try:
-            assim, all_states_upd, sigmas = run_filter(dataset, config_it)
-
-            aux.save_output(conf=config_it, type_output="updState", x=assim,
-                            city=city, calib=calib, treat=exp,
-                            rep=rep)
-
-            aux.save_output(conf=config_it, type_output="allState",
-                            x=all_states_upd,
-                            city=city, calib=calib, treat=exp,
-                            rep=rep)
-
-            # aux.save_output(conf=config_it, type_output="sigmas",
-            #                 x=sigmas,
-            #                 city=city, calib=calib, treat=exp,
-            #                 rep=rep)
-
-            outputs = pd.DataFrame(all_states_upd,
-                                   columns=states_names + ['dat'])
-            outputs_ = (outputs.loc[:, states_names]
-                        .reset_index()
-                        .melt(id_vars=['index'])
-                        .rename(columns={"index": "dat"}))
-
-            dataset = load_dataset(city, sensor_type, calib, str(exp), "summ")
-            observations = aux.get_obs(dataset, states_names, [])
-            error = aux.calcError(observations, outputs_, states_names)
-            aux.save_output(config_it, "error_assim", error, city, calib, exp,
-                            rep=rep)
-
-            print(it)
-
-        except:
-            print(it, "fail")
-
 #main_artif(1)
 #main_real(1)
 
 # PAPER 3
-config = pd.read_csv("../tables/runs_Filter2.csv")
+config = pd.read_csv("./tables/runs_Filter2.csv")
 config_run = config.loc[config["run"] == 1].reset_index()
 
-n_configs = range(config_run.shape[0])
-rep_min = 1
-rep_max = 10
-rep = range(rep_min, rep_max + 1)
-njobs = 14
+# n_configs = range(config_run.shape[0])
+# rep_min = 1
+# rep_max = 1
+# rep = range(rep_min, rep_max + 1)
+# njobs = 3
 
-config_rep = pd.DataFrame.from_records(itertools.product(n_configs, rep),
-                                        columns = ['it', 'rep'])
+# config_rep = pd.DataFrame.from_records(itertools.product(n_configs, rep),
+#                                         columns = ['it', 'rep'])
 
-Parallel(n_jobs=njobs,
-          verbose=5)(delayed(
-              lambda x: run_artif(config_run, config_rep, x))(cont)
-              for cont in range(config_rep.shape[0]))
+# Parallel(n_jobs=njobs,
+#           verbose=5)(delayed(
+#               lambda x: parallel_artif(config_run, config_rep, x))(cont)
+#               for cont in range(config_rep.shape[0]))
 
 # # PAPER 2
-# config = pd.read_csv("../tables/runs_Filter.csv")
+# config = pd.read_csv("./tables/runs_Filter.csv")
 # config_run = config.loc[config["run"] == 1].reset_index()
 
 # n_configs = range(config_run.shape[0])
@@ -711,7 +715,7 @@ Parallel(n_jobs=njobs,
 
 # Parallel(n_jobs=njobs,
 #           verbose=5)(delayed(
-#               lambda x: run_real(config_run, config_rep, x))(cont)
+#               lambda x: parallel_real(config_run, config_rep, x))(cont)
 #               for cont in range(config_rep.shape[0]))
 
 #winsound.Beep(440, 1000)

@@ -13,20 +13,20 @@ library("lubridate")
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 # Paths -------------------------------------------------------------------
 
-pathfiles <- "../data/weather/unc/"
+pathfiles <- "./data/weather/unc/"
 full_weather_files <- list.files(pathfiles, recursive = FALSE, 
                                  pattern = "*.csv", full.names = TRUE)
 
-pathout <- "../data/weather/unc/all/"
+pathout <- "./data/weather/unc/all/"
 
 
 # Load files --------------------------------------------------------------
 
-unc_scen <- read.csv("../tables/unc_weather_scen.csv")
+unc_scen <- read.csv("./tables/unc_weather_scen.csv")
 years <- c(1993:1997, 2000:2009 , 2015:2019)
 cities <- expand.grid(city = c("cps", "gnv"), year = years,
                       stringsAsFactors = FALSE)
@@ -42,7 +42,7 @@ unc_scen_all <- expand.grid(pdoy = unc_scen$pdate, len = unc_scen$len,
   mutate(pdate = as.Date(paste(year, pdoy, sep = "-"), tryFormats = c("%Y-%j")),
          city_cod = if_else(city == "cps", 1, 2))
 
-write.csv(unc_scen_all, file = "../tables/path_cod_unc.csv")
+write.csv(unc_scen_all, file = "./tables/path_cod_unc.csv")
 
 # Process data ------------------------------------------------------------
 

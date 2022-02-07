@@ -12,7 +12,7 @@ library(lubridate)
 library(stringr)
 
 # Functions ---------------------------------------------------------------
-source("01e-cleanOrgWeather_Radio_functions.R")
+source("./data_processing/01e-cleanOrgWeather_Radio_functions.R")
 
 procData <- function(x, sensor_dates){
   
@@ -30,18 +30,18 @@ procData <- function(x, sensor_dates){
 
 # Load files --------------------------------------------------------------
 
-radio_files <- list.files("../data/weather/monitoring/raw/radio", full.names = T)
+radio_files <- list.files("./data/weather/monitoring/raw/radio", full.names = T)
 
-if (file.exists("../data/weather/monitoring/raw/weather_radio.csv")){
+if (file.exists("./data/weather/monitoring/raw/weather_radio.csv")){
   
-  unlink("../data/weather/monitoring/raw/weather_radio.csv")
+  unlink("./data/weather/monitoring/raw/weather_radio.csv")
   
 }
 
 for (i in radio_files){
   
   temp <- read.csv(i, sep = ",")
-  write.table(temp, file = "../data/weather/monitoring/raw/weather_radio.csv",
+  write.table(temp, file = "./data/weather/monitoring/raw/weather_radio.csv",
               sep = ";",
               append = TRUE,
               row.names = FALSE,
@@ -51,10 +51,10 @@ for (i in radio_files){
 }
 
 header <-   c("sensor", "dateFull", "measurement", "proc", "comment")
-weather <- read.csv("../data/weather/monitoring/raw/weather_radio.csv", sep = ";",
+weather <- read.csv("./data/weather/monitoring/raw/weather_radio.csv", sep = ";",
                     col.names = header)
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
 
 # Process data ------------------------------------------------------------
@@ -62,5 +62,5 @@ colnames(sensor_dates)[1] <- "cycle"
 radio_full <- procData(weather, sensor_dates)
 
 write.csv(radio_full, 
-          file = "../data/weather/monitoring/weather_radio_org.csv", 
+          file = "./data/weather/monitoring/weather_radio_org.csv", 
           row.names=FALSE)

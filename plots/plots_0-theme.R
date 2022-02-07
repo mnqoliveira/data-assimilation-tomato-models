@@ -34,7 +34,7 @@ theme_vert <- theme(
   
   panel.grid.major = element_line(colour = "grey60", size = 0.1, linetype = 2))
 
-save(theme_vert, file = "../data/plot_theme_vert.RData")
+save(theme_vert, file = "./data/plot_theme_vert.RData")
 
 theme_horiz <- theme(
   plot.title = element_text(size = 10),
@@ -70,4 +70,4 @@ theme_horiz <- theme(
   
   panel.grid.major = element_line(colour = "grey60", size = 0.1, linetype = 2))
 
-save(theme_horiz, file = "../data/plot_theme_horiz.RData")
+save(theme_horiz, file = "./data/plot_theme_horiz.RData")

@@ -13,49 +13,49 @@ library(zoo)
 
 # Load files --------------------------------------------------------------
 #Calibration
-cover_calib_all <- list.files('../data/observations/monitoring/lai/', 
+cover_calib_all <- list.files('./data/observations/monitoring/lai/', 
                              pattern = '^raw_cover_calib.',
                              full.names = TRUE)
 
-height_calib_all <- list.files('../data/observations/monitoring/dry_mass_aboveground/', 
+height_calib_all <- list.files('./data/observations/monitoring/dry_mass_aboveground/', 
                               pattern = '^raw_height_calib.',
                               full.names = TRUE)
 
 
-nodes_calib_all <- list.files('../data/observations/monitoring/nodes/', 
+nodes_calib_all <- list.files('./data/observations/monitoring/nodes/', 
                               pattern = '^raw_n_calib',
                               full.names = TRUE)
 
-wfcover_calib_all <- list.files('../data/observations/monitoring/dry_mass_fruit/', 
+wfcover_calib_all <- list.files('./data/observations/monitoring/dry_mass_fruit/', 
                                 pattern = '^raw_wfcover_calib',
                                 full.names = TRUE)
 
-wmcover_calib_all <- list.files('../data/observations/monitoring/dry_mass_mature_fruit/', 
+wmcover_calib_all <- list.files('./data/observations/monitoring/dry_mass_mature_fruit/', 
                                 pattern = '^raw_wmcover_calib',
                                 full.names = TRUE)
 
 # Monitoring
-cover_all <- list.files('../data/observations/monitoring/lai/', 
-                        pattern = '^raw_cover_ciclo.',
+cover_all <- list.files('./data/observations/monitoring/lai/', 
+                        pattern = '^raw_cover_cycle.',
                         full.names = TRUE)
 
-nodes_all <-  list.files('../data/observations/monitoring/nodes/', 
-                         pattern = '^raw_n_ciclo.',
+nodes_all <-  list.files('./data/observations/monitoring/nodes/', 
+                         pattern = '^raw_n_cycle.',
                          full.names = TRUE)
 
-height_all <- list.files('../data/observations/monitoring/dry_mass_aboveground/', 
-                         pattern = '^raw_height_ciclo.',
+height_all <- list.files('./data/observations/monitoring/dry_mass_aboveground/', 
+                         pattern = '^raw_height_cycle.',
                          full.names = TRUE)
 
-wfcover_all <- list.files('../data/observations/monitoring/dry_mass_fruit/', 
-                          pattern = '^raw_wfcover_ciclo',
+wfcover_all <- list.files('./data/observations/monitoring/dry_mass_fruit/', 
+                          pattern = '^raw_wfcover_cycle',
                           full.names = TRUE)
 
-wmcover_all <- list.files('../data/observations/monitoring/dry_mass_mature_fruit/', 
-                          pattern = '^raw_wmcover_ciclo',
+wmcover_all <- list.files('./data/observations/monitoring/dry_mass_mature_fruit/', 
+                          pattern = '^raw_wmcover_cycle',
                           full.names = TRUE)
 
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 # Aboveground cover area --------------------------------------------------
 # Calibration
@@ -80,7 +80,7 @@ cover_abv <- cover_calib %>%
   rename(lai_abv = cover)
 
 write.csv(cover_abv, 
-          file = "../data/observations/monitoring/lai/lai_abv_calib_ids.csv", 
+          file = "./data/observations/monitoring/lai/lai_abv_calib_ids.csv", 
           row.names = FALSE)
 
 cover_abv_sd <- cover_abv %>%
@@ -91,7 +91,7 @@ cover_abv_sd <- cover_abv %>%
          lai_abv_sd = lai_abv_calib_sd)
 
 write.csv(cover_abv_sd, 
-          file = "../data/observations/monitoring/lai/lai_abv_calib_summ.csv", 
+          file = "./data/observations/monitoring/lai/lai_abv_calib_summ.csv", 
           row.names = FALSE)
 
 # Monitoring
@@ -137,7 +137,7 @@ cover_abv_monit_sd <- cover_abv %>%
   filter(!is.na(lai_abv), !is.na(node))
 
 write.csv(cover_abv_monit_sd, 
-          file = "../data/observations/monitoring/lai/lai_abv_ids.csv", 
+          file = "./data/observations/monitoring/lai/lai_abv_ids.csv", 
           row.names = FALSE)
 
 
@@ -154,7 +154,7 @@ cover_lat <- cover_calib %>%
   rename(lai_lat = cover) 
 
 write.csv(cover_lat, 
-          file = "../data/observations/monitoring/lai/lai_lat_calib_ids.csv", 
+          file = "./data/observations/monitoring/lai/lai_lat_calib_ids.csv", 
           row.names = FALSE)
 
 cover_lat_sd <- cover_lat %>%
@@ -165,7 +165,7 @@ cover_lat_sd <- cover_lat %>%
          lai_lat_sd = lai_lat_calib_sd)
 
 write.csv(cover_lat_sd, 
-          file = "../data/observations/monitoring/lai/lai_lat_calib_summ.csv", 
+          file = "./data/observations/monitoring/lai/lai_lat_calib_summ.csv", 
           row.names = FALSE)
 
 # Monitoring
@@ -196,7 +196,7 @@ cover_lat_monit_sd <- cover_lat %>%
   filter(!is.na(lai_lat), !is.na(node))
 
 write.csv(cover_lat_monit_sd, 
-          file = "../data/observations/monitoring/lai/lai_lat_ids.csv", 
+          file = "./data/observations/monitoring/lai/lai_lat_ids.csv", 
           row.names = FALSE)
 
 
@@ -221,7 +221,7 @@ height <- height_calib %>%
   select(-part, -angle)
 
 write.csv(height, 
-          file = "../data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv", 
           row.names = FALSE)
 
 height_sd <- height %>%
@@ -232,7 +232,7 @@ height_sd <- height %>%
          height_sd = height_calib_sd)
 
 write.csv(height_sd, 
-          file = "../data/observations/monitoring/dry_mass_aboveground/height_calib_summ.csv", 
+          file = "./data/observations/monitoring/dry_mass_aboveground/height_calib_summ.csv", 
           row.names = FALSE)
 
 # Monitoring
@@ -276,7 +276,7 @@ height_monit_sd <- height %>%
   filter(!is.na(height), !is.na(node))
 
 write.csv(height_monit_sd,
-          file = "../data/observations/monitoring/dry_mass_aboveground/height_ids.csv",
+          file = "./data/observations/monitoring/dry_mass_aboveground/height_ids.csv",
           row.names = FALSE)
 
 
@@ -303,7 +303,7 @@ write.csv(height_monit_sd,
 #          date = date0)
 # 
 # write.csv(nodes, 
-#           file = "../data/observations/monitoring/nodes/n_calib_ids_ciclo02.csv", 
+#           file = "./data/observations/monitoring/nodes/n_calib_ids_ciclo02.csv", 
 #           row.names = FALSE)
 # 
 # # Monitoring
@@ -346,7 +346,7 @@ write.csv(height_monit_sd,
 #   select(-n_sd, -camera)
 # 
 # write.csv(nodes_monit_sd, 
-#           file = "../data/observations/monitoring/nodes/n_lat_ids.csv", 
+#           file = "./data/observations/monitoring/nodes/n_lat_ids.csv", 
 #           row.names=FALSE)
 # 
 
@@ -372,7 +372,7 @@ wmcover <- wmcover_calib %>%
   rename(wm_lat = cover)
 
 write.csv(wmcover, 
-          file = "../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv", 
           row.names = FALSE)
 
 wmcover_sd <- wmcover %>%
@@ -383,7 +383,7 @@ wmcover_sd <- wmcover %>%
          wm_lat_sd = wm_lat_calib_sd)
 
 write.csv(wmcover_sd, 
-          file = "../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_summ.csv", 
+          file = "./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_summ.csv", 
           row.names = FALSE)
 
 # Monitoring
@@ -428,7 +428,7 @@ wmcover_lat_monit_sd <- wmcover_lat %>%
   filter(!is.na(wm_lat), !is.na(node))
 
 write.csv(wmcover_lat_monit_sd, 
-          file = "../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_ids.csv", 
           row.names = FALSE)
 
 
@@ -459,7 +459,7 @@ wfcover <- wfcover_calib %>%
   select(-wm_lat)
 
 write.csv(wfcover, 
-          file = "../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv", 
           row.names = FALSE)
 
 wfcover_sd <- wfcover %>%
@@ -470,7 +470,7 @@ wfcover_sd <- wfcover %>%
          wf_lat_sd = wf_lat_calib_sd)
 
 write.csv(wfcover_sd, 
-          file = "../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_summ.csv", 
+          file = "./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_summ.csv", 
           row.names = FALSE)
 
 # Monitoring
@@ -518,5 +518,5 @@ wfcover_lat_monit_sd <- wfcover_lat %>%
   filter(!is.na(wf_lat), !is.na(node))
 
 write.csv(wfcover_lat_monit_sd, 
-          file = "../data/observations/monitoring/dry_mass_fruit/wf_lat_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_fruit/wf_lat_ids.csv", 
           row.names = FALSE)

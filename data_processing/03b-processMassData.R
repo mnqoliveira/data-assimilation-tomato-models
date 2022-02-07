@@ -13,16 +13,16 @@ library(zoo)
 
 # Source functions --------------------------------------------------------
 
-source("03b-processMassData_functions.R")
+source("./data_processing/03b-processMassData_functions.R")
 
 # Load files --------------------------------------------------------------
 
-mv <- read.csv("../data/moisture/waterContent.csv") %>%
+mv <- read.csv("./data/moisture/waterContent.csv") %>%
   mutate(date = as.Date(date))
 
-scales_proc <- read.csv("../data/observations/monitoring/scales_proc.csv")
+scales_proc <- read.csv("./data/observations/monitoring/scales_proc.csv")
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 
 # temp <- x_mod %>%
 #   mutate(date = date(ymd_hms(dateFull))) %>%
@@ -30,7 +30,7 @@ sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
 #          as.Date(date) <= as.Date("2021-03-10")) %>%
 #   mutate(dateFull = ymd_hms(dateFull))
 # 
-# load("../data/plot_theme.RData")
+# load("./data/plot_theme.RData")
 # ggplot(temp) +
 #   geom_point(aes(x = dateFull, y = wm, colour = as.factor(node))) +
 #   scale_x_datetime(date_breaks = "2 hours",
@@ -45,7 +45,7 @@ scales_proc_mod <-  scales_proc %>%
   fixInitialValue(sensor_dates)
 
 write.csv(scales_proc_mod, 
-          file = "../data/observations/monitoring/scales_proc_full.csv", 
+          file = "./data/observations/monitoring/scales_proc_full.csv", 
           row.names=FALSE)
 
 scales_proc_mv <- scales_proc_mod %>%
@@ -58,5 +58,5 @@ scales_proc_mv <- scales_proc_mod %>%
   ungroup()
 
 write.csv(scales_proc_mv, 
-          file = "../data/observations/monitoring/scales_proc_mv.csv", 
+          file = "./data/observations/monitoring/scales_proc_mv.csv", 
           row.names=FALSE)

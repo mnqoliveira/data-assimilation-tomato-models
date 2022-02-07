@@ -8,12 +8,12 @@ Created on Sun Feb 28 08:44:36 2021
 import numpy as np
 import pandas as pd
 
-import run_Model_Simple as simple
-import run_Model_ReducedTomgro as tomgro
-import run_Model_Vanthoor as vanthoor
-#import run_Model_Hortsyst as hortsyst
+import simulations.run_ModelSimple as simple
+import simulations.run_ModelReducedTomgro as tomgro
+import simulations.run_ModelVanthoor as vanthoor
+#import simulations.run_ModelHortsyst as hortsyst
 
-import f_aux as aux
+import auxiliary_functions.f_aux as aux
 import scipy.optimize
 
 import json
@@ -207,6 +207,7 @@ def error_all(params_list, params_names, var_names, model,
     #error['metric'] = aux.tot_error_calc(error, 'dif_log_sq_simple')
     #error_mod = error.sort_index().drop(['max_obs', 'mean_obs'], axis=1)
     error_ = aux.tot_error_calc(error, 'dif_log_sq_simple').sum()
+    #error_ = aux.tot_error_calc(error, 'dif_sq').sum()
     # if error_ < 10:
     #     print(error_mod)
     #print(params_list, error_)
@@ -216,7 +217,7 @@ def error_all(params_list, params_names, var_names, model,
 
 def main(method, weather_loc, sensor_type, calibration, experiments, config_obs,
          model, var_names, params_names, it):
-    params_file = "../tables/parameters_inputs/params_limits_case1.csv"
+    params_file = "./tables/parameters_inputs/params_limits_case1.csv"
 
     limits = aux.retrieve_limits(filename=params_file, model_name=model)
     bounds = limits[0]
@@ -256,6 +257,23 @@ def main(method, weather_loc, sensor_type, calibration, experiments, config_obs,
                                     #        }
                                   )
 
+    # res = scipy.optimize.minimize(error_all,
+    #                               params_list,
+    #                               args=(params_names, var_names, model,
+    #                                     weather_loc, sensor_type,
+    #                                     calibration, experiments, config_obs),
+    #                                 method=method,
+    #                                 bounds=params_bounds,
+    #                                 #maxfun=1000,
+    #                                 # options={
+    #                                     # 'maxtime': 2*5,
+    #                                     #      'maxev': 10,
+    #                                     #      'maxfev': 10
+    #                                     #'eps': 1e-09,
+    #                                         #'maxiter': len(params_names)*300
+    #                                 #        }
+    #                               )
+
     return res
 
 
@@ -274,9 +292,9 @@ config_obs = "ids"
 # cps2 - ciclo2
 # experiments_int = [3, 4]
 # # cps3 - ciclo3
-experiments_int = [5, 6]
+#experiments_int = [5, 6]
 # # cps4 - ciclo4
-# experiments_int = [7, 8]
+experiments_int = [7, 8]
 
 #weather_loc = ['gnv']
 #sensor_type = "A"
@@ -312,7 +330,7 @@ params_names = ['alpha_F', 'beta', 'delta', 'DFmax',
 
 method = 'Nelder-Mead'
 
-params_file = "../tables/parameters_inputs/params_limits_case1.csv"
+params_file = "./tables/parameters_inputs/params_limits_case1.csv"
 limits = aux.retrieve_limits(filename=params_file, model_name=model)
 
 it = 0
@@ -350,11 +368,11 @@ def save_calibs(method, weather_loc, sensor_type, calibration, experiments,
                   (result["values"][3] < result["values"][4]))
 
     if (((model == "vanthoor") & cond_vant) | (model != "vanthoor")):
-        path_json = "../tables/parameters_inputs/calibration/an_" + \
+        path_json = "./tables/parameters_inputs/calibration/an_" + \
           str(res.success) + "_" + str(res.fun) + "_" + \
           model + "_" + weather_loc[0] + "_" + now + ".json"
     else:
-        path_json = "../tables/parameters_inputs/calibration/nope_an_" + \
+        path_json = "./tables/parameters_inputs/calibration/nope_an_" + \
           str(res.success) + "_" + str(res.fun) + "_" + \
           model + "_" + weather_loc[0] + "_" + now + ".json"
 

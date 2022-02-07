@@ -12,8 +12,8 @@ library(readxl)
 library(zoo)
 
 # Load files --------------------------------------------------------------
-analysis_files <- list.files('../data/observations/monitoring/', 
-                             pattern = '^analises_ciclo',
+analysis_files <- list.files('./data/observations/monitoring/', 
+                             pattern = '^destructive_cycle',
                              full.names = TRUE)
 
 # Mass destructive analysis -----------------------------------------------
@@ -53,7 +53,7 @@ for (filename in analysis_files){
 analysis <- Reduce(rbind, temp)
 
 write.csv(analysis, 
-          file = '../data/observations/monitoring/analysis.csv',
+          file = './data/observations/monitoring/analysis.csv',
           row.names = FALSE)
 
 
@@ -61,5 +61,5 @@ write.csv(analysis,
 nodes_calib <- Reduce(rbind, temp_nodes)
 
 write.csv(nodes_calib, 
-          file = '../data/observations/monitoring/nodes/n_calib_ids.csv',
+          file = './data/observations/monitoring/nodes/n_calib_ids.csv',
           row.names = FALSE)

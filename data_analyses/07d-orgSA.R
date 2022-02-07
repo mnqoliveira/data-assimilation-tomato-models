@@ -17,10 +17,10 @@ library("lubridate")
 # as parameters values and SI.
 
 # Files paths
-all_files_path <- list.files("../tables/results_SA", full.names = T, 
+all_files_path <- list.files("./tables/results_SA", full.names = T, 
                              pattern = ".csv", recursive = T)
 
-configs <- read.csv("../tables/runs_SA.csv") %>% 
+configs <- read.csv("./tables/runs_SA.csv") %>% 
   transmute(across(everything(), as.character)) %>%
   mutate(id = str_pad(id, 3, "left", "0"))
 
@@ -39,9 +39,9 @@ outputs <- filter(all_files, var_out == "outputs")
 si <- filter(all_files, var_out == "si")
 
 # Process params files info -----------------------------------------------
-if (file.exists("../tables/results_SA/outputs_SA.csv")){
+if (file.exists("./tables/results_SA/outputs_SA.csv")){
   
-  unlink("../tables/results_SA/outputs_SA.csv")
+  unlink("./tables/results_SA/outputs_SA.csv")
   
 }
 
@@ -52,13 +52,13 @@ outputs_mod <- outputs %>%
   select(-var_out) %>%
   rename(path_fac = path)
 
-write.csv(outputs_mod, "../tables/results_SA/outputs_SA.csv", 
+write.csv(outputs_mod, "./tables/results_SA/outputs_SA.csv", 
           row.names=FALSE)
 
 # Process all SI data -----------------------------------------------------
-if (file.exists("../tables/info_Si_org.csv")){
+if (file.exists("./tables/info_Si_org.csv")){
   
-  unlink("../tables/info_Si_org.csv")
+  unlink("./tables/info_Si_org.csv")
   
 }
 
@@ -74,5 +74,5 @@ si_mod <- si %>%
 #        var = if_else(grepl("plant_yield", var), "yield", var),
 #        var = if_else(grepl("f_solar", var), "fsolar", var))
   
-write.csv(si_mod, "../tables/info_Si_org.csv", 
+write.csv(si_mod, "./tables/info_Si_org.csv", 
           row.names=FALSE)

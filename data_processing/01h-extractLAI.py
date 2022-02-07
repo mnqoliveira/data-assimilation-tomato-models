@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
-import f_aux as aux
+import auxiliary_functions.f_aux as aux
 
 
 # %%
@@ -21,7 +21,8 @@ import f_aux as aux
 # =============================================================================
 def find_ref(cycle, img):
 
-    if cycle == "ciclo02":
+    #if cycle == "ciclo02":
+    if cycle == "cycle01":
         # Reference is a black card.
         # Template matching did not work.
         # Using color thresholds to find the reference.
@@ -97,7 +98,8 @@ def find_ref(cycle, img):
 
 def calc_conv_fact(conv, cycle, mask):
 
-    if cycle == "ciclo02":
+    if cycle == "cycle01":
+    #if cycle == "ciclo02":
 
         #known_dim = 8.9*10**(-2)
         known_dim = 5.7*10**(-2)
@@ -133,7 +135,8 @@ def calc_conv_fact(conv, cycle, mask):
     ref_dim2 = rect[1][1]
 
     ref_length = np.max((ref_dim1, ref_dim2))
-    if cycle == "ciclo02":
+    if cycle == "cycle01":
+    #if cycle == "ciclo02":
         ref_length = np.min((ref_dim1, ref_dim2))
     if area > 1000:
         conv = known_dim / ref_length
@@ -163,9 +166,9 @@ def proc_imgs(orig_imgs, path_mod, cycle, areas_ref, areas_file):
         # diferente
         conv, area_ref = calc_conv_fact(conv, cycle, card_mask)
 
-        if area_ref[2] > 10:
-            img_name = path_save + "/r1_" + img_it
-            cv2.imwrite(filename=img_name, img=card_mask)
+        # if area_ref[2] > 10:
+        #     img_name = path_save + "/r1_" + img_it
+        #     cv2.imwrite(filename=img_name, img=card_mask)
 
         areas_ref.append(area_ref + [img_it])
 
@@ -183,7 +186,9 @@ def proc_imgs(orig_imgs, path_mod, cycle, areas_ref, areas_file):
                                     kernel, iterations=1)
 
         # Contours
-        if cycle == "ciclo02":
+
+        #if cycle == "ciclo02":
+        if cycle == "cycle01":
             min_c = 500
         else:
             min_c = 1500
@@ -199,8 +204,8 @@ def proc_imgs(orig_imgs, path_mod, cycle, areas_ref, areas_file):
                                           contourIdx=-1,
                                           color=(255, 0, 0),
                                           thickness=3)
-        img_name = path_save + "/c_" + img_it
-        cv2.imwrite(filename=img_name, img=contours_draw)
+        #img_name = path_save + "/c_" + img_it
+        #cv2.imwrite(filename=img_name, img=contours_draw)
 
         # # Calculate areas of leaves
         areas_file = aux.calc_area(img_it, contours_filt2,
@@ -214,12 +219,13 @@ def proc_imgs(orig_imgs, path_mod, cycle, areas_ref, areas_file):
 # Separate card from leaves
 # =============================================================================
 
-cycle_l = ["ciclo02"]
+cycle_l = ["cycle01"]
 cycle = cycle_l[0]
 
-path_base_in = 'E:/drive_unicamp/SISDA/projetoModelagemTomateiro/pidata/scans/'
-path_base_out = '../data/observations/monitoring/'
-alt_path_base_out = 'E:/doc_local/'
+#path_base_in = 'E:/drive_unicamp/SISDA/projetoModelagemTomateiro/pidata/scans/'
+path_base_in = "./data/scans/"
+path_base_out = './data/observations/monitoring/'
+#alt_path_base_out = 'E:/doc_local/'
 
 for cycle in cycle_l:
 
@@ -245,11 +251,12 @@ for cycle in cycle_l:
         # orig_imgs = [s for s in orig_imgs if "jpeg" not in s]
         #img_it = orig_imgs[50]
 
-        path_save = alt_path_base_out + 'imgs_proc/scans/' + cycle
+        #path_save = alt_path_base_out + 'imgs_proc/scans/' + cycle
         path_mod = path_source
 
-        if cycle == "ciclo02":
-            path_save = alt_path_base_out + 'imgs_proc/scans/' + cycle + "/" + case + "/"
+        #if cycle == "ciclo02":
+        if cycle == "cycle01":
+            #path_save = alt_path_base_out + 'imgs_proc/scans/' + cycle + "/" + case + "/"
             path_mod = path_source + case + "/"
 
         contours_filt, areas_ref, areas_file = proc_imgs(orig_imgs,
@@ -260,11 +267,11 @@ for cycle in cycle_l:
 
     end = cycle + '.csv'
     outputs = pd.DataFrame(areas_file, columns=['filename', 'area'])
-    output_file_name = '../data/observations/monitoring/lai/raw_lai_scans_' + end
+    output_file_name = './data/observations/monitoring/lai/raw_lai_scans_' + end
     outputs.to_csv(output_file_name, index=False)
 
     areas_ref_pd = pd.DataFrame(areas_ref,
                                 columns=['area_calc', 'area_nom', 'area_err',
                                          'filename'])
-    output_file_name = '../data/observations/monitoring/ref_areas/ref_scan_' + end
+    output_file_name = './data/observations/monitoring/ref_areas/ref_scan_' + end
     areas_ref_pd.to_csv(output_file_name, index=False)

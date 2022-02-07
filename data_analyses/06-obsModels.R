@@ -15,22 +15,22 @@ library(ggplot2)
 
 
 # Load files --------------------------------------------------------------
-load("../data/plot_theme_vert.RData")
+load("./data/plot_theme_vert.RData")
 
 # Calibration ids
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv")
 
 # LAI
-cover_lat_calib <- read.csv("../data/observations/monitoring/lai/lai_lat_calib_ids.csv")
-cover_abv_calib <- read.csv("../data/observations/monitoring/lai/lai_abv_calib_ids.csv")
+cover_lat_calib <- read.csv("./data/observations/monitoring/lai/lai_lat_calib_ids.csv")
+cover_abv_calib <- read.csv("./data/observations/monitoring/lai/lai_abv_calib_ids.csv")
 
 # W
-height_calib <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
+height_calib <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
 
 # Wf
-wf_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+wf_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 
 wf_lat <- wf_lat_calib %>%
@@ -46,7 +46,7 @@ wf_lat <- wf_lat_calib %>%
   distinct()
 
 my_colors <- RColorBrewer::brewer.pal(4, "RdBu")[c(1, 3:4)]
-dict_filt <- read.csv("../tables/dictionary_paramsFilter.csv") %>%
+dict_filt <- read.csv("./tables/dictionary_paramsFilter.csv") %>%
   filter(lang == "pt")
 
 
@@ -113,7 +113,7 @@ for (it in 1:nrow(comb_mod)){
   
 }
 
-write.csv(comb_mod, file = "../tables/models_obs.csv", row.names = FALSE)
+write.csv(comb_mod, file = "./tables/models_obs.csv", row.names = FALSE)
 
 # # observed versus fitted values by cycle
 # plot(model, wf_lat ~ fitted(.) | cycle, abline = c(0,1))

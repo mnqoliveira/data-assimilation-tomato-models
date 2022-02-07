@@ -8,7 +8,7 @@ library(lubridate)
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 orgTime <- function(x){
   

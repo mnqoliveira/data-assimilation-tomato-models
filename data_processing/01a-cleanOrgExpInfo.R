@@ -47,9 +47,9 @@ cycle_days <- function(dates_plants){
 
 # Load files --------------------------------------------------------------
 
-sensor_dates <- read.csv("../tables/relevant_dates_sensors.csv")
+sensor_dates <- read.csv("./tables/relevant_dates_sensors.csv")
 colnames(sensor_dates)[1] <- "cycle"
-plant_dates <- read.csv("../tables/relevant_dates_plants.csv")
+plant_dates <- read.csv("./tables/relevant_dates_plants.csv")
 colnames(plant_dates)[1] <- "cycle"
 
 # Process -----------------------------------------------------------------
@@ -59,4 +59,4 @@ cycles_dates <- cycle_days(plant_dates) %>%
   mutate(dat = row_number() - 1) %>%
   ungroup()
 
-write.csv(cycles_dates, file = "../data/cycle_dates.csv", row.names=FALSE)
+write.csv(cycles_dates, file = "./data/cycle_dates.csv", row.names=FALSE)

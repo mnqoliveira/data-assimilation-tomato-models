@@ -10,16 +10,16 @@ Sys.setenv(LANG = "En")
 
 library("tidyverse")
 
-lai_ids_all <- list.files('../data/observations/monitoring/lai/', 
-                              pattern = '^raw_lai_scans_ciclo.',
+lai_ids_all <- list.files('./data/observations/monitoring/lai/', 
+                              pattern = '^raw_lai_scans_cycle.',
                               full.names = TRUE)
 
 
 
-codes_exp <- read.csv("../tables/codes_exp.csv") %>%
+codes_exp <- read.csv("./tables/codes_exp.csv") %>%
   select(-id, -node, -city_exp) %>%
   distinct()
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 # Proc --------------------------------------------------------------------
 temp <- list()
@@ -50,5 +50,5 @@ lai_ids_mod <-  lai_ids %>%
 tail(lai_ids_mod)
 
 write.csv(lai_ids_mod, 
-          file = '../data/observations/monitoring/lai/lai_ids.csv', 
+          file = './data/observations/monitoring/lai/lai_ids.csv', 
           row.names = FALSE)

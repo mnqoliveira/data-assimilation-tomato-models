@@ -10,7 +10,7 @@ library(stringr)
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 formatData <- function(x){
   

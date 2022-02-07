@@ -10,7 +10,7 @@ library(forecast)
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 fixTime <- function(x, sensor_dates){
   # Datalogger has a programming problem

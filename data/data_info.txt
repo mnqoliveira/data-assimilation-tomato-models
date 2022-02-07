@@ -1,0 +1,14 @@
+Raw data is available at:
+https://doi.org/10.25824/redu/EP4NGO
+
+Data organization is compatible with the following paths used in these scripts:
+data/masks (Masks)
+data/moisture (Substrate moisture)
+data/observations/monitoring/destructive_cycleXX.csv
+data/observations/monitoring/scales (Weight)
+data/scans/cycleXX (LAI data - Folders are named Ciclo0N+1 instead of Cycle0N)
+data/weather/monitoring/raw/li1400 (PAR)
+data/weather/monitoring/raw/radio (Transdutors)
+data/weather/monitoring/raw/sensorpi
+
+Scan reference for Cycle 01 is on folder "guardar" in file that refers to scans of cycle01/Ciclo02

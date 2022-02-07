@@ -11,19 +11,19 @@ library(tidyverse)
 library(zoo)
 
 # Load data ---------------------------------------------------------------
-obsData <- read.csv("../data/observations/monitoring/analysis.csv")
-nodes_ids_1 <- read.csv("../data/observations/monitoring/nodes/n_calib_ids_ciclo02.csv")
-nodes_ids_2 <- read.csv("../data/observations/monitoring/nodes/n_calib_ids.csv")
-lai_ids <- read.csv("../data/observations/monitoring/lai/lai_ids.csv")
+obsData <- read.csv("./data/observations/monitoring/analysis.csv")
+nodes_ids_1 <- read.csv("./data/observations/monitoring/nodes/n_calib_ids_cycle01.csv")
+nodes_ids_2 <- read.csv("./data/observations/monitoring/nodes/n_calib_ids.csv")
+lai_ids <- read.csv("./data/observations/monitoring/lai/lai_ids.csv")
 
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 # Initial processing ------------------------------------------------------
 # DM
-codes_exp <- read.csv("../tables/codes_exp.csv") %>%
+codes_exp <- read.csv("./tables/codes_exp.csv") %>%
   distinct()
 
-codes_exp_mod <- read.csv("../tables/codes_exp.csv") %>%
+codes_exp_mod <- read.csv("./tables/codes_exp.csv") %>%
   select(-id, -node, -city_exp) %>%
   distinct()
 
@@ -38,7 +38,7 @@ lai_sum <- lai %>%
   rename(lai = lai_avg)
 
 write.csv(lai_sum, 
-          file = '../data/observations/monitoring/lai/lai_summ.csv', 
+          file = './data/observations/monitoring/lai/lai_summ.csv', 
           row.names = FALSE)
 
 # Nodes -------------------------------------------------------------------
@@ -152,7 +152,7 @@ ratio_dm_parts  <- obsData_mod %>%
   filter(!is.nan(ratio_dm))
 
 write.csv(ratio_dm_parts, 
-          file = "../data/observations/monitoring/dry_mass_aboveground/dm_parts_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_aboveground/dm_parts_ids.csv", 
           row.names = FALSE)
 
 # Aboveground biomass: sum all the parts from the same plant
@@ -190,7 +190,7 @@ ratio_parts <- obs_above %>%
   filter(ratio != 0)
 
 write.csv(ratio_parts, 
-          file = "../data/observations/monitoring/dry_mass_aboveground/parts_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_aboveground/parts_ids.csv", 
           row.names = FALSE)
 
 # Fruit mass: should include mature and non-mature fruits
@@ -240,13 +240,13 @@ obs_m_fruit <- obsData_mod %>%
          wm_fm = wm_fm*ro)
 
 write.csv(obs_above, 
-          file = "../data/observations/monitoring/dry_mass_aboveground/w_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_aboveground/w_ids.csv", 
           row.names = FALSE)
 write.csv(obs_fruit, 
-          file = "../data/observations/monitoring/dry_mass_fruit/wf_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_fruit/wf_ids.csv", 
           row.names = FALSE)
 write.csv(obs_m_fruit, 
-          file = "../data/observations/monitoring/dry_mass_mature_fruit/wm_ids.csv", 
+          file = "./data/observations/monitoring/dry_mass_mature_fruit/wm_ids.csv", 
           row.names = FALSE)
 
 # All ids
@@ -260,7 +260,7 @@ obs_ids <- obs_above %>%
   mutate(city = "cps")
 
 write.csv(obs_ids, 
-          file = "../data/observations/monitoring/obs_exp_all_ids.csv", 
+          file = "./data/observations/monitoring/obs_exp_all_ids.csv", 
           row.names = FALSE)  
 
 
@@ -273,7 +273,7 @@ obs_map <- obs_ids %>%
   left_join(maps)
 
 write.csv(obs_map, 
-          file = "../data/observations/monitoring/obs_exp_all_map.csv", 
+          file = "./data/observations/monitoring/obs_exp_all_map.csv", 
           row.names = FALSE)  
 
 # Harvests per plant
@@ -291,7 +291,7 @@ harvests <- obsData_mod %>%
   select(-contains("zero"), -part)
 
 write.csv(harvests, 
-          file = "../data/observations/monitoring/harvests.csv", 
+          file = "./data/observations/monitoring/harvests.csv", 
           row.names = FALSE)
 
 # Summary: averages and standard deviations
@@ -329,5 +329,5 @@ summ_exp_all <- summ_exp %>%
   arrange(cycle, date)
 
 write.csv(summ_exp_all, 
-          file = "../data/observations/monitoring/experiments.csv", 
+          file = "./data/observations/monitoring/experiments.csv", 
           row.names = FALSE)

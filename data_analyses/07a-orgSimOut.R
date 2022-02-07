@@ -11,35 +11,40 @@ library("tidyverse")
 library("lubridate")
 
 # Load data ---------------------------------------------------------------
-simul_files_path <- list.files("../tables/results_simul/exp/", 
+simul_files_path <- list.files("./tables/results_simul/exp/", 
                                pattern = "simple|tomgro|vanthoor",
                                include.dirs = FALSE, full.names = TRUE)
 
-simul_files <- list.files("../tables/results_simul/exp/", 
+simul_files <- list.files("./tables/results_simul/exp/", 
                           pattern = "simple|tomgro|vanthoor",
                           include.dirs = FALSE) %>%
-  strsplit(split = "-")
+  strsplit(split = "-") %>%
+  lapply(matrix, nrow=1) %>%
+  lapply(data.frame)
 
-error_files_path <- list.files("../tables/results_simul/errors/", 
+error_files_path <- list.files("./tables/results_simul/errors/", 
                                pattern = "simple|tomgro|vanthoor",
                                include.dirs = FALSE, full.names = TRUE)
 
-error_files <- list.files("../tables/results_simul/errors/", 
+error_files <- list.files("./tables/results_simul/errors/", 
                           pattern = "simple|tomgro|vanthoor",
                           include.dirs = FALSE) %>%
-  strsplit(split = "-")
+  strsplit(split = "-") %>%
+  lapply(matrix, nrow=1) %>%
+  lapply(data.frame)
 
 # Process outputs of models -----------------------------------------------
-
-outputs <- data.frame(matrix(unlist(simul_files),
-                             nrow = length(simul_files),
-                             byrow = T)) %>%
+outputs <- do.call(bind_rows, simul_files)%>%
   rename(model = X1,
          city = X2,
          exp = X3,
-         calib = X4) %>%
-  mutate(calib = gsub(".csv", "", calib)) %>%
+         calib = X4,
+         sensor = X5) %>%
+  mutate(calib = gsub(".csv", "", calib),
+         sensor = gsub(".csv", "", sensor)) %>%
   separate(calib, into=c("nope", "calib")) %>%
+  select(-nope) %>%
+  separate(sensor, into=c("nope", "sensor")) %>%
   select(-nope) %>%
   unite("city_exp", c("city", "exp"), remove=FALSE)
 
@@ -57,6 +62,7 @@ for (it in 1:nrow(outputs)) {
              exp = outputs$exp[it],
              calib = outputs$calib[it],
              city = outputs$city[it],
+             sensor = outputs$sensor[it],
              rad_type = outputs$rad[it]) %>%
       rename_all(tolower)
     
@@ -68,6 +74,7 @@ for (it in 1:nrow(outputs)) {
              exp = outputs$exp[it],
              calib = outputs$calib[it],
              city = outputs$city[it],
+             sensor = outputs$sensor[it],
              rad_type = outputs$rad[it],
              k = if_else(city == "brd" | city == "gai",
                          0.8, 0.58),
@@ -85,23 +92,24 @@ for (it in 1:nrow(outputs)) {
 models <- Reduce(bind_rows, all_results) %>%
   gather(starts_with("w"), "n", starts_with("lai"), c("dw", "pg", "rm"),
          key = "variable", value = "measurement") %>%
-  arrange(model, exp, calib, city, variable, das) %>%
-  select(das, model, exp, calib, city, variable, measurement)
+  arrange(model, exp, calib, city, variable, das)
 
-write.csv(models, "../tables/results_simul/results_simulations_all.csv", 
+write.csv(models, "./tables/results_simul/results_simulations_all.csv", 
           row.names=FALSE)
 
 # Errors ------------------------------------------------------------------
 
-outputs <- data.frame(matrix(unlist(error_files),
-                             nrow = length(error_files),
-                             byrow = T)) %>%
+outputs <- do.call(bind_rows, simul_files)%>%
   rename(model = X1,
          city = X2,
          exp = X3,
-         calib = X4) %>%
-  mutate(calib = gsub(".csv", "", calib)) %>%
+         calib = X4,
+         sensor = X5) %>%
+  mutate(calib = gsub(".csv", "", calib),
+         sensor = gsub(".csv", "", sensor)) %>%
   separate(calib, into=c("nope", "calib")) %>%
+  select(-nope) %>%
+  separate(sensor, into=c("nope", "sensor")) %>%
   select(-nope) %>%
   unite("city_exp", c("city", "exp"), remove=FALSE)
 
@@ -115,6 +123,7 @@ for (it in 1:nrow(outputs)) {
            model = outputs$model[it],
            exp = outputs$exp[it],
            calib = outputs$calib[it],
+           sensor = outputs$sensor[it],
            city = outputs$city[it]) %>%
     rename_all(tolower)
 
@@ -131,5 +140,5 @@ all_err <- Reduce(bind_rows, all_results) %>%
          abs_error = abs(error),
          sc_rel_error = error/max_obs)
 
-write.csv(all_err, "../tables/results_simul/all_errors.csv", 
+write.csv(all_err, "./tables/results_simul/all_errors.csv", 
           row.names=FALSE)

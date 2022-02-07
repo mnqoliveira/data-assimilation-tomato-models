@@ -14,18 +14,18 @@ library("lubridate")
 
 # Functions ---------------------------------------------------------------
 
-source("03a-processWeather_functions.R")
+source("./data_processing/03a-processWeather_functions.R")
 
 
 # Load files --------------------------------------------------------------
 
-cycles_dates <- read.csv("../data/cycle_dates.csv")
+cycles_dates <- read.csv("./data/cycle_dates.csv")
 
-codes_exp <- read.csv("../tables/codes_exp.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
 
-pi_full <- read.csv("../data/weather/monitoring/weather_pi_org.csv")
-radio_full <- read.csv("../data/weather/monitoring/weather_radio_org.csv")
-rad_full <- read.csv("../data/weather/monitoring/weather_radiation_org.csv")
+pi_full <- read.csv("./data/weather/monitoring/weather_pi_org.csv")
+radio_full <- read.csv("./data/weather/monitoring/weather_radio_org.csv")
+rad_full <- read.csv("./data/weather/monitoring/weather_radiation_org.csv")
 
 # Process data ------------------------------------------------------------
 
@@ -37,10 +37,10 @@ weather_full <- pi_full %>%
   filter(!is.na(node))
 
 write.csv(weather_full,
-          file = "../data/weather/monitoring/weather_init.csv",
+          file = "./data/weather/monitoring/weather_init.csv",
           row.names=FALSE)
 
-#weather_full <- read.csv("../data/weather/monitoring/weather_init.csv")
+#weather_full <- read.csv("./data/weather/monitoring/weather_init.csv")
 
 # Since I may have many missing values between two dates in a sense that 
 # smoothing between them directly makes no sense. And since there are no 
@@ -70,10 +70,10 @@ weather_full_no_na <- x %>%
   fillNAs(cycles_dates = cycles_dates)
 
 write.csv(weather_full_no_na,
-          file = "../data/weather/monitoring/weather_fill.csv",
+          file = "./data/weather/monitoring/weather_fill.csv",
           row.names=FALSE)
 
-#weather_full_no_na <- read.csv("../data/weather/monitoring/weather_fill.csv")
+#weather_full_no_na <- read.csv("./data/weather/monitoring/weather_fill.csv")
 
 # Fill remaining NAs with impossible values so that they may be fixed
 # by the outlier smoothing function
@@ -87,10 +87,10 @@ weather_full_mod <- weather_full_no_na %>%
   mutate(measurement = na_if(measurement, -99))
 
 write.csv(weather_full_mod,
-          file = "../data/weather/monitoring/weather_final.csv",
+          file = "./data/weather/monitoring/weather_final.csv",
           row.names=FALSE)
 
-#weather_full_mod <- read.csv("../data/weather/monitoring/weather_final.csv")
+#weather_full_mod <- read.csv("./data/weather/monitoring/weather_final.csv")
 
 weather_hourly <- weather_full_mod %>%
   agg_hourly() %>%
@@ -100,10 +100,10 @@ weather_hourly <- weather_full_mod %>%
   filter(!is.na(cycle))
 
 write.csv(weather_hourly,
-          file = "../data/weather/monitoring/weather_hourly.csv",
+          file = "./data/weather/monitoring/weather_hourly.csv",
           row.names=FALSE)
 
-#weather_hourly <- read.csv("../data/weather/monitoring/weather_hourly.csv")
+#weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
 
 
 # Hourly weather dataset (TOMGRO) ------------------------------------------
@@ -164,7 +164,7 @@ for (i in 1:nrow(combinations)){
   # } 
 
   if(combinations$model[i] == "tomgro"){
-    write.csv(weather_set, file = paste0("../data/weather/hourly_",
+    write.csv(weather_set, file = paste0("./data/weather/hourly_",
                                          city_exp, ".csv"), row.names=FALSE)
 
   } else {
@@ -179,7 +179,7 @@ for (i in 1:nrow(combinations)){
       filter(!is.na(tmean)) %>%
       ungroup()
 
-    write.csv(weather_set_s, file = paste0("../data/weather/daily_",
+    write.csv(weather_set_s, file = paste0("./data/weather/daily_",
                                            city_exp, ".csv"), row.names=FALSE)
 
     # if ((combinations$type[i] == "A") & (combinations$model[i] == "simple")){
@@ -215,4 +215,4 @@ for (i in 1:nrow(combinations)){
 # 
 # summary_all <- rbind(summaries, summaries2)
 # write.csv(summary_all,
-#           file = "../tables/summary_cps.csv", row.names = FALSE)
+#           file = "./tables/summary_cps.csv", row.names = FALSE)

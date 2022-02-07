@@ -12,7 +12,7 @@ library(zoo)
 
 # Functions ---------------------------------------------------------------
 
-source("00-additional_functions.R")
+source("./data_processing/00-additional_functions.R")
 
 orgVariables <- function(x, tSensors, hSensors){
   

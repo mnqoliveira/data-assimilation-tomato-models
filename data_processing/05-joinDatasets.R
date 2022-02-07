@@ -11,10 +11,10 @@ library("lubridate")
 library("zoo")
 
 # Experiments -------------------------------------------------------------
-experiments <- read.csv("../data/observations/monitoring/obs_exp_all.csv")
+experiments <- read.csv("./data/observations/monitoring/obs_exp_all.csv")
 
 # Monitoring --------------------------------------------------------------
-monitoring <- read.csv("../data/observations/monitoring/monitoring_cps.csv") %>%
+monitoring <- read.csv("./data/observations/monitoring/monitoring_cps.csv") %>%
   mutate(node = as.character(node))
 
 # Join --------------------------------------------------------------------
@@ -35,5 +35,5 @@ full_set <- experiments %>%
 
 temp <- filter(full_set, city == "cps")
   
-write.csv(full_set, "../data/observations/full_set_obs.csv", row.names=FALSE)
+write.csv(full_set, "./data/observations/full_set_obs.csv", row.names=FALSE)
 

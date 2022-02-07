@@ -10,7 +10,7 @@ import numpy as np
 import copy
 import scipy.stats
 
-import f_aux as aux
+import auxiliary_functions.f_aux as aux
 
 from filterpy.kalman import ExtendedKalmanFilter as filterpy_EKF
 from filterpy.kalman import UnscentedKalmanFilter as filterpy_UKF
@@ -120,6 +120,7 @@ class EnKF(filterpy_EnKF):
             setattr(self.model, self.config["state_var"], s)
             self.fx(self.model, self.dt)
             self.sigmas[i] = getattr(self.model, self.config["state_var"])
+            #print(self.sigmas[i])
 
             for st_it, st in enumerate(self.config["states_names"]):
                 setattr(self.model, st, st_default[st_it])

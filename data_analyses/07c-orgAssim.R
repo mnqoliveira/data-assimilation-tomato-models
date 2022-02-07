@@ -19,11 +19,11 @@ library("data.table")
 # em que o arquivo foi salvo
 
 # Load assimilation outputs
-all_files_path <- list.files("../tables/results_DA/", full.names = T, 
+all_files_path <- list.files("./tables/results_DA/", full.names = T, 
                              pattern = ".csv", recursive = T)
 
-configs <- read.csv("../tables/runs_Filter.csv") %>% 
-  rbind(read.csv("../tables/runs_Filter2.csv")) %>%
+configs <- read.csv("./tables/runs_Filter.csv") %>% 
+  rbind(read.csv("./tables/runs_Filter2.csv")) %>%
   transmute(across(everything(), as.character)) %>%
   mutate(id = str_pad(id, 4, "left", "0"),
          exp = paste0("n", str_pad(exp, 2, "left", "0")))
@@ -39,7 +39,7 @@ outputs_mod <- data.frame(all_files_path) %>%
                                    "updState", "errors"))) %>%
   left_join(configs)
 
-write.csv(outputs_mod, "../tables/results_DA/aux_files/assim_exp.csv", 
+write.csv(outputs_mod, "./tables/results_DA/aux_files/assim_exp.csv", 
           row.names=FALSE)
 
 ensembles <- data.frame(all_files_path) %>%
@@ -72,7 +72,7 @@ for (it in 1:nrow(allStates)) {
 
 all_assim <- rbindlist(all_results)
 
-save(all_assim, file="../tables/results_DA/aux_files/all_states.RData")
+save(all_assim, file="./tables/results_DA/aux_files/all_states.RData")
 
 # Outputs: states updated -------------------------------------------------
 
@@ -105,7 +105,7 @@ for (it in 1:nrow(updState)) {
 
 upd_assim <- rbindlist(all_results)
 
-save(upd_assim, file="../tables/results_DA/aux_files/upd_states.RData") 
+save(upd_assim, file="./tables/results_DA/aux_files/upd_states.RData") 
 
 
 # Errors ------------------------------------------------------------------
@@ -133,7 +133,7 @@ all_err <- do.call(bind_rows, all_results) %>%
 	       abs_error = abs(error),
 	       sc_rel_error = error/max_obs)
 
-save(all_err, file="../tables/results_DA/aux_files/all_errors.RData")
+save(all_err, file="./tables/results_DA/aux_files/all_errors.RData")
 
 # Ensembles ---------------------------------------------------------------
 
@@ -160,7 +160,7 @@ all_results <- list()
 #all_assim <- Reduce(bind_rows, all_results)  %>%
 #  arrange(id, das)
 #
-#write.csv(all_assim, "../tables/results_DA/aux_files/all_ensembles.csv",
+#write.csv(all_assim, "./tables/results_DA/aux_files/all_ensembles.csv",
 #          row.names=FALSE)
 
 rm(list = ls())

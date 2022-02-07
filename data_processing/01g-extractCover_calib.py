@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
-import f_aux as aux
+import auxiliary_functions.f_aux as aux
 
 # %%
 # =============================================================================
@@ -25,7 +25,8 @@ def calc_conv_fact(cycle, img):
 
     pos = img_it[0:3]
 
-    if cycle == "ciclo02":
+    if cycle == "cycle01":
+    #if cycle == "ciclo02":
 
         # Small card used for lateral view was marked in pink as
         # base of the stairs above view
@@ -58,7 +59,7 @@ def calc_conv_fact(cycle, img):
                 area = [ref_length * conv, 4.0*10**(-2), 0]
 
     else:
-        # Assuming cycles 3 and 4 follow the same patterns
+        # Assuming cycles 2 and 3 follow the same patterns
         # Square in chessboard was marked in pink.
         lower_thresh = np.array([255, 0, 255])
         upper_thresh = np.array([255, 0, 255])
@@ -117,14 +118,6 @@ def calc_conv_fact(cycle, img):
     #                                  thickness=3)
     # cv2.imwrite(filename=img_name, img=contours_draw)
 
-    contours_draw = cv2.drawContours(image = img.copy(),
-          contours = ref_bw,
-          contourIdx = -1,
-          color = (255, 0, 0),
-          thickness = 3)
-    img_name = path_save + "ref_" + img_it
-    cv2.imwrite(filename = img_name, img = contours_draw)
-
     return conv, area
 
 
@@ -134,26 +127,28 @@ def calc_conv_fact(cycle, img):
 # =============================================================================
 
 cycle_l = ["ciclo02", "ciclo03", "ciclo04"]
+cycle_l = ["cycle01", "cycle02", "cycle03"]
 
-path_base_in = 'E:/drive_unicamp/SISDA/projetoModelagemTomateiro/'
-path_base_out = '../data/observations/monitoring/'
-alt_path_base_out = 'E:/doc_local/'
+path_base_in = './data/'
+path_base_out = './data/observations/monitoring/'
+#alt_path_base_out = 'E:/doc_local/'
 
 it_exp = 0
 
 for it_exp in range(len(cycle_l)):
     cycle = cycle_l[it_exp]
 
-    path = path_base_in + 'fotos_rotulos/' + cycle + "/calibracao/"
+    path = path_base_in + 'masks/' + cycle + "/calibration/"
     orig_imgs = os.listdir(path)
     nodes = [s for s in orig_imgs if "nodes" in s]
     leaves = [s for s in orig_imgs if "leaves" in s]
 
     # first pictures have no reference
-    if cycle == "ciclo02":
+    #if cycle == "ciclo02":
+    if cycle == "cycle01":
         leaves = leaves[3:]
 
-    path_save = alt_path_base_out + 'imgs_proc/cover/' + cycle + '/calibracao/'
+    #path_save = alt_path_base_out + 'imgs_proc/cover/' + cycle + '/calibracao/'
 
     leaves_file = []
     ref_file = []
@@ -192,8 +187,8 @@ for it_exp in range(len(cycle_l)):
                                               contourIdx = -1,
                                               color = (0, 255, 0),
                                               thickness = 3)
-            img_name = path_save + "leaves_" + img_it
-            cv2.imwrite(filename = img_name, img = contours_draw)
+            # img_name = path_save + "leaves_" + img_it
+            # cv2.imwrite(filename = img_name, img = contours_draw)
 
 
             if pos == "lat":
@@ -225,8 +220,8 @@ for it_exp in range(len(cycle_l)):
                                               contourIdx = -1,
                                               color = (0, 255, 0),
                                               thickness = 3)
-                    img_name = path_save + "fruits_" + img_it
-                    cv2.imwrite(filename = img_name, img = contours_draw)
+                    # img_name = path_save + "fruits_" + img_it
+                    # cv2.imwrite(filename = img_name, img = contours_draw)
 
                 # =============================================================================
                 # Mature fruits
@@ -245,8 +240,8 @@ for it_exp in range(len(cycle_l)):
                                               contourIdx = -1,
                                               color = (0, 255, 0),
                                               thickness = 3)
-                    img_name = path_save + "mfruits_" + img_it
-                    cv2.imwrite(filename = img_name, img = contours_draw)
+                    # img_name = path_save + "mfruits_" + img_it
+                    # cv2.imwrite(filename = img_name, img = contours_draw)
 
 
         print(leaves_file)
@@ -291,7 +286,7 @@ for it_exp in range(len(cycle_l)):
 
     #     end = 'calib_' + cycle + '.csv'
     #     outputs = pd.DataFrame(nodes_file, columns=['filename', 'count'])
-    #     output_file_name = '../data/observations/monitoring/nodes/raw_ncover_' + end
+    #     output_file_name = './data/observations/monitoring/nodes/raw_ncover_' + end
     #     outputs.to_csv(output_file_name, index=False)
 
     end = 'ref_calib_' + cycle + '.csv'

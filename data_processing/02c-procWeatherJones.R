@@ -14,7 +14,7 @@ library("lubridate")
 
 # Process data ------------------------------------------------------------
 
-spreadsheetPath <- "../data/weather/jones/weather_all_jones.xlsx"
+spreadsheetPath <- "./data/weather/jones/weather_all_jones.xlsx"
 nSheets <- length(excel_sheets(spreadsheetPath))
 namesSheets <- excel_sheets(spreadsheetPath)
 i <- 7
@@ -66,7 +66,7 @@ for (i in 1:nSheets){
     
   #}
   
-  write.csv(dataset_mod, file = paste0("../data/weather/hourly_", namesSheets[i], 
+  write.csv(dataset_mod, file = paste0("./data/weather/hourly_", namesSheets[i], 
                                    ".csv"), row.names=FALSE)
   
   dataset_daily <- dataset_mod %>%
@@ -77,7 +77,7 @@ for (i in 1:nSheets){
               rad = sum(rad), 
               co2 = mean(co2))
   
-  write.csv(dataset_daily, file = paste0("../data/weather/daily_", namesSheets[i], 
+  write.csv(dataset_daily, file = paste0("./data/weather/daily_", namesSheets[i], 
                                        ".csv"), row.names=FALSE)
   if (i %in% c(4, 5, 6)){
     temp <- dataset_daily %>%
@@ -110,4 +110,4 @@ for (i in 1:nSheets){
 # 
 # summary_all <- rbind(summaries, summaries2)
 # write.csv(summary_all, 
-#           file = "../tables/summary_gnv.csv", row.names = FALSE)
+#           file = "./tables/summary_gnv.csv", row.names = FALSE)

@@ -16,36 +16,36 @@ library("lubridate")
 
 # Load files --------------------------------------------------------------
 
-#exp_dates <- read.csv("../tables/exp_dates.csv")
+#exp_dates <- read.csv("./tables/exp_dates.csv")
 
 
 # Indirect LAI, W, Wf and Wm ----------------------------------------------
 # calib lai_lat_calib
-lai_lat_calib <- read.csv("../data/observations/monitoring/lai/lai_lat_calib_summ.csv")
-lai_abv_calib <- read.csv("../data/observations/monitoring/lai/lai_abv_calib_summ.csv")
-height_calib <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_calib_summ.csv")
+lai_lat_calib <- read.csv("./data/observations/monitoring/lai/lai_lat_calib_summ.csv")
+lai_abv_calib <- read.csv("./data/observations/monitoring/lai/lai_abv_calib_summ.csv")
+height_calib <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_calib_summ.csv")
 
-wf_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_summ.csv")
-wm_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_summ.csv")
+wf_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_summ.csv")
+wm_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_summ.csv")
 
 # Harvests ----------------------------------------------------------------
 
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
-cycle_dates <- read.csv("../data/cycle_dates.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
 
 # Indirect N ------------------------------------------------------------
 # # calib n_calib
-# n_calib <- read.csv("../data/observations/nodes/")
+# n_calib <- read.csv("./data/observations/nodes/")
 
 # CPS ---------------------------------------------------------------------
-cps <- read.csv("../data/observations/monitoring/experiments.csv") %>%
+cps <- read.csv("./data/observations/monitoring/experiments.csv") %>%
   arrange(city_exp, date) %>%
   mutate(node = "calib")
 
 # Jones -------------------------------------------------------------------
-filesPaths <- list.files("../data/observations/jones/", full.names = TRUE, 
+filesPaths <- list.files("./data/observations/jones/", full.names = TRUE, 
                          pattern = "*.csv")
-shortName <- list.files("../data/observations/jones/", 
+shortName <- list.files("./data/observations/jones/", 
                         pattern = "*.csv")
 shortName <- substring(shortName, 1, nchar(shortName) - 4)
 
@@ -69,9 +69,9 @@ for (i in 1:length(shortName)){
 }
 
 # SIMPLE ------------------------------------------------------------------
-filesPaths <- list.files("../data/observations/simple/", full.names = TRUE,
+filesPaths <- list.files("./data/observations/simple/", full.names = TRUE,
                          pattern = "*.csv")
-shortName <- list.files("../data/observations/simple/",
+shortName <- list.files("./data/observations/simple/",
                         pattern = "*.csv")
 shortName <- substring(shortName, 1, nchar(shortName) - 4)
 
@@ -97,9 +97,9 @@ for (i in 1:length(shortName)){
 
 # DSSAT -------------------------------------------------------------------
 # 
-# filesPaths <- list.files("../data/observations/dssat/", full.names = TRUE,
+# filesPaths <- list.files("./data/observations/dssat/", full.names = TRUE,
 #                          pattern = "*.csv")
-# shortName <- list.files("../data/observations/dssat/",
+# shortName <- list.files("./data/observations/dssat/",
 #                         pattern = "*.csv")
 # shortName <- substring(shortName, 1, nchar(shortName) - 4)
 # 
@@ -129,9 +129,9 @@ for (i in 1:length(shortName)){
 # 
 
 # Araujo ------------------------------------------------------------------
-filesPaths <- list.files("../data/observations/araujo/", full.names = TRUE,
+filesPaths <- list.files("./data/observations/araujo/", full.names = TRUE,
                          pattern = "obs(.*)\\.csv")
-shortName <- list.files("../data/observations/araujo/",
+shortName <- list.files("./data/observations/araujo/",
                         pattern = "obs(.*)\\.csv")
 shortName <- substring(shortName, 1, nchar(shortName) - 4)
 
@@ -196,5 +196,5 @@ all_obs <- cps %>%
   mutate(doy = yday(as.Date(date)),
          node = "calib")
 
-write.csv(all_obs, "../data/observations/monitoring/obs_exp_all.csv", row.names=FALSE)
+write.csv(all_obs, "./data/observations/monitoring/obs_exp_all.csv", row.names=FALSE)
 
