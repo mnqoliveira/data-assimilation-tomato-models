@@ -155,7 +155,7 @@ def main():
                                       'plant_yield'])
         print(state)
 
-        aux.save_output("simple", "simul", state, city, calib, treat, 1)
+        aux.save_output("simple", "simul", state, city, calib, treat, sensor)
 
         if config_obs is not None:
             var_names = ['lai', 'w', 'wm']
@@ -173,6 +173,6 @@ def main():
 
             error = aux.calcError(observations, outputs_, var_names)
             aux.save_output("simple", "error_simul",
-                            error, city, calib, treat, 1)
+                            error, city, calib, treat, sensor)
 
 #main()

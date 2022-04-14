@@ -66,8 +66,14 @@ x <- weather_full  %>%
          hour = hour(dateFull)) %>%
   mutate(sensor_var = paste(sensor, variable, sep = "_")) 
 
+# Include transmitance for imputation from external data
+transm <- 0.7
 weather_full_no_na <- x %>%
-  fillNAs(cycles_dates = cycles_dates)
+  fillNAs(cycles_dates = cycles_dates) %>%
+  mutate(measurement = if_else((variable == "radiation") &
+                                 (imputation == "case4"),
+                               measurement * transm,
+                               measurement))
 
 write.csv(weather_full_no_na,
           file = "./data/weather/monitoring/weather_fill.csv",
@@ -80,9 +86,11 @@ write.csv(weather_full_no_na,
 weather_full_mod <- weather_full_no_na %>%
   mutate(measurement = if_else(is.na(measurement), -99, measurement),
          dateFull = ymd_hms(dateFull, truncated = 1)) %>%
-  group_by(node, sensor_var, sensor_id) %>%
+  group_by(node, sensor_var, sensor_id, cycle) %>%
   arrange(node, sensor_var, sensor_id, dateFull) %>%
-  mutate(measurement = smooth(measurement)) %>%
+  mutate(measurement = if_else(variable == "humidity", 
+                               measurement,
+                               as.numeric(smooth(measurement)))) %>%
   ungroup() %>%
   mutate(measurement = na_if(measurement, -99))
 

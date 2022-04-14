@@ -252,8 +252,7 @@ fillNAs_external <- function(x, cycles_dates){
   
   df_proc$rad <- mapply(FUN = hourlyRad,
                         srad = df_proc$rad, doy = df_proc$doy, 
-                        lat = df_proc$lat[1], hour = df_proc$hour,
-                        unit = "MJg")
+                        lat = df_proc$lat[1], hour = df_proc$hour)
   df_proc$rad <- round(df_proc$rad, 4)
   df_proc$tmean <- mapply(FUN = hourlyTemp, 
                           doy = df_proc$doy, 
@@ -271,10 +270,11 @@ fillNAs_external <- function(x, cycles_dates){
     mutate(value = measurement,
            value = if_else(variable == "temperature", 
                            tmean, value),
+                           # All radiation uses the same unit at this point
            value = if_else(sensor_var == "li1400_radiation", 
                            rad*555.6, value),
            value = if_else(sensor_var == "pi_radiation", 
-                           rad*555.6 / 0.018, value),
+                           rad*555.6, value),
            imputation = "case4") %>%
     select(-rad, -tmean, -year, -doy, -measurement, -dateFull)
   

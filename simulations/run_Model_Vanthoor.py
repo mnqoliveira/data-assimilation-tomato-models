@@ -214,7 +214,7 @@ def main():
         state_all['das'] = list(range(state_all.shape[0]))
 
         aux.save_output("vanthoor", "simul", state_all,
-                        city, calib, treat, 1)
+                        city, calib, treat, sensor)
 
         if config_obs is not None:
             var_names = ['lai', 'w', 'wf', 'wm']
@@ -227,7 +227,7 @@ def main():
 
             error = aux.calcError(observations, outputs_, var_names)
             aux.save_output("vanthoor", "error_simul",
-                            error, city, calib, treat, 1)
+                            error, city, calib, treat, sensor)
 
         # obs = dataset['obs']
         # print(obs.loc[~np.isnan(obs.wm), ["lai", "w", "wf", "wm"]])

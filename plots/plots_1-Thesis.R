@@ -83,6 +83,8 @@ rad_power <- read.csv("./data/weather/unc/cps_POWER_SinglePoint_Daily_19870101_2
 
 # Simulations
 models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
+tomgro_gnvMod <- read.csv("./tables/metrics/simul/metrics_gnvMod.csv")
+tomgro_calib <- read.csv("./tables/metrics/simul/metrics_calib.csv")
 
 # Observations
 obs <- read.csv("./data/observations/monitoring/observations_proc.csv")
@@ -106,6 +108,10 @@ case1_hi <- read.csv("./tables/results_SA/case1_highest_indices.csv")
 load("./tables/results_DA/aux_files/all_states.RData")
 #load("./tables/results_DA/aux_files/upd_states.RData")
 
+load("./tables/results_DA/aux_files/all_errors.RData")
+errors_filt <- all_err %>%
+  mutate(config = as.numeric(config))
+
 # Assimilation
 info_runs <- read.csv("./tables/runs_Filter.csv") %>% 
   rbind(read.csv("./tables/runs_Filter2.csv")) %>%
@@ -118,7 +124,7 @@ dict <- read.csv("./tables/dictionary_paramsFilter.csv")
 
 # Additional variables ----------------------------------------------------
 
-path_figures <- "../../../../Doutorado/Tese/figures/"
+path_figures <- "../../../../Doutorado/4_Tese/figures/"
 
 cycles <- c("1" = "Cycle 0",
             "2" = "Cycle 1",
@@ -138,8 +144,8 @@ plot_states <- c("lai" = "LAI\n[m² leaves/m² soil]",
                  "wf" = "Fruit weight\n[g D.M./m² soil]", 
                  "wm" = "Mature fruit weight\n[g D.M./m² soil]")
 
-plot_states_1L <- c("lai" = "LAI", 
-                 "n" = "N", 
+plot_states_1L <- c("lai" = "Leaf area index", 
+                 "n" = "Number of nodes", 
                  "w" = "Aboveground biomass", 
                  "wf" = "Fruit weight", 
                  "wm" = "Mature fruit weight")
@@ -180,7 +186,6 @@ factors_weather <- c("co2" = "Carbon Dioxide",
 codes_plants <- c("n03" = "Cycle 1, Plant 1", "n04" = "Cycle 1, Plant 2", 
                   "n05" = "Cycle 2, Plant 1", "n06" = "Cycle 2, Plant 2",
                   "n07" = "Cycle 3, Plant 1", "n08" = "Cycle 3, Plant 2")
-
 
 # Org variables -----------------------------------------------------------
 
@@ -332,7 +337,7 @@ ggsave(plot_file_name,
 weather_mod <- weather_hourly %>%
   separate(stat_sensor_var, sep = "_", into = c("stat", "sensor", "var")) %>%
   filter(!is.na(cycle), value < 3000, 
-         sensor != "pi", cycle != 1) %>%
+         sensor != "pi", sensor != "none", cycle != 1) %>%
   mutate(stat_var = str_c(var, stat, sep = "_"), date = as.Date(date)) %>%
   filter((stat == "mean" & var == "radiation") | 
            (var == "temperature" & stat != "med") |
@@ -356,9 +361,9 @@ weather_mod <- weather_hourly %>%
                                "temperature")),
          stat = if_else(variable == "rad", "sum", 
                         substring(variable, 2, nchar(variable))),
-         measurement = if_else(variable == "rad", measurement*0.5/555.6, measurement))
+         measurement = if_else(variable == "rad", measurement/555.6, measurement))
 
-rad_ext <- rad_power %>% 
+rad_ext <- rad_power %>%
   rename_all(tolower) %>%
   mutate(date = as.Date(paste(year, doy, sep = "-"), tryFormats = c("%Y-%j"))) %>%
   rename(rad_ext_d = allsky_sfc_sw_dwn) %>%
@@ -1095,10 +1100,10 @@ comb <- data.frame(state = c("leaf_area", "leaf_area", "w_plant", "wf_plant"),
 # Scatter Lai_lat
 plot2a <- ggplot() +
   geom_point(data = dataset,
-             aes(x = lai_lat, y = leaf_area, fill = cycle_mod),
+             aes(x = leaf_area, y = lai_lat, fill = cycle_mod),
              shape=21, size=2) +
-  labs(x = plot_vars_1l[match("lai_lat", names(plot_vars_1l))],
-       y = plot_vars_1l[match("leaf_area", names(plot_vars_1l))]) +
+  labs(x = plot_vars_1l[match("leaf_area", names(plot_vars_1l))],
+       y = plot_vars_1l[match("lai_lat", names(plot_vars_1l))]) +
   scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
                         aesthetics = c("fill"),
                         name = "Cycle") +
@@ -1109,10 +1114,10 @@ plot2a <- ggplot() +
 # Scatter Lai_abv
 plot2b <- ggplot() +
   geom_point(data = dataset,
-             aes(x = lai_abv, y = leaf_area, fill = cycle_mod),
+             aes(x = leaf_area, y = lai_abv, fill = cycle_mod),
              shape=21, size=2) +
-  labs(x = plot_vars_1l[match("lai_abv", names(plot_vars_1l))],
-       y = plot_vars_1l[match("leaf_area", names(plot_vars_1l))]) +
+  labs(x = plot_vars_1l[match("leaf_area", names(plot_vars_1l))],
+       y = plot_vars_1l[match("lai_abv", names(plot_vars_1l))]) +
   scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
                         aesthetics = c("fill"),
                         name = "Cycle") +
@@ -1123,10 +1128,10 @@ plot2b <- ggplot() +
 # Scatter W
 plot3a <- ggplot() +
   geom_point(data = dataset,
-             aes(x = w_plant_fm, y = w_plant, fill = cycle_mod),
+             aes(x = w_plant, y = w_plant_fm, fill = cycle_mod),
              shape=21, size=2) +
-  labs(x = plot_vars_1l[match("w_plant_fm", names(plot_vars_1l))],
-       y = plot_vars_1l[match("w_plant", names(plot_vars_1l))]) +
+  labs(x = plot_vars_1l[match("w_plant", names(plot_vars_1l))],
+       y = plot_vars_1l[match("w_plant_fm", names(plot_vars_1l))]) +
   scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
                         aesthetics = c("fill"),
                         name = "Cycle") +
@@ -1137,10 +1142,10 @@ plot3a <- ggplot() +
 # Scatter Wf
 plot3b <- ggplot() +
   geom_point(data = dataset,
-             aes(x = wf_lat, y = wf_plant, fill = cycle_mod),
+             aes(x = wf_plant, y = wf_lat, fill = cycle_mod),
              shape=21, size=2) +
-  labs(x = plot_vars_1l[match("wf_lat", names(plot_vars_1l))],
-       y = plot_vars_1l[match("wf_plant", names(plot_vars_1l))]) +
+  labs(x = plot_vars_1l[match("wf_plant", names(plot_vars_1l))],
+       y = plot_vars_1l[match("wf_lat", names(plot_vars_1l))]) +
   scale_discrete_manual(values = paletteer_d("RColorBrewer::Set1"), 
                         aesthetics = c("fill"),
                         name = "Cycle") +
@@ -1574,7 +1579,76 @@ ggsave(plot_file_name,
        width = 25, height = 18, units = "cm",
        family = "serif")
 
-# Fig 32 - Assim - Low-cost Wf --------------------------------------------
+
+# Fig 32 - Ranges ---------------------------------------------------------
+rmse <- errors_filt %>%
+  filter(id < 500) %>%
+  left_join(info_runs) %>%
+  select(dat, variable, obs, pred, exp, id, config, rep,
+         filt, case, state_var, meas_var, frequency) %>%
+  filter(variable == "wm") %>%
+  mutate(error = obs - pred,
+         rel_error = (obs - pred)/obs,
+         se = error * error) %>%
+  group_by(variable, exp, frequency, config, filt, case, id,
+           state_var, meas_var, rep) %>%
+  summarise(rmse = sqrt(mean(se))) %>%
+  ungroup() %>%
+  filter(rmse < 1000, filt == "ukf")
+
+errors_mod <- rmse %>%
+  filter(!((filt == "enkf") & (case !=  "case2"))) %>%
+  filter(as.numeric(id) <= 500) %>%
+  filter(config <= 12) %>%
+  mutate(filt_ = paste(filt, meas_var, sep = "_"),
+         freq_ = factor(frequency,
+                        levels = c("0.1", "0.5", "1"),
+                        labels = c("10%", "50%", "100%")),
+         meas_var_ = factor(meas_var,
+                            levels = c("lai_abv", "lai_lat", "w_fm_full", "wf_lat"),
+                            labels = c("GC Abv/LAI", "GC Lat/LAI", 
+                                       "W_fm_full/W", "Area Wf/Wf")))
+
+tomgro_gnvMod_ <- tomgro_gnvMod %>%
+  filter(metric == "rmse", variable == "wm", sensor == "A") %>%
+  gather(starts_with("n0"), key = "exp", value = "rmse")
+
+tomgro_calib_ <- tomgro_calib %>%
+  filter(metric == "rmse", variable == "wm", sensor == "A") %>%
+  gather(starts_with("n0"), key = "exp", value = "rmse")
+
+ggplot() +
+  facet_wrap("exp",
+             scales = "free_y",
+             labeller = labeller(exp = codes_plants)
+             ) +
+  # Assimilation
+  geom_point(aes(x = meas_var_, y =  rmse, colour = freq_),
+               data = errors_mod, alpha = 0.5, size = 3) +
+  # # Null error
+  geom_hline(data=tomgro_gnvMod_, aes(yintercept = rmse),
+             lty = "dashed", size = 1) +
+  geom_hline(data=tomgro_calib_, aes(yintercept = rmse),
+             size = 1) +
+  labs(x = "",
+       y = "RMSE [g D.M./m² soil]",
+       colour = "Percentage of observations used") +
+  scale_colour_brewer(palette = "Set1", type = "") +
+  theme_vert +
+  theme(panel.background = element_rect(fill = "gray99"),
+        axis.text.x = element_text(angle = 0,
+                                   hjust = 1,
+                                   colour = "black",
+                                   size = 8))
+
+plot_file_name <- paste0(path_figures,
+                         'Fig32_ranges_assim_freq.png')
+ggsave(plot_file_name,
+       width = 25, height = 18, units = "cm",
+       family = "serif")
+
+
+# Fig 33 - Assim - Low-cost Wf --------------------------------------------
 Pdata <- upd_assim %>%
   filter(as.numeric(id) >= 916, as.numeric(id) <= 931) %>%
   mutate(measurement = as.numeric(measurement),
@@ -1614,12 +1688,12 @@ ggplot() +
   theme_vert
 
 plot_file_name <- paste0(path_figures,
-                         'Fig32_assim_lowcost_wf.png')
+                         'Fig33_assim_lowcost_wf.png')
 ggsave(plot_file_name,
        width = 18, height = 15, units = "cm",
        family = "serif")
 
-# Fig 33 - Assim - Low-cost Wm --------------------------------------------
+# Fig 34 - Assim - Low-cost Wm --------------------------------------------
 
 Pdata <- upd_assim %>%
   filter(as.numeric(id) >= 916, as.numeric(id) <= 931) %>%
@@ -1661,7 +1735,7 @@ ggplot() +
 
 
 plot_file_name <- paste0(path_figures,
-                         'Fig33_assim_lowcost_wm.png')
+                         'Fig34_assim_lowcost_wm.png')
 ggsave(plot_file_name,
        width = 18, height = 15, units = "cm",
        family = "serif")
