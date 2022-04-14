@@ -4,5 +4,8 @@ This repository contains the code used in my PhD project. It includes data prepa
 
 Raw data may be found in [this repository](https://doi.org/10.25824/redu/EP4NGO).
 
-Related publications:
+## Related publications
 Monique Oliveira and Luiz Rodrigues. 2021. Monitoramento de plantas em casas de vegetação para assimilação de dados. In Anais do XIII Congresso Brasileiro de Agroinformática, novembro 10, 2021, Evento Online, Brasil. SBC, Porto Alegre, Brasil, 215-224. DOI: https://doi.org/10.5753/sbiagro.2021.18393. (In Portuguese)
+
+## Versions
+Version used for Ref1 (Tomato models) and Ref2 (Data assimilation in greenhouses) (to be further detailed after publication). [Commit](https://github.com/mnqoliveira/data-assimilation-tomato-models/commit/fd3ff44619eb4f0cdc8be02b39b4dfa4d2fce497)
