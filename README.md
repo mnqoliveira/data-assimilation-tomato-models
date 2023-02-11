@@ -10,4 +10,6 @@ Monique Oliveira and Luiz Rodrigues. 2021. Monitoramento de plantas em casas de 
 OLIVEIRA, Monique Pires Gravina de. Leveraging data assimilation and monitoring data for improvement of crop growth estimates in protected environments. 2022. Ph.D. Thesis - Universidade Estadual de Campinas, Faculdade de Engenharia Agrícola, Campinas, SP. [Link](https://hdl.handle.net/20.500.12733/4792)
 
 ## Versions
-Version used for Ref1 (Tomato models) and Ref2 (Data assimilation in greenhouses) (to be further detailed after publication). [Commit](https://github.com/mnqoliveira/data-assimilation-tomato-models/commit/fd3ff44619eb4f0cdc8be02b39b4dfa4d2fce497)
+Update regarding submission of Ref 4 (Low cost sensors) [Tag](https://github.com/mnqoliveira/data-assimilation-tomato-models/releases/tag/v0.1.1)
+
+Version used for first submission of Ref1 (Tomato models) and Ref2 (Real time data) (to be further detailed after publication). [Tag](https://github.com/mnqoliveira/data-assimilation-tomato-models/releases/tag/v0.1.0)
