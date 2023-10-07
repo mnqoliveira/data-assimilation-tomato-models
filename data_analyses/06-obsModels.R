@@ -104,12 +104,16 @@ for (it in 1:nrow(comb_mod)){
   pred <- predict(model, dataset_[condition, ])
   real <- dataset_[condition, comb_mod$meas_var[it]]
   
+  pvalues <- anova(model)[["p-value"]]
+  
   # Save model outputs
   comb_mod[it, "slope"] <- model$coefficients[2]
   comb_mod[it, "intercept"] <- model$coefficients[1]
   comb_mod[it, "se_train"] <- model$sigma
   comb_mod[it, "r2_train"] <- (cor(pred_train, real_train))**2
   comb_mod[it, "mape_val"] <- mean(abs(real - pred)/real)
+  comb_mod[it, "pvalue_intercept"] <- pvalues[1]
+  comb_mod[it, "pvalue_slope"] <- pvalues[2]
   
 }
 

@@ -162,18 +162,10 @@ def run_simul(info, params, rates, states, weather):
 
 
 def main():
-    weather_loc = ['gnv']
-    sensor_type = ["A"]
-    experiments_int = [4, 5, 6]
-    calibrations = ['gnv']
-    experiments = [str(s) for s in experiments_int]
-    config_obs = "summ"
-
     weather_loc = ['cps']
     sensor_type = ["A"]
-    experiments_int = [7]
-    #experiments_int = [1, 3, 5, 7]
-    calibrations = ['cpsopt']
+    experiments_int = [1, 2, 3, 4, 5, 6, 7, 8]
+    calibrations = ['cps4']
     experiments = [str(s) for s in experiments_int]
     config_obs = "summ"
 

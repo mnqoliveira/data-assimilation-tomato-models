@@ -175,7 +175,7 @@ degToRad <- function(deg){
 # lat <- 27.6
 
 
-hourlyRad <- function(srad, doy, lat, hour, unit){
+hourlyRad <- function(srad, doy, lat, hour, unit="MJg"){
   # Same method as in DSSAT
   
   # micromol photon / J - McCree
@@ -297,5 +297,42 @@ hourlyTemp <- function(doy, lat, hs, tmax, tmin){
   
 }
 
+solar_local_hour <- function(hs, lat, long, doy, tz=-3){
+  # Power From The Sun
+  # 
+  # by William B. Stine and Michael Geyer
+  # https://www.powerfromthesun.net/Book/chapter03/chapter03.html#Solar%20Time
+  # Eq. 3.5
+  
+  # Degrees
+  x = 360*(doy-1)/365.242
+  x_ = degToRad(x)
+  
+  # Difference between mean solar time and true solar time
+  # Equation of time (minutes)
+  EOT = 0.258*cos(x_) - 7.416*sin(x_) -3.648*cos(2*x_) - 9.228*sin(2*x_)
+  
+  # The parameter D in Equation (3.5) is equal to 1 (hour) if 
+  # the location is in a region where daylight savings time is 
+  # currently in effect, or zero otherwise.
+  D = 0
+  
+  # Longitude correction (hours)
+  long_ref = tz*15
+  LC = (long - long_ref)/15
+  
+  LCT = floor(hs - EOT/60 + LC + D)
+  
+  return(LCT)
+  
+}
 
+
+# Save packages -----------------------------------------------------------
+
+# allPackage <- data.frame(installed.packages(c(.Library,
+#                                               "c:/Users/Monique/Documents/R/win-library/4.0")))
+# row.names(allPackage) <- NULL
+# 
+# write.csv(allPackage, file = "./requirements_R.csv")
 

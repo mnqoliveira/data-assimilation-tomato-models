@@ -114,10 +114,10 @@ def main():
     calibrations = ['cpsopt']
     experiments_int = [7, 8]
 
-    weather_loc = ['gnv']
-    sensor_type = ["A"]
-    experiments_int = [4, 5, 6]
-    calibrations = ['gnvopt']
+    # weather_loc = ['gnv']
+    # sensor_type = ["A"]
+    # experiments_int = [4, 5, 6]
+    # calibrations = ['gnvopt', 'gnv']
 
     experiments = [str(s) for s in experiments_int]
 

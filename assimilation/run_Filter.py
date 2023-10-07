@@ -9,7 +9,10 @@ import pandas as pd
 import numpy as np
 from joblib import Parallel, delayed
 import itertools
-#import gc
+import gc
+import sys
+import tracemalloc
+from tracemalloc import Filter
 
 import assimilation.filters as filters
 import simulations.run_Model_Simple as simple
@@ -19,7 +22,7 @@ import simulations.run_Model_ReducedTomgro_oo as tomgro
 import assimilation.measurementFunctions as hx
 import auxiliary_functions.f_aux as aux
 
-#import winsound
+import winsound
 # np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
 
 # %% Agnostic auxiliary functions
@@ -112,22 +115,22 @@ def filter_state(model_obj, proc_func, meas_func,
                  dim_x, dim_z):
 
     if config_it['filt'] == "ukf":
-        filter_f = filters.filter_ukf(model_obj, proc_func,
-                                      meas_func, dataset, config_it, dt,
-                                      dim_x, dim_z)
+        filter_f = filters.filter_ukf(model_obj, proc_func, meas_func,
+                                       dataset, config_it, dt,
+                                       dim_x, dim_z)
     elif config_it['filt'] == "pf":
         filter_f = filters.filter_pf(model_obj, proc_func, meas_func,
-                                     dataset, config_it, dt,
-                                     dim_x, dim_z)
+                                      dataset, config_it, dt,
+                                      dim_x, dim_z)
     elif config_it['filt'] == "enkf":
-        filter_f = filters.filter_enkf(model_obj, proc_func,
-                                       meas_func, dataset, config_it, dt,
-                                       dim_x, dim_z)
+        filter_f = filters.filter_enkf(model_obj, proc_func, meas_func,
+                                        dataset, config_it, dt,
+                                        dim_x, dim_z)
 
     elif config_it['filt'] == "ekf":
-        filter_f = filters.filter_ekf(model_obj, proc_func,
-                                      meas_func, dataset, config_it, dt,
-                                      dim_x, dim_z)
+        filter_f = filters.filter_ekf(model_obj, proc_func, meas_func,
+                                       dataset, config_it, dt,
+                                       dim_x, dim_z)
 
     return filter_f
 
@@ -241,9 +244,10 @@ def run_filter(dataset, config_it):
     sigmas = list()
     state = np.ravel(list(st.values()))
 
-    #all_dat = all_dat[0:5]
-    it = 0
-    dat = all_dat[it]
+    # all_dat = all_dat[0:10]
+    # it = 0
+    # dat = all_dat[it]
+    # all_dat = all_dat[0:-1]
 
     for it, dat in enumerate(all_dat):
 
@@ -271,28 +275,14 @@ def run_filter(dataset, config_it):
         if dat in obs.dat.tolist():
             measurement = float(obs.loc[it, config_it['meas_var']].values)
             # Add perturbation caused by repetition - case of controlled errors
-            if ((config_it["config"] < 100) &
-                (config_it['state_var'] == config_it['meas_var'][0])):
-                measurement = measurement * config_it["noise"][it]
+            #if ((config_it["config"] < 100) &
+            #(config_it['state_var'] == config_it['meas_var'][0])):
+            #    measurement = measurement * config_it["noise"][it]
             if np.isnan(np.sum(measurement)):
                 measurement = None
         else:
             # measurement = np.nan
             measurement = None
-
-        # Ascribe model uncertainty
-        if np.isnan(config_it["Q"]):
-            if config_it['state_var'] == config_it['meas_var'][0]:
-                # Model error equals to the non-calibrated error in the
-                # full watered and fertilized experiment
-                sd = [s + '_sd_md' for s in [config_it['state_var']]]
-                Q = obs.loc[it, sd].item()**2
-            else:
-                # Model error depends on experiment
-                err_ = err.loc[dat <= err.dat, "abs_error"].iloc[0]
-                Q = err_**2
-
-            filter_f.Q = Q
 
         # Ascribe observation uncertainty
         if (np.isnan(config_it["R"])) and (measurement is not None):
@@ -307,15 +297,40 @@ def run_filter(dataset, config_it):
                          info=info, params=params, rates=rates, states=st,
                          weather_d=weather_d)
 
-        sigmas = save_outputs(x=sigmas, obj=filter_f,
-                              type_out="sigmas",
-                              dat=dat,
-                              config_it=config_it)
+        # Ascribe model uncertainty
+        if np.isnan(config_it["Q"]):
+            if config_it['state_var'] == config_it['meas_var'][0]:
+                # Model error equals to the non-calibrated error in the
+                # full watered and fertilized experiment
+                sd = [s + '_sd_md' for s in [config_it['state_var']]]
+                Q = (obs.loc[it, sd].item() * filter_f.x.item())**2
+            else:
+                # Model error depends on experiment
+                err_ = err.loc[dat <= err.dat, "r_abs_error"].iloc[0]
+                Q = (err_ * filter_f.x.item())**2
+        else:
+            if int(config_it["id"]) >= 500:
+                Q = (config_it["Q"] * filter_f.x.item())**2
+            else:
+                Q = (config_it["Q"])**2
+
+        if Q == 0:
+            Q = 0.0001
+
+        filter_f.Q = Q
+        # print(filter_f)
+
+        # sigmas = save_outputs(x=sigmas, obj=filter_f,
+        #                       type_out="sigmas",
+        #                       dat=dat,
+        #                       config_it=config_it)
 
         # Update step
         # For Kalman Filters, this only modifies the state of interest
         filter_f.update(z=measurement, hx=meas_func,
                         dataset=obs.loc[obs.dat == dat, :])
+        filter_f.x = np.max([filter_f.x, [0]], keepdims=True)
+        filter_f.x_post = filter_f.x
 
         # Save results
         assim = save_outputs(x=assim, obj=filter_f,
@@ -328,17 +343,16 @@ def run_filter(dataset, config_it):
             fz(filter_f, config=config_it)
             model_upd = []
             for st in config_it["states_names"]:
-                    model_upd.append(np.array(getattr(filter_f.model, st),
-                                              ndmin=2))
+                model_upd.append(np.array(getattr(filter_f.model, st), 
+                                          ndmin=2))
             state = np.vstack((state, np.ravel(model_upd)))
+            # print(state)
         else:
             model_upd = filter_f.x
             state = np.vstack((state, np.ravel(model_upd)))
 
     all_states_upd = np.hstack((state,
                                 np.array(range(state.shape[0])).reshape(-1, 1)))
-        # assim
-        # filter_f
 
     return assim, all_states_upd, sigmas
 
@@ -377,20 +391,26 @@ def main_real(rep):
 
         config_it["weather_pert"] = "rad"
 
+        # Retrieve from destructive analyses errors and model performances.
+        # As model performs differently in each growth cycle, experiment
+        # is also subset. Includes sensors because this changes the outcome.
         errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
                 (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
                 (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
-                (errors_notCalib.loc[:, "model"] == "tomgro")
+                (errors_notCalib.loc[:, "model"] == "tomgro") &
+                (errors_notCalib.loc[:, "sensor"] == sensor_type)
                 )
         config_it["model_err"] = errors_notCalib.loc[mask,
                                                      ["dat", "variable",
-                                                      "abs_error"]].reset_index()
+                                                      "r_abs_error"]].reset_index()
 
         load_dataset, states_names, _, _ = choose_model(config_it)
         config_it["states_names"] = states_names
         dataset = load_dataset(city, sensor_type, calib, str(exp), "monit")
+        
+        config_it["seed"] = 42+rep
 
         try:
             assim, all_states_upd, sigmas = run_filter(dataset, config_it)
@@ -434,8 +454,10 @@ def main_artif(rep):
 
     config = pd.read_csv("./tables/runs_Filter2.csv")
     config_run = config.loc[config["run"] == 1].reset_index()
+    #config_run = config_run[0:4]
 
-    it = 1
+    it = 0
+    # it = 5
     rep = 1
     fail_list = list()
 
@@ -462,26 +484,31 @@ def main_artif(rep):
 
         config_it["weather_pert"] = "rad"
 
+        # Retrieve from destructive analyses errors and model performances.
+        # As truth is simulated using the calibration from the last cycle,
+        # exp is fixed.
         errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
-                (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
+                (errors_notCalib.loc[:, "exp"] == "n07") &
                 (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
-                (errors_notCalib.loc[:, "model"] == "tomgro")
+                (errors_notCalib.loc[:, "model"] == "tomgro") &
+                (errors_notCalib.loc[:, "sensor"] == sensor_type)
                 )
         config_it["model_err"] = errors_notCalib.loc[mask,
                                                      ["dat", "variable",
-                                                      "abs_error"]].reset_index()
+                                                      "r_abs_error"]].reset_index()
 
         load_dataset, states_names, _, _ = choose_model(config_it)
         config_it["states_names"] = states_names
         dataset = load_dataset(city, sensor_type, calib, str(exp), "artif_obs")
 
         np.random.seed(42+rep)
+        config_it["seed"] = 42+rep
         config_it["noise"] = np.random.normal(1, 0.09, size=200)
 
         try:
-            np.random.seed(42+rep)
+            np.random.seed(config_it["seed"])
             assim, all_states_upd, sigmas = run_filter(dataset, config_it)
 
             aux.save_output(conf=config_it, type_output="updState", x=assim,
@@ -493,10 +520,10 @@ def main_artif(rep):
                             city=city, calib=calib, treat=exp,
                             rep=rep)
 
-            aux.save_output(conf=config_it, type_output="sigmas",
-                            x=sigmas,
-                            city=city, calib=calib, treat=exp,
-                            rep=rep)
+            # aux.save_output(conf=config_it, type_output="sigmas",
+            #                 x=sigmas,
+            #                 city=city, calib=calib, treat=exp,
+            #                 rep=rep)
 
             outputs = pd.DataFrame(all_states_upd,
                                    columns=states_names + ['dat'])
@@ -546,20 +573,26 @@ def parallel_real(config_run, config_rep, it_out):
 
         config_it["weather_pert"] = "rad"
 
+        # Retrieve from destructive analyses errors and model performances.
+        # As model performs differently in each growth cycle, experiment
+        # is also subset
         errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
                 (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
                 (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
-                (errors_notCalib.loc[:, "model"] == "tomgro")
+                (errors_notCalib.loc[:, "model"] == "tomgro") &
+                (errors_notCalib.loc[:, "sensor"] == sensor_type)
                 )
         config_it["model_err"] = errors_notCalib.loc[mask,
                                                      ["dat", "variable",
-                                                      "abs_error"]].reset_index()
+                                                      "r_abs_error"]].reset_index()
 
         load_dataset, states_names, _, _ = choose_model(config_it)
         config_it["states_names"] = states_names
         dataset = load_dataset(city, sensor_type, calib, str(exp), "monit")
+        
+        config_it["seed"] = 42+rep
 
         try:
             assim, all_states_upd, sigmas = run_filter(dataset, config_it)
@@ -597,7 +630,6 @@ def parallel_real(config_run, config_rep, it_out):
             print(it, "fail")
 
 
-
 def parallel_artif(config_run, config_rep, it_out):
 
         it = config_rep['it'][it_out]
@@ -623,26 +655,31 @@ def parallel_artif(config_run, config_rep, it_out):
 
         config_it["weather_pert"] = "rad"
 
+        # Retrieve from destructive analyses errors and model performances.
+        # As truth is simulated using the calibration from the last cycle,
+        # exp is fixed.
         errors_notCalib = pd.read_csv("./tables/results_simul/all_errors.csv")
         mask = ((errors_notCalib.loc[:, "city"] == city) &
                 (errors_notCalib.loc[:, "calib"] == calib) &
-                (errors_notCalib.loc[:, "exp"] == ("n0"+str(exp))) &
+                (errors_notCalib.loc[:, "exp"] == "n08") &
                 (errors_notCalib.loc[:, "variable"] == config_it["state_var"]) &
-                (errors_notCalib.loc[:, "model"] == "tomgro")
+                (errors_notCalib.loc[:, "model"] == "tomgro") &
+                (errors_notCalib.loc[:, "sensor"] == sensor_type)
                 )
         config_it["model_err"] = errors_notCalib.loc[mask,
                                                      ["dat", "variable",
-                                                      "abs_error"]].reset_index()
+                                                      "r_abs_error"]].reset_index()
 
         load_dataset, states_names, _, _ = choose_model(config_it)
         config_it["states_names"] = states_names
         dataset = load_dataset(city, sensor_type, calib, str(exp), "artif_obs")
 
         np.random.seed(42+rep)
+        config_it["seed"] = 42+rep
         config_it["noise"] = np.random.normal(1, 0.09, size=200)
 
         try:
-            np.random.seed(42+rep)
+            np.random.seed(config_it["seed"])
             assim, all_states_upd, sigmas = run_filter(dataset, config_it)
 
             aux.save_output(conf=config_it, type_output="updState", x=assim,
@@ -682,40 +719,42 @@ def parallel_artif(config_run, config_rep, it_out):
 #main_artif(1)
 #main_real(1)
 
-# PAPER 3
-config = pd.read_csv("./tables/runs_Filter2.csv")
-config_run = config.loc[config["run"] == 1].reset_index()
-
-# n_configs = range(config_run.shape[0])
-# rep_min = 1
-# rep_max = 1
-# rep = range(rep_min, rep_max + 1)
-# njobs = 3
-
-# config_rep = pd.DataFrame.from_records(itertools.product(n_configs, rep),
-#                                         columns = ['it', 'rep'])
-
-# Parallel(n_jobs=njobs,
-#           verbose=5)(delayed(
-#               lambda x: parallel_artif(config_run, config_rep, x))(cont)
-#               for cont in range(config_rep.shape[0]))
-
-# # PAPER 2
-# config = pd.read_csv("./tables/runs_Filter.csv")
+# # PAPER 3
+# config = pd.read_csv("./tables/runs_Filter2.csv")
 # config_run = config.loc[config["run"] == 1].reset_index()
 
 # n_configs = range(config_run.shape[0])
 # rep_min = 1
 # rep_max = 20
 # rep = range(rep_min, rep_max + 1)
-# njobs = 7
+# njobs = 4
 
 # config_rep = pd.DataFrame.from_records(itertools.product(n_configs, rep),
 #                                         columns = ['it', 'rep'])
 
+# it_out = 2
+
 # Parallel(n_jobs=njobs,
 #           verbose=5)(delayed(
-#               lambda x: parallel_real(config_run, config_rep, x))(cont)
+#               lambda x: parallel_artif(config_run, config_rep, x))(cont)
 #               for cont in range(config_rep.shape[0]))
 
-#winsound.Beep(440, 1000)
+# PAPER 2
+config = pd.read_csv("./tables/runs_Filter.csv")
+config_run = config.loc[config["run"] == 1].reset_index()
+
+n_configs = range(config_run.shape[0])
+rep_min = 1
+rep_max = 20
+rep = range(rep_min, rep_max + 1)
+njobs = 4
+
+config_rep = pd.DataFrame.from_records(itertools.product(n_configs, rep),
+                                        columns = ['it', 'rep'])
+
+Parallel(n_jobs=njobs,
+          verbose=5)(delayed(
+              lambda x: parallel_real(config_run, config_rep, x))(cont)
+              for cont in range(config_rep.shape[0]))
+
+winsound.Beep(440, 1000)

@@ -122,13 +122,6 @@ def main():
     experiments = [str(s) for s in experiments_int]
     config_obs = "summ"
 
-    # weather_loc = ['cps']
-    # sensor_type = ['A']
-    # experiments_int = [4, 6]
-    # calibrations = ['cps4']
-    # experiments = [str(s) for s in experiments_int]
-    # config_obs = "summ"
-
     city = weather_loc[0]
     calib = calibrations[0]
     treat = experiments[0]

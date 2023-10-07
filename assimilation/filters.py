@@ -12,7 +12,7 @@ import scipy.stats
 
 import auxiliary_functions.f_aux as aux
 
-from filterpy.kalman import ExtendedKalmanFilter as filterpy_EKF
+#from filterpy.kalman import ExtendedKalmanFilter as filterpy_EKF
 from filterpy.kalman import UnscentedKalmanFilter as filterpy_UKF
 from filterpy.kalman import EnsembleKalmanFilter as filterpy_EnKF
 from filterpy.kalman import MerweScaledSigmaPoints
@@ -63,12 +63,13 @@ def filter_ukf(model_obj, proc_func, meas_func,
                dataset, config_it,
                dt,
                dim_x, dim_z):
-    sigmas = MerweScaledSigmaPoints(dim_x, alpha=.3, beta=2., kappa=1.)
+    sigmas = MerweScaledSigmaPoints(dim_x, alpha=0.001, beta=2., kappa=1)
 
     ukf = UKF(dim_x, dim_z, fx=proc_func, hx=meas_func,
               dt=dt, points=sigmas)
     ukf.x = dataset['states'].copy()[config_it['state_var']]
-    ukf.Q = config_it['Q']**2
+    # ukf.Q = config_it['Q'] # squares included afterwards, depending on case
+    ukf.Q = 0.01 # placeholder values required for initalization and reasonably low
     ukf.P = config_it['P']**2
     ukf.sigmas = ukf.sigmas_f
 
@@ -177,13 +178,14 @@ class EnKF(filterpy_EnKF):
         self.S = P_zz
         self.SI = self.inv(self.S)
         self.K = np.dot(P_xz, self.SI)
-        # XXX self.y = np.subtract(z, z_mean)   # residual
-        self.y = 1
+        self.y = np.subtract(z, z_mean)   # residual
+        #self.y = 1
 
     	# Perturbs observations with normal distribution of mean R.
         e_r = np.random.multivariate_normal(self._mean_z, R, N)
         for i in range(N):
-            self.sigmas[i] = (self.sigmas[i] + np.dot(self.K, z + e_r[i] - sigmas_h[i]))
+            self.sigmas[i] = (self.sigmas[i] + 
+                              np.dot(self.K, z + e_r[i] - sigmas_h[i]))
 
         self.x = np.mean(self.sigmas, axis=0)
         self.P = self.P - np.dot(np.dot(self.K, self.S), self.K.T)
@@ -192,6 +194,25 @@ class EnKF(filterpy_EnKF):
         self.z = copy.deepcopy(z)
         self.x_post = self.x.copy()
         self.P_post = self.P.copy()
+
+
+    def __repr__(self):
+        return '\n'.join([
+            'EnKF object',
+            pretty_str('x', self.x),
+            pretty_str('P', self.P),
+            pretty_str('x_prior', self.x_prior),
+            pretty_str('P_prior', self.P_prior),
+            pretty_str('x_post', self.x_post),
+            pretty_str('P_post', self.P_post),
+            pretty_str('R', self.R),
+            pretty_str('Q', self.Q),
+            pretty_str('K', self.K),
+            pretty_str('S', self.S),
+            pretty_str('y', self.y),
+            # pretty_str('weights', self.weights),
+            # pretty_str('sigmas', self.sigmas)
+            ])
 
 
 def filter_enkf(model_obj, proc_func, meas_func,
@@ -207,7 +228,8 @@ def filter_enkf(model_obj, proc_func, meas_func,
                 N=int(config_it['N']),
                 fx=proc_func, hx=meas_func)
 
-    enkf.Q = config_it['Q']**2
+    #enkf.Q = config_it['Q'] # squares included afterwards, depending on case
+    enkf.Q = 0.01 # initial values required and reasonably low
     enkf.R = config_it['R']**2
     enkf.y = 1
     enkf.config = config_it
@@ -235,6 +257,9 @@ class PF(object):
     Differently from the implementation of Kalman Filters in this work,
     PF treats as particles all the states of the model. Only one state
     is updated, but they are all carried along together.
+    
+    OBS: Although it is possible to obtain results with this code, it has
+    not been widely tested.
 
     """
     def __init__(self, dim_x, dim_z, dt, hx, fx):
@@ -436,57 +461,57 @@ def filter_pf(model_obj, proc_func, meas_func,
     return pf
 
 
-# %% EKF functions
-class EKF(filterpy_EKF):
-    """
-    Overwriting predict and update as implemented, as they do not account for
-    other arguments in the process/measurement functions.
-    """
+# # %% EKF functions
+# class EKF(filterpy_EKF):
+#     """
+#     Overwriting predict and update as implemented, as they do not account for
+#     other arguments in the process/measurement functions.
+#     """
 
-    def predict(self, dt=None, fx=None, **fx_args):
+#     def predict(self, dt=None, fx=None, **fx_args):
 
-        # save prior
-        self.x_prior = np.copy(self.x)
-        self.P_prior = np.copy(self.P)
+#         # save prior
+#         self.x_prior = np.copy(self.x)
+#         self.P_prior = np.copy(self.P)
 
-        # if not isinstance(fx_args, tuple):
-        #     args = (fx_args,)
+#         # if not isinstance(fx_args, tuple):
+#         #     args = (fx_args,)
 
-        # H = HJacobian(x, *args)
+#         # H = HJacobian(x, *args)
 
-        # # predict step
-        # x = dot(F, x) + dot(B, u)
-        # P = dot(F, P).dot(F.T) + Q
+#         # # predict step
+#         # x = dot(F, x) + dot(B, u)
+#         # P = dot(F, P).dot(F.T) + Q
 
-        # save prior
-        self.x_prior = np.copy(self.x)
-        self.P_prior = np.copy(self.P)
-
-
-    def update(self, z, hx=None, **hx_args):
-
-        if not isinstance(hx_args, tuple):
-            hx_args = (hx_args,)
-
-        if np.isscalar(z) and self.dim_z == 1:
-            z = np.asarray([z], float)
-
-        self.x_post = self.x.copy()
-        self.P_post = self.P.copy()
+#         # save prior
+#         self.x_prior = np.copy(self.x)
+#         self.P_prior = np.copy(self.P)
 
 
-def filter_ekf(proc_func, meas_func,
-                dataset, config_it,
-                dt,
-                dim_x, dim_z):
+#     def update(self, z, hx=None, **hx_args):
 
-    ekf = EKF(x=dataset['states'].copy()[config_it['state_var']],
-                P=np.eye(dim_x)*config_it['P'],
-                dim_z=dim_z, dt=dt,
-                N=int(config_it['N']),
-                fx=proc_func, hx=meas_func)
-    ekf.Q = config_it['Q']
-    ekf.R = config_it['R']  # Default value for measurement error
+#         if not isinstance(hx_args, tuple):
+#             hx_args = (hx_args,)
 
-    return ekf
+#         if np.isscalar(z) and self.dim_z == 1:
+#             z = np.asarray([z], float)
+
+#         self.x_post = self.x.copy()
+#         self.P_post = self.P.copy()
+
+
+# def filter_ekf(proc_func, meas_func,
+#                 dataset, config_it,
+#                 dt,
+#                 dim_x, dim_z):
+
+#     ekf = EKF(x=dataset['states'].copy()[config_it['state_var']],
+#                 P=np.eye(dim_x)*config_it['P'],
+#                 dim_z=dim_z, dt=dt,
+#                 N=int(config_it['N']),
+#                 fx=proc_func, hx=meas_func)
+#     ekf.Q = config_it['Q']
+#     ekf.R = config_it['R']  # Default value for measurement error
+
+#     return ekf
 

@@ -158,16 +158,24 @@ def loop_exps(params_list, params_names, var_names, model,
     load_dataset, _, states_names, states_comp = chooseModel(model)
 
     out = pd.DataFrame(None)
-    exp_it = experiments[0]
+    comb = aux.expand_grid({'city': weather_loc,
+                            'sensor': sensor_type,
+                            'calib': calibration,
+                            'treat': experiments})
 
-    for exp_it in experiments:
-        # Assuming no location and calibration will be mixed, but experiments
-        # may
-        dataset = load_dataset(city=weather_loc[0],
-                            sensor=sensor_type,
-                            calib=calibration,
-                            treat=exp_it,
-                            config_obs=config_obs)
+    it_exp = 0
+
+    for it_exp in range(comb.shape[0]):
+        city = comb.city[it_exp]
+        calib = comb.calib[it_exp]
+        treat = comb.treat[it_exp]
+        sensor = comb.sensor[it_exp]
+
+        dataset = load_dataset(city=city,
+                               sensor=sensor,
+                               calib=calib,
+                               treat=treat,
+                               config_obs=config_obs)
         for it, p_it in enumerate(params_names):
             dataset['params'][p_it] = params_list[it]
 
@@ -177,7 +185,7 @@ def loop_exps(params_list, params_names, var_names, model,
                     .reset_index()
                     .melt(id_vars=['index'])
                     .rename(columns={"index": "dat"}))
-        outputs_['exp'] = exp_it
+        outputs_['exp'] = treat
 
         observations = aux.get_obs(dataset, var_names, states_comp)
 
@@ -329,6 +337,7 @@ params_names = ['alpha_F', 'beta', 'delta', 'DFmax',
 # 'dual_annealing' 'max_fun: 1000'
 
 method = 'Nelder-Mead'
+method = 'Dual Annealing'
 
 params_file = "./tables/parameters_inputs/params_limits_case1.csv"
 limits = aux.retrieve_limits(filename=params_file, model_name=model)
@@ -336,8 +345,8 @@ limits = aux.retrieve_limits(filename=params_file, model_name=model)
 it = 0
 
 def save_calibs(method, weather_loc, sensor_type, calibration, experiments,
-                    config_obs,
-                    model, var_names, params_names, it):
+                config_obs,
+                model, var_names, params_names, it):
 
     try:
         np.random.seed(42+int(it*1000))
@@ -379,20 +388,20 @@ def save_calibs(method, weather_loc, sensor_type, calibration, experiments,
     with open(path_json, 'w') as json_file:
         json.dump(result, json_file)
 
-list_it = np.arange(1, 2, 1)
+list_it = np.arange(1, 4, 1)
 njobs = 6
 
 save_calibs(method, weather_loc, sensor_type,
             calibration, experiments, config_obs,
             model, var_names, params_names, 1)
 
-# Parallel(n_jobs=njobs,
-#           verbose=3)(delayed(
-#               lambda x: save_calibs(method, weather_loc, sensor_type,
-#                                     calibration, experiments,
-#                                     config_obs,
-#                                     model, var_names, params_names,
-#                                     list_it[x]))(cont)
-#               for cont in range(len(list_it)))
+Parallel(n_jobs=njobs,
+          verbose=3)(delayed(
+              lambda x: save_calibs(method, weather_loc, sensor_type,
+                                    calibration, experiments,
+                                    config_obs,
+                                    model, var_names, params_names,
+                                    list_it[x]))(cont)
+              for cont in range(len(list_it)))
 
-#winsound.Beep(440, 1000)
+winsound.Beep(440, 1000)
