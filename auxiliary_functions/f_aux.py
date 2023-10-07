@@ -119,7 +119,7 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
         prefix = conf['filt'] + '-' + conf['model'] + '-'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
-        path_save = './tables/results_DA/errors/'
+        path_save = './tables/results_DA/errors/' + conf['ref'] + '/'
         output_file_name = path_save + prefix + suffix
 
     elif type_output == "updState":
@@ -136,12 +136,12 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
         prefix = conf['filt'] + '-' + conf['model'] + '-updState-'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
-        path_save = './tables/results_DA/'
+        path_save = './tables/results_DA/' + conf['ref'] + '/'
         output_file_name = path_save + prefix + suffix
 
     elif type_output == "allState":
         prefix = conf['filt'] + '-' + conf['model'] + '-allStates-'
-        path_save = './tables/results_DA/'
+        path_save = './tables/results_DA/' + conf['ref'] + '/'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
 
@@ -151,7 +151,7 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
 
     elif type_output == "sigmas":
         prefix = conf['filt'] + '-' + conf['model'] + '-sigmas-'
-        path_save = './tables/results_DA/ensembles/'
+        path_save = './tables/results_DA/ensembles/' + conf['ref'] + '/'
         suffix = str(int(conf['id'])).zfill(4) + "-" + exp_n + '_' + \
             str(int(rep)).zfill(4) + '.csv'
 
@@ -303,33 +303,51 @@ def modify_obs(obs, config_it):
 
     var = config_it['state_var']
     meas_var = "".join(config_it['meas_var'])
+    use_delta = (config_it['case'] == "case2") | (config_it['case'] == "case3")
 
     # Select appropriate observations
     if meas_var == var:
         obs_ = obs.loc[(obs.node == "calib"), ]
 
-        if int(config_it["id"])  >= 500:
+        # Artificial observations were configured to include the calibration
+        # that generated them and they are retrieved based on the id of the
+        # configurations.
+        if int(config_it["id"]) >= 500:
+
+            # Case controlled error
             if int(config_it["config"]) < 100:
-                # Case controlled error
+
+                fixed_cond = (((obs_["calib"] == "cpsIV")) &
+                              (obs_["exp"] == exp) &
+                              (obs_["rep"] == config_it["rep"]))
+
                 if config_it["config"] <= 6:
-                    obs_ = obs_.loc[((obs["calib"] == "cps4") &
-                                     (obs["config"] == config_it["config"])  &
-                                     (obs["exp"] == exp)), ]
+                    config_ = config_it["config"]
+
                 elif (config_it["config"] >= 8) & (config_it["config"] <= 10):
-                    obs_ = obs_.loc[((obs["calib"] == "cps4") &
-                                     (obs["config"] == (config_it["config"] - 4))  &
-                                     (obs["exp"] == exp)), ]
+                    config_ = config_it["config"] - 4
+
                 elif (config_it["config"] >= 11) & (config_it["config"] <= 13):
-                    obs_ = obs_.loc[((obs["calib"] == "cps4") &
-                                     (obs["config"] == (config_it["config"] - 7))  &
-                                     (obs["exp"] == exp)), ]
+                    # EnKF case 3, sensor B
+                    config_ = config_it["config"] - 7
+
                 else:
-                    obs_ = obs_.loc[((obs["calib"] == "cps4") &
-                                     (obs["config"] == 5)  &
-                                     (obs["exp"] == exp)), ]
+                    # Both variable errors
+                    config_ = 5
+
+                obs_ = obs_.loc[(fixed_cond & (obs_["config"] == config_)), ]
+
+                if use_delta:
+
+                    # Replace meas_var_sd_md with delta meas_var_sd
+                    meas_var_sd = meas_var + '_sd'
+                    meas_var_sd_delta = meas_var + '_sd_d'
+
+                    obs_.loc[:, meas_var_sd] = obs_.loc[:, meas_var_sd_delta]
+
+            # Case non-controled error (Vanthoor)
             else:
-                # Case non-controled error
-                obs_ = obs_.loc[((obs["calib"] == "cps4") &
+                obs_ = obs_.loc[((obs["calib"] == "cpsIV") &
                                  (obs["config"] > 100) &
                                  (obs["exp"] == exp)), ]
         else:
@@ -341,12 +359,11 @@ def modify_obs(obs, config_it):
 
     # Remove last observation as it should not be assimilated
     last = obs_.shape[0] - 1
-    obs_.index = obs_.index.astype('int')
+    obs_.reset_index(inplace=True, drop=True)
     # obs = obs.drop(obs.index[last], axis=0)
     obs_.loc[last, config_it['meas_var']] = np.nan
 
     obs_mod = relevant_obs(obs_, config_it)
-    obs_mod.reset_index(inplace=True, drop=True)
 
     return obs_mod
 
@@ -393,7 +410,12 @@ def gen_perturb(config_it, x):
     # A pre-selected parameter is perturbed and this value is then
     # applied in the prediction of state particles
     elif case == "case2":
-        e = np.random.multivariate_normal(z, np.eye(1)*x*0.1, N)
+        # Elevar ao quadrado diminui o número no caso de números menores do que
+        # que 1
+        np.random.seed(config_it["seed"])
+        # e = (np.random.uniform(0.9*x, 1.1*x, N))**2
+        # Paper 2
+        e = np.random.multivariate_normal(z, np.eye(1)*(x*0.1)**2, N)
         x_mod = x + e
         x_mod[x_mod < 0] = 0.
 
@@ -402,7 +424,12 @@ def gen_perturb(config_it, x):
     # applied in the prediction of state particles
     elif case == "case3":
         for h in x:
-            e = np.random.multivariate_normal(z, np.eye(1)*h*0.3, N)
+            # Change from 10% to 30% depending on the analysis
+            # Paper 4
+            # e = np.random.multivariate_normal(z, np.eye(1)*(h*0.3)**2, N)
+            np.random.seed(config_it["seed"])
+            e = (np.random.uniform(0.9*h, 1.1*h, N))**2
+            # e = np.random.multivariate_normal(z, np.eye(1)*(h*0.1)**2, N)
             # Particles in lines, hours in columns
             x_mod = np.hstack((x_mod, (h + e)))
         x_mod = x_mod[:, 1:]
@@ -429,25 +456,28 @@ def load_data(model, weather, sensor, experiment, calib, config_obs):
     """
     data = {}
 
-    # Two cases:
+    # Three cases:
     # 1. Simple run of the model: weather is particular, but parameters,
     # inputs and initial states (isp) are from the experiment, that is the same
     # regardless of weather.
-    # 2. And SA case in which weather refer to the overall
+    # 2. SA case in which weather refer to the overall
     # city. So weather must refer to the input and isp, have to be adapted.
+    # 3. I only wish the weather inputs from the cycle and parameters come from
+    # a different one (cpsIV = cps4)
 
     # Parameters - To each simulation, a parameter defined previously
     # Parameters and inputs are not experiment dependent,
     # Weather, intial state and observations are
     # Input may be, especially in my case.
 
-    # Special cases: Campinas and SA Case 1
-    if (((sensor == 'A') | (sensor == 'B')) & (weather == "cps")):
+    # Special case 1: Campinas
+    if (((sensor == 'A') | (sensor == 'B')  | (sensor == 'C')) &
+        (weather == "cps")):
         city_mod = 'cps' + sensor
     else:
         city_mod = weather
 
-    # Calib Fixed = SA Case 1
+    # Special case 2: Calib Fixed = SA Case 1
     if calib == "fixed":
         city_mod = 'fixed'
         experiment = 'fixed'
@@ -464,6 +494,13 @@ def load_data(model, weather, sensor, experiment, calib, config_obs):
         # Match cycle
         cycle = np.ceil(int(experiment)/2)
         weather_suffix = city_mod + "_" + n + ".csv"
+
+    # Special case 3: inputs refer to Cycle 4 in Campinas
+    # but weather refer to the weather of the Cycle
+    if ((calib == "cpsIV") | (calib == "gnvIV")):
+        n = "n08"
+        exp_n = weather + "_" + n
+        n_obs = "n" + experiment
 
     # Parameters
     filename = model + "_p"
@@ -523,7 +560,7 @@ def load_data(model, weather, sensor, experiment, calib, config_obs):
     elif config_obs == "artif_obs":
         obs_temp_mod = obs_temp
     else:
-        mask = (obs_temp.loc[:, "exp"] == n)
+        mask = (obs_temp.loc[:, "exp"] == n_obs)
         obs_temp_mod = obs_temp.loc[mask, ]
 
     data['obs'] = obs_temp_mod
@@ -577,7 +614,7 @@ def convert_rad(weather, target):
 # From Jones et al 1999, spreadsheet:
     if weather.radiation_unit.iloc[0] != "mmolPAR" and target == "mmolPAR":
         if weather.radiation_unit.iloc[0] == "MJg":
-            # "MJ" infers MJ m-2 day-1
+            # "MJ" infers MJ m-2 day-1 global rad
             # 23.923/12.07*277.78 = 556.6
             weather.loc[:, rad_var] = (weather.loc[:, rad_var] * 555.6)
         else:
@@ -1132,123 +1169,6 @@ def calc_height(img_it, contour_height, conv, list_save):
     list_save.append([img_it, height])
 
     return list_save
-
-# # %% Segmenter Felipe
-
-# def load_id(path, image_id):
-#     base_path = os.path.join(path, image_id)
-#     img = cv2.imread(base_path + '.png').reshape(-1, 3)
-#     lab = cv2.imread(base_path + '_lb.png').reshape(-1, 3)
-
-#     return img, lab
-
-
-# def parse_label(label_rgb, encoding_rgb):
-#     labels = -np.ones(label_rgb.shape[0])
-
-#     label_encoding = {}
-
-#     for i, k in enumerate(encoding_rgb):
-#         label_encoding[i] = k
-#         labels[(label_rgb == np.array(encoding_rgb[k])).all(1)] = i
-
-#     return labels.ravel(), label_encoding
-
-
-# def predict_mask(img, model):
-#     X = img.reshape(-1, 3)
-
-#     pred = model.predict_proba(X)[:, 1]
-#     pred = pred.reshape(img.shape[0], img.shape[1])
-#     return pred
-
-
-# def build_training_data(path, encoding_rgb, compress=True):
-#     ''' For a folder, look for all files that have a corresponding
-#     file with _lb suffix, and load the data corresponding a those
-#     files and labels.
-
-#     After concatenating the dataset, if compress is True, it will
-#     group duplicated rows and create a weight vector corresponding
-#     to the occurences of that row.
-#     '''
-#     contents = os.listdir(path)
-#     imgs = [x.split('.')[0] for x in contents if not x.endswith('_lb.png')]
-
-#     imgs = [x for x in imgs if (x + '_lb.png') in contents]
-
-#     label_encoding = {}
-
-#     X = []
-#     y = []
-
-#     for img in imgs:
-#         img, lab = load_id(path, img)
-#         lab, img_label_encoding = parse_label(lab, encoding_rgb)
-#         X.append(img)
-#         y.append(lab)
-#         label_encoding.update(img_label_encoding)
-
-#     X = np.vstack(X)
-#     y = np.hstack(y)
-#     labeled = y != -1
-
-#     X = X[labeled]
-#     y = y[labeled]
-
-#     if compress:
-#         X, ii, w = np.unique(X, return_index=True, return_counts=True, axis=0)
-#         y = y[ii]
-#     else:
-#         w = np.ones_like(y)
-
-#     return X, y, w, label_encoding
-
-
-# def create_pipeline():
-#     pipe = Pipeline(
-#             [
-#                 ('scaler', StandardScaler()),
-#                 ('classif', LogisticRegression())
-#                 ]
-#             )
-#     return pipe
-
-
-# def learner():
-#     with open('./data/constants.yml', 'r') as f:
-#         constants = yaml.full_load(f)
-
-#     pipe = create_pipeline()
-
-#     X, y, weights, le = build_training_data('./data/train', constants['encoding'])
-
-#     pipe.fit(X, y, classif__sample_weight=np.log10(weights + 1))
-
-#     with open('model/pipe.pkl', 'wb') as f:
-#         joblib.dump(pipe, f)
-
-
-
-# def pred_fun(f):
-
-#     with open('./model/pipe.pkl', 'rb') as f:
-#         pipe = joblib.load(f)
-
-#     predict_path = './data/val'
-#     predict_imgs = os.listdir(predict_path)
-
-#     for img_path in predict_imgs:
-#         img = cv2.imread(os.path.join(predict_path, img_path))
-#         mask = predict_mask(img, pipe)
-
-#         # fig, ax = plt.subplots(1, 2)
-#         # ax[0].imshow(img)
-#         # ax[1].imshow(mask, cmap='gray')
-#         # plt.show()
-
-#         cv2.imwrite(os.path.join('./data/pmasks', img_path), mask)
-
 
 
 # %% Old

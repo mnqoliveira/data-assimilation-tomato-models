@@ -99,7 +99,7 @@ write.csv(models, "./tables/results_simul/results_simulations_all.csv",
 
 # Errors ------------------------------------------------------------------
 
-outputs <- do.call(bind_rows, simul_files)%>%
+outputs <- do.call(bind_rows, error_files) %>%
   rename(model = X1,
          city = X2,
          exp = X3,
@@ -136,8 +136,10 @@ for (it in 1:nrow(outputs)) {
 
 all_err <- Reduce(bind_rows, all_results) %>%
   arrange(model, exp, calib, city, variable, das) %>%
-  mutate(error = obs - pred,
+  mutate(error = pred - obs,
+         obs_ = pmax(obs, 0.01),
          abs_error = abs(error),
+         r_abs_error = abs_error/abs(obs_),
          sc_rel_error = error/max_obs)
 
 write.csv(all_err, "./tables/results_simul/all_errors.csv", 

@@ -56,8 +56,10 @@ errors_models <- errors_simul %>%
   ungroup() %>%
   group_by(model, exp, city, calib, variable, sensor) %>%
   summarise(rmse = sqrt(mean(se)),
+            rrmse = rmse/mean(obs),
             me = mean(error),
             mae = mean(abs_error),
+            mape = mean(r_abs_error),
             sd_mae = sd(abs_error)
          ) %>%
   ungroup() %>%
@@ -74,20 +76,19 @@ errors_models <- errors_simul %>%
 # All
 tomgro_gnvMod <- errors_models %>%
   filter(model == "tomgro", calib == "gnvMod", city == "cps") %>%
-  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  gather(rmse, me, mae, sd_mae, mape, rrmse, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
 write.csv(tomgro_gnvMod, file = "./tables/metrics/simul/metrics_gnvMod.csv", 
           row.names = FALSE)
 
-
 tomgro_calib <- errors_models %>%
-  filter(model == "tomgro", city == "cps",
+  filter(model == "tomgro" | model == "vanthoor", city == "cps",
          ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
             (calib == "cps3" & (exp == "n05" | exp == "n06")) |
-            (calib == "cpsopt" & (exp == "n07" | exp == "n08")))) %>%
+            (calib == "cps4" & (exp == "n07" | exp == "n08")))) %>%
   select(-calib) %>%
-  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  gather(rmse, me, mae, sd_mae, mape, rrmse, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
 write.csv(tomgro_calib, file = "./tables/metrics/simul/metrics_calib.csv", 
@@ -108,7 +109,7 @@ last_calib <- errors_simul %>%
   filter(model == "tomgro", city == "cps",
          ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
             (calib == "cps3" & (exp == "n05" | exp == "n06")) |
-            (calib == "cpsopt" & (exp == "n07" | exp == "n08")))) %>%
+            (calib == "cps4" & (exp == "n07" | exp == "n08")))) %>%
   group_by(exp) %>%
   filter(das == max(das)) %>%
   ungroup() %>%
@@ -126,28 +127,30 @@ errors_models_nozero <- errors_simul %>%
   ungroup() %>%
   group_by(model, exp, city, calib, variable, sensor) %>%
   summarise(rmse = sqrt(mean(se)),
+            rrmse = rmse/mean(obs),
             me = mean(error),
             mae = mean(abs_error),
+            mape = mean(r_abs_error),
+            rmae = mae/mean(obs),
             sd_mae = sd(abs_error)) %>%
   ungroup() %>%
   arrange(model, city, variable, calib, exp) 
 
 tomgro_gnvMod <- errors_models_nozero %>%
-  filter(model == "tomgro", calib == "gnvMod", city == "cps") %>%
-  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  filter(model == "tomgro", calib == "gnvIV", city == "cps") %>%
+  gather(rmse, me, mae, sd_mae, mape, rrmse, rmae, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
 write.csv(tomgro_gnvMod, file = "./tables/metrics/simul/metrics_gnvMod_nozero.csv", 
           row.names = FALSE)
 
-
 tomgro_calib <- errors_models_nozero %>%
-  filter(model == "tomgro", city == "cps",
+  filter(model == "tomgro" | model == "vanthoor", city == "cps",
          ((calib == "cps2" & (exp == "n03" | exp == "n04")) |
             (calib == "cps3" & (exp == "n05" | exp == "n06")) |
-            (calib == "cpsopt" & (exp == "n07" | exp == "n08")))) %>%
+            (calib == "cps4" & (exp == "n07" | exp == "n08")))) %>%
   select(-calib) %>%
-  gather(rmse, me, mae, sd_mae, key = "metric", value = "measurement") %>%
+  gather(rmse, me, mae, sd_mae, rmae, mape, rrmse, key = "metric", value = "measurement") %>%
   spread(exp, measurement)
 
 write.csv(tomgro_calib, file = "./tables/metrics/simul/metrics_calib_nozero.csv", 
@@ -157,21 +160,22 @@ write.csv(tomgro_calib, file = "./tables/metrics/simul/metrics_calib_nozero.csv"
 # Calculated with simulations as references of truth
 simulations <- models_all %>%
   filter(city == "cps", model == "tomgro",
-         variable != "dw", variable != "rm", variable != "pg",
-         calib == "gnvMod" | (calib == "cps4" & sensor == "A"),
-         exp == "n01" | exp == "n03" | exp == "n05" | exp == "n07")
+         variable == "wm",
+         # variable != "dw", variable != "rm", variable != "pg",
+         calib == "gnvIV" | (calib == "cpsIV" & sensor == "A"),
+         exp == "n03" | exp == "n05" | exp == "n07")
 
 error_notCalib <- simulations %>%
   spread(calib, measurement) %>%
   group_by(das, model, exp, variable) %>%
-  mutate(cps4 = mean(cps4, na.rm = TRUE)) %>%
+  mutate(cpsIV = mean(cpsIV, na.rm = TRUE)) %>%
   group_by(das, model, exp, variable, sensor) %>%
-  summarise(error = cps4 - gnvMod, 
+  summarise(error = gnvIV - cpsIV, 
             abs_error = abs(error),
-            rel_err = if_else(cps4 != 0, abs_error/cps4, 0)) %>%
+            rel_err = if_else(cpsIV != 0, abs_error/cpsIV, 0)) %>%
   ungroup() %>%
   mutate(filt = "none",
-         calib = "gnvMod",
+         calib = "gnvIV",
          id = 0,
          config = 0) %>%
   rename(dat = das)
@@ -210,291 +214,13 @@ for (it in configs){
   
 }
 
-error <- Reduce(rbind, errors_l)
+error <- Reduce(rbind, errors_l) %>%
+  mutate(selected = case_when(filt == "none" | filt == "ukf" ~ 1,
+                              filt == "enkf" & case == "case2" ~ 1,
+                              TRUE ~ 0))
 
 write.csv(error, file = "./tables/metrics/assim/artif/metrics_wm.csv", 
           row.names = FALSE)
-
-
-# KS Assim Artif Vanthoor -------------------------------------------------
-errors_filt_artif <- all_err %>%
-  mutate(config = as.numeric(config)) %>%
-  left_join(info_runs) %>%
-  mutate(rel_err = if_else(obs != 0, abs(error)/obs, 0),
-         rel_err = rel_err * 100)
-
-errors_mod <- errors_filt_artif %>%
-  select(-obs, -pred, -max_obs, -mean_obs, -error, -abs_error, 
-         -sc_rel_error, -city, -N, -P, -Q, -mae, 
-         -run, -sensor_type) %>%
-  filter(variable == "wm",
-         !((filt == "enkf") & (case !=  "case2"))) %>%  
-  filter(id >= 1000) %>%
-  filter(config > 100 & (config <= 104 | config >= 107 | 
-                           ((config == 106))),
-         rel_err > 0) %>%
-  mutate(filt_ = paste(filt, meas_var, sep = "_"),
-         filt_ = factor(filt_,
-                        levels = c("enkf_wf", "enkf_wm", "ukf_wf", 
-                                   "ukf_wm", "pf_wf", "pf_wm", "none"),
-                        labels = c("EnKF\nWf", "EnKF\nWm", "UKF\nWf", 
-                                   "UKF\nWm", "PF\nWf", "PF\nWm", "No assim."),
-                        ordered = TRUE),
-         config_ = factor(config,
-                          levels = c(101, 102, 103, 104, 
-                                     106: 112),
-                          labels = c("Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E.",
-                                     "Both var.",
-                                     "Both var.",
-                                     "Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E.",
-                                     "Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E."),
-                          ordered = TRUE)) %>%
-  filter(filt != "pf") %>%
-  unite("id_out", frequency, filt_, exp) %>%
-  mutate(id_ins = as.numeric(config_))
-
-combs <- t(combn(1:4, 2))
-head(errors_mod)
-
-combinations <- merge(unique(errors_mod$id_out), combs) %>%
-  rename(id_out = x,
-         g1 = V1,
-         g2 = V2) %>%
-  mutate(D = NA,
-         p = NA)
-
-for (it in 1:nrow(combinations)){
-  
-  data_filt <- filter(errors_mod, id_out == combinations$id_out[it])
-  
-  g1 <- filter(data_filt, id_ins == combinations$g1[it])
-  g2 <- filter(data_filt, id_ins == combinations$g2[it])
-    
-  temp <- ks.test(g1$rel_err, g2$rel_err, alternative='two.sided')
-  
-  combinations$D[it] <- temp$statistic
-  combinations$p[it] <- temp$p.value
-    
-}
-
-ks_all <- combinations %>%
-  separate(id_out, into = c("frequency", "filt_", "exp"), sep = "_") %>%
-  separate(filt_, into = c("filt", "meas_var"), sep = "\n")
-
-write.csv(ks_all, file = "./tables/metrics/assim/ks.csv", row.names = FALSE)
-
-
-# KS Assim Artif Vanthoor - v2 - 50 and 100 -------------------------------
-errors_filt_artif <- all_err %>%
-  mutate(config = as.numeric(config)) %>%
-  left_join(info_runs) %>%
-  mutate(rel_err = if_else(obs != 0, abs(error)/obs, 0),
-         rel_err = rel_err * 100)
-
-errors_mod <- errors_filt_artif %>%
-  select(-obs, -pred, -max_obs, -mean_obs, -error, -abs_error, 
-         -sc_rel_error, -city, -N, -P, -Q, -mae, 
-         -run, -sensor_type) %>%
-  filter(variable == "wm",
-         !((filt == "enkf") & (case !=  "case2"))) %>%  
-  filter(id >= 1000) %>%
-  filter(config > 100 & (config <= 104 | config >= 107 | 
-                           ((config == 106))),
-         rel_err > 0) %>%
-  mutate(filt_ = paste(filt, meas_var, sep = "_"),
-         filt_ = factor(filt_,
-                        levels = c("enkf_wf", "enkf_wm", "ukf_wf", 
-                                   "ukf_wm", "pf_wf", "pf_wm", "none"),
-                        labels = c("EnKF\nWf", "EnKF\nWm", "UKF\nWf", 
-                                   "UKF\nWm", "PF\nWf", "PF\nWm", "No assim."),
-                        ordered = TRUE),
-         config_ = factor(config,
-                          levels = c(101, 102, 103, 104, 
-                                     106: 112),
-                          labels = c("Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E.",
-                                     "Both var.",
-                                     "Both var.",
-                                     "Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E.",
-                                     "Both Fixed",
-                                     "Fixed O.E.",
-                                     "Fixed M.E."),
-                          ordered = TRUE),
-         config2 = as.numeric(config_)) %>%
-  filter(filt != "pf") %>%
-  unite("id_out", filt_, exp, config2, remove = FALSE) %>%
-  #filter(frequency != 0.1) %>%
-  mutate(id_ins = frequency)
-
-combs <- t(combn(unique(errors_mod$id_ins), 2))
-head(errors_mod)
-
-combinations <- merge(unique(errors_mod$id_out), combs) %>%
-  rename(id_out = x,
-         g1 = V1,
-         g2 = V2) %>%
-  mutate(D = NA,
-         p = NA)
-
-it <- 55
-for (it in 1:nrow(combinations)){
-  
-  data_filt <- errors_mod[errors_mod$id_out == combinations$id_out[it], ]
-  
-  g1 <- data_filt[data_filt$id_ins == combinations$g1[it], ]
-  g2 <- data_filt[data_filt$id_ins == combinations$g2[it], ]
-
-  temp <- ks.test(g1$rel_err, g2$rel_err, alternative='two.sided')
-  
-  combinations$D[it] <- temp$statistic
-  combinations$p[it] <- temp$p.value
-  
-}
-
-ks_all <- combinations %>%
-  separate(id_out, into = c("filt_", "exp", "config2"), sep = "_") %>%
-  separate(filt_, into = c("filt", "meas_var"), sep = "\n")
-
-write.csv(ks_all, file = "./tables/metrics/assim/ks2.csv", row.names = FALSE)
-
-# KS Assim Artif Controlled -----------------------------------------------
-errors_filt_artif <- all_err %>%
-  mutate(config = as.numeric(config)) %>%
-  left_join(info_runs) %>%
-  mutate(rel_err = if_else(obs != 0, abs(error)/obs, 0),
-         rel_err = rel_err * 100)
-
-errors_mod <- errors_filt_artif %>%
-  select(-obs, -pred, -max_obs, -mean_obs, -error, -abs_error, 
-         -sc_rel_error, -city, -N, -P, -Q, -it, -comment, -mae, 
-         -run, -sensor_type) %>%
-  filter(variable == "wm") %>%
-  filter(id >= 500, id <= 1000) %>%
-  filter(!(filt == "enkf" & case != "case2")) %>%
-  mutate(filt = factor(filt,
-                       levels = c("enkf", "ukf", "pf"),
-                       labels = c("Ensemble KF", "Unscented KF", 
-                                  "Particle Filter"),
-                       ordered = TRUE),
-         config_ = if_else(config == 1 | config == 4, 10,
-                           if_else(config == 2 | config == 5, 30, 
-                                   if_else(config == 3 | config == 6, 50, 0)))) %>%
-  filter(config_ != 0) %>%
-  mutate(R_ = factor(config_,
-                     levels = c("10", "30", "50"),
-                     labels = c("10%", "30%", "50%"),
-                     ordered = TRUE)) %>%
-  filter(frequency == 1,
-         config <= 6, 
-         rel_err > 0, filt != "pf") %>%
-  mutate(type = if_else(config <= 3, "Fixed", "Variable")) %>%
-  unite("id_out", frequency, filt, meas_var, exp, config_) %>%
-  mutate(id_ins = as.numeric(as.factor(type)))
-
-combs <- t(combn(1:2, 2))
-head(errors_mod)
-
-combinations <- merge(unique(errors_mod$id_out), combs) %>%
-  rename(id_out = x,
-         g1 = V1,
-         g2 = V2) %>%
-  mutate(D = NA,
-         p = NA)
-
-for (it in 1:nrow(combinations)){
-  
-  data_filt <- filter(errors_mod, id_out == combinations$id_out[it])
-  
-  g1 <- filter(data_filt, id_ins == combinations$g1[it])
-  g2 <- filter(data_filt, id_ins == combinations$g2[it])
-  
-  temp <- ks.test(g1$rel_err, g2$rel_err, alternative='two.sided')
-  
-  combinations$D[it] <- temp$statistic
-  combinations$p[it] <- temp$p.value
-  
-}
-
-ks_all <- combinations %>%
-  separate(id_out, into = c("frequency", "filt", "meas_var", "exp", "config_"), sep = "_")
-
-write.csv(ks_all, file = "./tables/metrics/assim/ks_controlled.csv", row.names = FALSE)
-
-
-# KS Assim Artif Controlled 50 vs 100 -------------------------------------
-errors_filt_artif <- all_err %>%
-  mutate(config = as.numeric(config)) %>%
-  left_join(info_runs) %>%
-  mutate(rel_err = if_else(obs != 0, abs(error)/obs, 0),
-         rel_err = rel_err * 100)
-
-errors_mod <- errors_filt_artif %>%
-  select(-obs, -pred, -max_obs, -mean_obs, -error, -abs_error, 
-         -sc_rel_error, -city, -N, -P, -Q, -it, -comment, -mae, 
-         -run, -sensor_type) %>%
-  filter(variable == "wm") %>%
-  filter(id >= 500, id <= 1000) %>%
-  filter(!(filt == "enkf" & case != "case2")) %>%
-  mutate(filt = factor(filt,
-                       levels = c("enkf", "ukf", "pf"),
-                       labels = c("Ensemble KF", "Unscented KF", 
-                                  "Particle Filter"),
-                       ordered = TRUE),
-         config_ = if_else(config == 8 | config == 4, 10,
-                           if_else(config == 9 | config == 5, 30, 
-                                   if_else(config == 10 | config == 6, 50, 0)))) %>%
-  filter(config_ != 0) %>%
-  mutate(R_ = factor(config_,
-                     levels = c("10", "30", "50"),
-                     labels = c("10%", "30%", "50%"),
-                     ordered = TRUE)) %>%
-  filter((config >= 4 & config <= 6) | (config >= 8 & config <= 10), 
-         rel_err > 0, 
-         filt != "Particle Filter") %>%
-  unite("id_out", filt, meas_var, exp, config_, remove = FALSE) %>%
-  #filter(frequency != 0.1) %>%
-  mutate(id_ins = frequency)
-
-combs <- t(combn(unique(errors_mod$id_ins), 2))
-head(errors_mod)
-
-combinations <- merge(unique(errors_mod$id_out), combs) %>%
-  rename(id_out = x,
-         g1 = V1,
-         g2 = V2) %>%
-  mutate(D = NA,
-         p = NA)
-
-it <- 1
-for (it in 1:nrow(combinations)){
-  
-  data_filt <- errors_mod[errors_mod$id_out == combinations$id_out[it], ]
-  
-  g1 <- data_filt[data_filt$id_ins == combinations$g1[it], ]
-  g2 <- data_filt[data_filt$id_ins == combinations$g2[it], ]
-  
-  temp <- ks.test(g1$rel_err, g2$rel_err, alternative='two.sided')
-  
-  combinations$D[it] <- temp$statistic
-  combinations$p[it] <- temp$p.value
-  
-}
-
-ks_all <- combinations %>%
-  separate(id_out, into = c("filt", "meas_var", "exp", "config_"), sep = "_")
-
-write.csv(ks_all, file = "./tables/metrics/assim/ks_controlled2.csv", row.names = FALSE)
-
-
 
 # Errors - real - state = assim -------------------------------------------
 errors_filt_mod <- errors_filt %>%
@@ -503,8 +229,8 @@ errors_filt_mod <- errors_filt %>%
   select(dat, variable, obs, pred, exp, id, config, filt, state_var, meas_var,
          calib, frequency) %>%
   filter(variable == state_var) %>%
-  mutate(error = obs - pred,
-         rel_error = (obs - pred)/obs) %>%
+  mutate(error = pred - obs,
+         rel_error = (pred - obs)/obs) %>%
   group_by(variable, exp, config, filt, state_var, meas_var,
            calib, frequency) %>%
   summarise(rmse = sqrt(mean(error*error))) %>%
@@ -518,8 +244,8 @@ error_last <- errors_filt %>%
   left_join(info_runs) %>%
   select(dat, variable, obs, pred, exp, id, config, 
          filt, state_var, meas_var, frequency, rep, calib) %>%
-  mutate(error = obs - pred,
-         rel_error = (obs - pred)/obs) %>%
+  mutate(error = pred - obs,
+         rel_error = (pred - obs)/obs) %>%
   group_by(exp) %>%
   filter(dat == max(dat), variable == state_var) %>%
   select(variable, state_var, meas_var, exp, error, config, filt, rep,
@@ -533,19 +259,20 @@ write.csv(error_last, file = "./tables/metrics/assim/last_real.csv",
 rmse <- errors_filt %>%
   filter(id < 500) %>%
   left_join(info_runs) %>%
-  select(dat, variable, obs, pred, exp, id, config, rep,
+  select(dat, variable, obs, pred, exp, id, config, rep, calib,
          filt, state_var, meas_var, frequency) %>%
   filter(variable == "wm") %>%
-  mutate(error = obs - pred,
-         rel_error = (obs - pred)/obs,
+  mutate(error = pred - obs,
+         rel_error = (pred - obs)/obs,
          se = error * error) %>%
-  group_by(variable, exp, frequency, config, filt, state_var, meas_var, rep) %>%
+  group_by(variable, exp, frequency, config, calib, filt, state_var, meas_var, rep) %>%
   summarise(rmse = sqrt(mean(se))) %>%
   ungroup() %>%
-  group_by(variable, exp, frequency, config, filt, state_var, meas_var) %>%
+  group_by(variable, exp, frequency, calib, config, filt, state_var, meas_var) %>%
   summarise(rmse_max = max(rmse),
-            rmse_min = min(rmse)) %>%
-  gather(rmse_min, rmse_max, key = "metric", value = "rmse") %>%
+            rmse_min = min(rmse),
+            rmse_mean = mean(rmse)) %>%
+  gather(rmse_min, rmse_max, rmse_mean, key = "metric", value = "rmse") %>%
   spread(exp, rmse)
 
 write.csv(rmse, file = "./tables/metrics/assim/rmse_real_wm.csv", 
@@ -557,8 +284,8 @@ metrics_nozero <- errors_filt %>%
   select(dat, variable, obs, pred, exp, id, config, rep,
          filt, state_var, meas_var, frequency) %>%
   filter(variable == "wm", obs > 0) %>%
-  mutate(error = obs - pred,
-         rel_error = (obs - pred)/obs,
+  mutate(error = pred - obs,
+         rel_error = (pred - obs)/obs,
          se = error * error) %>%
   group_by(variable, exp, frequency, config, filt, state_var, meas_var, rep) %>%
   summarise(rmse = sqrt(mean(se)),
@@ -581,7 +308,7 @@ write.csv(metrics_nozero, file = "./tables/metrics/assim/metrics_real_wm_nozero.
 
 # Residual / Innovation ---------------------------------------------------
 
-resid <- upd_states_out %>%
+resid <- upd_assim %>%
   filter(variable == "Resid") %>%
   group_by(id, das) %>%
   summarise(res_mean = mean(measurement),
@@ -589,13 +316,13 @@ resid <- upd_states_out %>%
 
 # Normalized innovations
 
-calc <- upd_states_out %>%
+calc <- upd_assim %>%
   filter(variable == "Resid" | variable == "P_upd_m" | variable == "R") %>%
   spread(variable, measurement) %>%
   rename(P = P_upd_m) %>%
   mutate(ni = Resid / sqrt(P + R))
 
-calc_summ <- calc %>%
+calc_summ <- upd_assim %>%
   group_by(id) %>%
   summarise(mean_ni = mean(ni),
             sd_ni = sd(ni))

@@ -12,11 +12,11 @@ library("data.table")
 
 # Load data ---------------------------------------------------------------
 
-# Carregar todos os arquivos e incluir numero do experimento e todos os 
-# codigos relevantes para identificacao em colunas adicionais
-# Salvar essa info, pq ela que vamos usar para filtrar situacoes para o plot
-# Incluir o id do numero da linha pq ele vai voltar na identificacao da pasta
-# em que o arquivo foi salvo
+# Load all files and include the experiment number and all relevant codes
+# in additional columns, for identification. Save this info, because this is 
+# the one used to filter situations for the plot.
+# Include id for line number because it will come back to identify the
+# folder in which the file was saved.
 
 # Load assimilation outputs
 all_files_path <- list.files("./tables/results_DA/", full.names = T, 
@@ -129,7 +129,7 @@ for (it in 1:nrow(errors)) {
 
 all_err <- do.call(bind_rows, all_results) %>%
 	arrange(id, dat, variable) %>%
-      	mutate(error = obs - pred,
+  mutate(error = pred - obs,
 	       abs_error = abs(error),
 	       sc_rel_error = error/max_obs)
 

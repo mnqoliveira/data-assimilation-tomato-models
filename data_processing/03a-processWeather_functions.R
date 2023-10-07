@@ -237,12 +237,22 @@ fillNAs_external <- function(x, cycles_dates){
     rename_all(tolower) %>%
     mutate(date = as.Date(paste(year, doy, sep = "-"), tryFormats = c("%Y-%j"))) %>%
     filter(date %in% as.Date(cycles_dates$date)) %>%
-    select(date, lat, year, doy, t2m_max, t2m_min, starts_with("allsky")) %>%
+    select(date, lat, lon, year, doy, t2m_max, t2m_min, starts_with("allsky")) %>%
     rename(tmax = t2m_max,
            tmin = t2m_min,
            rad = allsky_sfc_sw_dwn) %>%
     mutate(date = as.character(date)) %>%
-    left_join(cycles_dates)
+    left_join(cycles_dates) %>%
+    # Imputation based on previous and following day
+    mutate(rad = if_else(rad == -99, 
+                         (lead(rad) + lag(rad)) * 0.5, 
+                         rad),
+           tmax = if_else(tmax == -99, 
+                         (lead(tmax) + lag(tmax)) * 0.5, 
+                         tmax),
+           tmin = if_else(rad == -99, 
+                         (lead(tmin) + lag(tmin)) * 0.5, 
+                         tmin))
   
   all_hours <- data.frame(hour = rep(seq(1, 24), 366),
                           doy = rep(c(1:366), each = 24))
@@ -261,20 +271,22 @@ fillNAs_external <- function(x, cycles_dates){
   
   df_proc_mod <- df_proc %>%
     mutate(hour = if_else(hour == 24, 0L, hour)) %>%
-    select(-lat, -tmax, -tmin)
+    #mutate(hour = solar_local_hour(hour, lat, lon, doy)) %>%
+    select(-lat, -lon, -tmax, -tmin)
   
   x_fill <- x %>%
     filter(is.na(measurement) & (variable == "temperature" | 
                                    variable == "radiation")) %>%
     left_join(df_proc_mod) %>%
+    # Replace only is measurement is missing
     mutate(value = measurement,
            value = if_else(variable == "temperature", 
-                           tmean, value),
-                           # All radiation uses the same unit at this point
-           value = if_else(sensor_var == "li1400_radiation", 
-                           rad*555.6, value),
-           value = if_else(sensor_var == "pi_radiation", 
-                           rad*555.6, value),
+                           tmean, 
+                           # As all imputation is made in MJg and should
+                           # return mmolPAR, conversion is the same for
+                           # whichever sensor
+                           if_else(variable == "radiation", rad*555.6, -99.)),
+           value = na_if(value, -99.),
            imputation = "case4") %>%
     select(-rad, -tmean, -year, -doy, -measurement, -dateFull)
   
