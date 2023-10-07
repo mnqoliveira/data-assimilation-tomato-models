@@ -762,7 +762,7 @@ class tomgro(object):
             self.model.dwf = self.model.rate_fruits()
             self.model.wf = np.array(self.model.wf + self.model.dwf, ndmin=1)
 
-        if config["state_var"] != "wm":
+        if config["state_var"] != "w":
             self.model.dw = self.model.rate_aboveground()
             self.model.w = np.array(self.model.w + self.model.dw, ndmin=1)
 
