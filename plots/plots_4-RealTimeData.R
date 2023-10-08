@@ -15,29 +15,29 @@ library(patchwork)
 
 # Path save ---------------------------------------------------------------
 
-path_png <- "../paper/paper2-DAaplic/figures/"
-path_eps <- "../paper/paper2-DAaplic/sub3_2023-09-17_infprocag/figs/"
+path_png <- "./paper/paper2-DAaplic/figures/"
+path_eps <- "./paper/paper2-DAaplic/sub3_2023-09-17_infprocag/figs/"
 
 # Load theme --------------------------------------------------------------
-load("../data/plot_theme_vert2.RData")
+load("./data/plot_theme_vert2.RData")
 
 # Load data ---------------------------------------------------------------
 # Dates
-cycle_dates <- read.csv("../data/cycle_dates.csv")
-codes_exp <- read.csv("../tables/codes_exp.csv")
+cycle_dates <- read.csv("./data/cycle_dates.csv")
+codes_exp <- read.csv("./tables/codes_exp.csv")
 
 # Harvests
-harvests <- read.csv("../data/observations/monitoring/harvests.csv")
+harvests <- read.csv("./data/observations/monitoring/harvests.csv")
 
 # Cover lat data
-cover_lat_calib <- read.csv("../data/observations/monitoring/lai/lai_lat_calib_ids.csv")
-cover_abv_calib <- read.csv("../data/observations/monitoring/lai/lai_abv_calib_ids.csv")
-height_calib <- read.csv("../data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
-wf_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
-wm_lat_calib <- read.csv("../data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
+cover_lat_calib <- read.csv("./data/observations/monitoring/lai/lai_lat_calib_ids.csv")
+cover_abv_calib <- read.csv("./data/observations/monitoring/lai/lai_abv_calib_ids.csv")
+height_calib <- read.csv("./data/observations/monitoring/dry_mass_aboveground/height_calib_ids.csv")
+wf_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_fruit/wf_lat_calib_ids.csv")
+wm_lat_calib <- read.csv("./data/observations/monitoring/dry_mass_mature_fruit/wm_lat_calib_ids.csv")
 
 # Load dictionary of measurement
-dict <- read.csv("../tables/dictionary_paramsFilter.csv")
+dict <- read.csv("./tables/dictionary_paramsFilter.csv")
 
 # From the first harvest on, the data will be ignored
 wm_lat <- wm_lat_calib %>%
@@ -65,33 +65,33 @@ wf_lat <- wf_lat_calib %>%
   distinct()
 
 # Assimilation
-info_runs <- read.csv("../tables/runs_Filter.csv") %>%
+info_runs <- read.csv("./tables/runs_Filter.csv") %>%
   mutate(exp_int = exp,
          exp = paste0("n0", exp_int)) %>%
   select(-it, -comment)
 
 # Assimilation results
-load("../tables/results_DA/aux_files/all_states.RData")
+load("./tables/results_DA/aux_files/all_states.RData")
 
-load("../tables/results_DA/aux_files/all_errors.RData")
+load("./tables/results_DA/aux_files/all_errors.RData")
 errors_filt <- all_err %>%
   mutate(config = as.numeric(config))
 
 # Simulations
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
-tomgro_gnvMod <- read.csv("../tables/metrics/simul/metrics_gnvMod.csv") %>%
+tomgro_gnvMod <- read.csv("./tables/metrics/simul/metrics_gnvMod.csv") %>%
   filter(model == "tomgro")
-tomgro_calib <- read.csv("../tables/metrics/simul/metrics_calib.csv") %>%
+tomgro_calib <- read.csv("./tables/metrics/simul/metrics_calib.csv") %>%
   filter(model == "tomgro")
 
 # Observations
-obs <- read.csv("../data/observations/monitoring/observations_proc.csv")
-obs_last <- read.csv( "../data/observations/monitoring/observations_last.csv")
+obs <- read.csv("./data/observations/monitoring/observations_proc.csv")
+obs_last <- read.csv( "./data/observations/monitoring/observations_last.csv")
 # Calibration ids
-obs_ids <- read.csv("../data/observations/monitoring/obs_exp_all_ids.csv")
+obs_ids <- read.csv("./data/observations/monitoring/obs_exp_all_ids.csv")
 # Full monitoring and experiment
-obs_all <- read.csv("../data/observations/full_set_obs.csv") %>%
+obs_all <- read.csv("./data/observations/full_set_obs.csv") %>%
   filter(city == "cps")
 
 # Labels ------------------------------------------------------------------
@@ -124,6 +124,7 @@ plot_vars_unitless = c("leaf_area" = "Leaf area",
 
 
 plot_vars_1l = c("leaf_area" = "Leaf area [m² leaves/plant]",
+                 "lai" = "Leaf area [m² leaves/m² soil]",
               "lai_lat" = "Green cover area (lateral view) [m²/plant]",
               "lai_abv" = "Green cover area (top-down view) [m²/plant]",
               "height" = "Height [m]",
@@ -151,7 +152,7 @@ codes_plants_df <- data.frame(exp = names(codes_plants),
                               plant_id = codes_plants,
                               row.names = NULL)
 
-models_transf <- read.csv("../tables/models_obs.csv") %>%
+models_transf <- read.csv("./tables/models_obs.csv") %>%
   select(-name_plot, -var_plot, -order, -unit, -lang) %>%
   left_join(select(codes_exp, cycle))
 
@@ -412,9 +413,10 @@ obs_last_i <- obs_last %>%
   filter(exp == "n07" | exp == "n08")
 
 ggplot() +
-  facet_wrap("exp",
+  facet_grid(variable2 ~ exp,
              # scales = "free",
              # space = "free_x",
+             switch="y"
              drop = TRUE,
              labeller = labeller(variable = plot_vars,
                                  exp = codes_plants,
@@ -725,17 +727,20 @@ tomgro_calib_ <- tomgro_calib %>%
   left_join(exp_cycle) %>%
   left_join(var_measvar)
 
+plot_vars_unitless_ <- gsub("\n", "", plot_vars_unitless)
+
 ggplot() +
-  facet_wrap("meas_var", scales = "free_y",
-             labeller = labeller(meas_var = plot_vars_1l)) +
+  facet_wrap(vars(variable, meas_var), scales = "free_y",
+             labeller = labeller(meas_var = plot_vars_unitless_,
+                                 variable = plot_vars_1l)) +
   # Assimilation
   geom_point(aes(x = exp_names, y =  rmse, colour = freq_),
              data = errors_mod, alpha = 0.5, size = 3) +
   # # Null error
   geom_point(data=tomgro_gnvMod_, aes(x= exp_names, y = rmse),
-             shape = 4, size = 2) +
-  geom_point(data=tomgro_calib_, aes(x= exp_names, y = rmse),
              size = 2) +
+  geom_point(data=tomgro_calib_, aes(x= exp_names, y = rmse),
+             shape = 4, size = 2) +
   labs(x = "", y = "RMSE", colour = "Percentage of observations used") +
   theme_vert +
   scale_colour_brewer(palette = "Set1", type = "") +
@@ -756,6 +761,13 @@ ggsave(namefile,
        device = "png"
 )
 
+namefile <- paste0(path_eps, "Fig8.pdf")
+ggsave(namefile,
+       width = 18, height = 12, units = "cm", 
+       family = "serif", 
+       dpi = 320,
+       device = "pdf"
+)
 
 namefile <- paste0(path_eps, "Fig8.eps")
 ggsave(namefile,
@@ -853,10 +865,10 @@ ggplot() +
   theme_vert +
   scale_colour_manual(name="Approach",
                       breaks=c("tomgro", "gnvMod", "ukf", "enkf"),
-                      labels=c("OL, calib.",
-                               "OL, no calib.",
-                               "UKF, no calib.",
-                               "EnKF, no calib."),
+                      labels=c("OL, calib. within",
+                               "OL, calib. external",
+                               "UKF, calib. external",
+                               "EnKF, calib. external"),
                       values = paletteer_d("RColorBrewer::Set1")[c(1, 4, 3, 2)],
                       drop = FALSE) +
   guides(colour=guide_legend(override.aes = list(size = 2),
