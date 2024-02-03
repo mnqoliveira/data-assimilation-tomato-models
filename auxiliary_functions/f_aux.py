@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import itertools
+import math
 import os
 import random
 
@@ -22,6 +23,11 @@ import random
 #from sklearn.preprocessing import StandardScaler
 
 # %% General auxiliary tools
+
+def valid_value(value):
+    """Simple check of values"""
+
+    return value is not None and not math.isnan(value)
 
 def expand_grid(data_dict):
     """
@@ -129,7 +135,7 @@ def save_output(conf, type_output, x, city, calib, treat, rep):
                                      var+'_est_m', 'P_m',
                                      var+'_upd_m', 'P_upd_m',
                                      'observations', 'R', 'Gain',
-                                     'Resid', 'Cov_pred',
+                                     'Resid', 'System_unc',
                                      'das'])
         x['exp'] = treat
 
@@ -337,14 +343,6 @@ def modify_obs(obs, config_it):
 
                 obs_ = obs_.loc[(fixed_cond & (obs_["config"] == config_)), ]
 
-                if use_delta:
-
-                    # Replace meas_var_sd_md with delta meas_var_sd
-                    meas_var_sd = meas_var + '_sd'
-                    meas_var_sd_delta = meas_var + '_sd_d'
-
-                    obs_.loc[:, meas_var_sd] = obs_.loc[:, meas_var_sd_delta]
-
             # Case non-controled error (Vanthoor)
             else:
                 obs_ = obs_.loc[((obs["calib"] == "cpsIV") &
@@ -353,6 +351,12 @@ def modify_obs(obs, config_it):
         else:
             obs_ = obs_.loc[(obs["node"] == "calib"), ]
 
+        if use_delta:
+            # Replace meas_var_sd with delta meas_var_sd
+            meas_var_sd = meas_var + '_sd'
+            meas_var_sd_delta = meas_var + '_sd_d'
+
+            obs_.loc[:, meas_var_sd] = obs_.loc[:, meas_var_sd_delta]
 
     else:
         obs_ = obs.loc[((obs.exp == exp) & (obs.node != "calib")), ]
@@ -410,13 +414,11 @@ def gen_perturb(config_it, x):
     # A pre-selected parameter is perturbed and this value is then
     # applied in the prediction of state particles
     elif case == "case2":
-        # Elevar ao quadrado diminui o número no caso de números menores do que
-        # que 1
         np.random.seed(config_it["seed"])
-        # e = (np.random.uniform(0.9*x, 1.1*x, N))**2
+        x_mod = (np.random.uniform(0.9*x, 1.1*x, N))
         # Paper 2
-        e = np.random.multivariate_normal(z, np.eye(1)*(x*0.1)**2, N)
-        x_mod = x + e
+        # e = np.random.multivariate_normal(z, np.eye(1)*(x*0.1), N)
+        # x_mod = x + e
         x_mod[x_mod < 0] = 0.
 
     # Case 3: inputs
@@ -426,10 +428,10 @@ def gen_perturb(config_it, x):
         for h in x:
             # Change from 10% to 30% depending on the analysis
             # Paper 4
+            # Published like this, but should not include the squared
             # e = np.random.multivariate_normal(z, np.eye(1)*(h*0.3)**2, N)
             np.random.seed(config_it["seed"])
-            e = (np.random.uniform(0.9*h, 1.1*h, N))**2
-            # e = np.random.multivariate_normal(z, np.eye(1)*(h*0.1)**2, N)
+            e = np.random.multivariate_normal(z, np.eye(1)*(h*0.1), N)
             # Particles in lines, hours in columns
             x_mod = np.hstack((x_mod, (h + e)))
         x_mod = x_mod[:, 1:]

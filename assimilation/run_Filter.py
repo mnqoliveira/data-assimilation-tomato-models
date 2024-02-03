@@ -198,7 +198,7 @@ def save_outputs(x, obj, type_out,
             filter_f.K,
             # Residual
             filter_f.y,
-            # Covariance of prediction
+            # System uncertainty / Innovation covariance
             filter_f.S,
             # DAT
             dat
@@ -240,12 +240,12 @@ def run_filter(dataset, config_it):
                             dim_x=dim_x, dim_z=dim_z)
 
     # Initialize outputs to be saved
-    assim = list()
-    sigmas = list()
+    assim, sigmas = list(), list()
     state = np.ravel(list(st.values()))
+    measurement, previous, delta, dat_pr = 0, 0, 0, 0
 
-    # all_dat = all_dat[0:10]
-    # it = 0
+    # all_dat = all_dat[37:60]
+    # it = 89
     # dat = all_dat[it]
     # all_dat = all_dat[0:-1]
 
@@ -274,6 +274,8 @@ def run_filter(dataset, config_it):
         # Only one observation at a time
         if dat in obs.dat.tolist():
             measurement = float(obs.loc[it, config_it['meas_var']].values)
+            if aux.valid_value(measurement) and aux.valid_value(previous):
+                delta = (measurement - previous)/((dat-dat_pr)+1)
             # Add perturbation caused by repetition - case of controlled errors
             #if ((config_it["config"] < 100) &
             #(config_it['state_var'] == config_it['meas_var'][0])):
@@ -281,13 +283,17 @@ def run_filter(dataset, config_it):
             if np.isnan(np.sum(measurement)):
                 measurement = None
         else:
-            # measurement = np.nan
             measurement = None
 
         # Ascribe observation uncertainty
-        if (np.isnan(config_it["R"])) and (measurement is not None):
+        if (np.isnan(config_it["R"])) and aux.valid_value(measurement):
             sd = [s + '_sd' for s in config_it['meas_var']]
             filter_f.R = obs.loc[it, sd].item()**2 + 0.0001
+
+        if (int(config_it["id"]) >= 1000) and not (np.isnan(config_it["R"])):
+            # This should be applied in all cases 2 and 3, but for the examples
+            # here, this condition entails the same result
+            filter_f.R = ((config_it["R"] * delta)**2 + 0.0001)
 
         # Predict step
         # For Kalman Filters, this only modifies the state of interest
@@ -350,6 +356,10 @@ def run_filter(dataset, config_it):
         else:
             model_upd = filter_f.x
             state = np.vstack((state, np.ravel(model_upd)))
+
+        if aux.valid_value(measurement):
+            previous = measurement
+            dat_pr = dat
 
     all_states_upd = np.hstack((state,
                                 np.array(range(state.shape[0])).reshape(-1, 1)))
