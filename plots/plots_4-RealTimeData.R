@@ -16,7 +16,7 @@ library(patchwork)
 # Path save ---------------------------------------------------------------
 
 path_png <- "./paper/paper2-DAaplic/figures/"
-path_eps <- "./paper/paper2-DAaplic/sub3_2023-09-17_infprocag/figs/"
+path_eps <- "./paper/paper2-DAaplic/sub3_2023-10-08_infprocag/figs/"
 
 # Load theme --------------------------------------------------------------
 load("./data/plot_theme_vert2.RData")
@@ -256,7 +256,7 @@ ggsave(namefile,
        width = 18, height = 25, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
        )
 
 
@@ -353,7 +353,7 @@ ggsave(namefile,
        width = 20, height = 20, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
 
 # Figure 5 - Assim lai_abv ------------------------------------------------
@@ -416,7 +416,7 @@ ggplot() +
   facet_grid(variable2 ~ exp,
              # scales = "free",
              # space = "free_x",
-             switch="y"
+             switch="y",
              drop = TRUE,
              labeller = labeller(variable = plot_vars,
                                  exp = codes_plants,
@@ -460,7 +460,7 @@ ggsave(namefile,
        width = 15, height = 10, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
 
 # Figure 6 - Assim Wf -----------------------------------------------------
@@ -564,7 +564,7 @@ ggsave(namefile,
        width = 18, height = 10, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
 
 # Figure 7 - Assim W ------------------------------------------------------
@@ -671,7 +671,7 @@ ggsave(namefile,
        width = 12, height = 18, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
 
 # Figure 8 - Frequency ----------------------------------------------------
@@ -774,7 +774,7 @@ ggsave(namefile,
        width = 18, height = 12, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
 
 # Figure 9 - Different calibration ----------------------------------------
@@ -892,5 +892,5 @@ ggsave(namefile,
        width = 12, height = 12, units = "cm", 
        family = "serif", 
        dpi = 320,
-       device = "eps"
+       device = cairo_ps
 )
