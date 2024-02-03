@@ -24,18 +24,18 @@ library("scales")
 # source("./07c-orgAssim.R")
 
 # Load data ---------------------------------------------------------------
-load("../data/plot_theme_vert2.RData")
+load("./data/plot_theme_vert2.RData")
 
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
 # Measured
-#errors_filt <- read.csv("../tables/results_DA/aux_files/all_errors.csv")
-load("../tables/results_DA/aux_files/all_errors.RData")
+#errors_filt <- read.csv("./tables/results_DA/aux_files/all_errors.csv")
+load("./tables/results_DA/aux_files/all_errors.RData")
 
-# truth <- read.csv("../data/synthetic/truth_tomgro.csv") %>%
+# truth <- read.csv("./data/synthetic/truth_tomgro.csv") %>%
 #   rename(obs = wm, das = dat) %>%
 #   select(exp, das, obs)
-# assim_results <- allStates %>%
+# assim_results <- alresults_DA./tableslStates %>%
 #   filter(variable == "wm") %>%
 #   select(id, rep, exp, das, measurement, variable) %>%
 #   rename(pred = measurement)
@@ -45,29 +45,31 @@ load("../tables/results_DA/aux_files/all_errors.RData")
 #   mutate(error = pred - obs) %>%
 #   filter(das > 0)
 
-errors_simul <- read.csv("../tables/results_simul/all_errors.csv")
+errors_simul <- read.csv("./tables/results_simul/all_errors.csv")
 
 # Assimilation
-info_runs <- read.csv("../tables/runs_Filter2.csv") %>%
+info_runs <- read.csv("./tables/runs_Filter2.csv") %>%
   mutate(exp_int = exp,
          exp = paste0("n0", exp_int)) %>%
   select(-it, -comment)
 
 # Assimilation results
-# all_states_out <- read.csv("../tables/results_DA/aux_files/all_states.csv")
-# upd_states_out <- read.csv("../tables/results_DA/aux_files/upd_states.csv")
+# all_states_out <- read.csv("./tables/results_DA/aux_files/all_states.csv")
+# upd_states_out <- read.csv("./tables/results_DA/aux_files/upd_states.csv")
 
-load("../tables/results_DA/aux_files/all_states.RData")
-load("../tables/results_DA/aux_files/upd_states.RData")
+load("./tables/results_DA/aux_files/all_states.RData")
+# load("./tables/results_DA/aux_files/upd_states.RData")
 
 # Simulations
-models_all <- read.csv( "../tables/results_simul/results_simulations_all.csv")
+models_all <- read.csv( "./tables/results_simul/results_simulations_all.csv")
 
 # Observations
-obs <- read.csv("../data/synthetic/obs_artif_all.csv")
+obs <- read.csv("./data/synthetic/obs_artif_all.csv")
+
+weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
 
 # Ensembles
-#ensembles <- read.csv("../tables/results_DA/aux_files/all_ensembles.csv")
+#ensembles <- read.csv("./tables/results_DA/aux_files/all_ensembles.csv")
 
 # General variables -------------------------------------------------------
 simulations <- models_all %>%
@@ -204,7 +206,7 @@ ggplot() +
                                    size = 8))
 
 plot_name <- "Fig1-controlled-subsample"
-plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 ggsave(plot_file_name,
        width = 14, height = 8, units = "cm",
        family = "serif")
@@ -310,9 +312,236 @@ ggplot() +
   theme(panel.background = element_blank())
 
 plot_name <- "v2_Fig-curves"
-plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 ggsave(plot_file_name,
        width = 20, height = 25, units = "cm", family = "serif")
+
+
+# Presentation - Additional -----------------------------------------------
+weather_mod <- weather_hourly %>%
+  separate(stat_sensor_var, sep = "_", into = c("stat", "sensor", "var")) %>%
+  filter(!is.na(cycle), value < 3000, 
+         sensor != "pi", sensor != "none", cycle != 1, node == 1) %>%
+  mutate(stat_var = str_c(var, stat, sep = "_"), date = as.Date(date)) %>%
+  filter((stat == "mean" & var == "radiation") | 
+           (var == "temperature" & stat != "med") |
+           (var == "humidity" & stat != "med")) %>%
+  select(-stat, -var, -sensor, -starts_with("flag")) %>%
+  spread(stat_var, value) %>%
+  group_by(cycle, date, node) %>%
+  summarise(rad = sum(radiation_mean, na.rm = TRUE),
+            tmax = max(temperature_max, na.rm = TRUE),
+            tmin = min(temperature_min, na.rm = TRUE),
+            tmean = mean(temperature_mean, na.rm = TRUE),
+            hmean = mean(humidity_mean, na.rm = TRUE),
+            hmax = max(humidity_max, na.rm = TRUE),
+            hmin = min(humidity_min, na.rm = TRUE)) %>%
+  ungroup() %>%
+  gather(c("rad", "tmax", "tmin", "tmean", "hmean", "hmax", "hmin"), 
+         key = "variable", value = "measurement") %>%
+  mutate(var = if_else(variable == "rad", "radiation", 
+                       if_else(variable == "hmean" | variable == "hmax" | variable == "hmin", 
+                               "humidity",
+                               "temperature")),
+         stat = if_else(variable == "rad", "sum", 
+                        substring(variable, 2, nchar(variable))),
+         measurement = if_else(variable == "rad", measurement/555.6, measurement)) %>%
+  filter(var != "humidity")
+
+cycles <- c("1" = "Ciclo 0",
+            "2" = "Ciclo 1",
+            "3" = "Ciclo 2",
+            "4" = "Ciclo 3")
+
+weather_mod <- weather_mod %>%
+  mutate(var_ = factor(var,
+                       levels = c("radiation", "temperature", "humidity"),
+                       labels = c("RFA~(MJ~m^{-2}~dia^{-1})",
+                                  "Temperatura~('°C')", "UR~('%')")),
+         cycle_ = factor(cycle,
+                         levels = names(cycles),
+                         labels = cycles))
+
+# "Temperature~('°C')", 
+# "Light~(µmol~m^{-2}~s^{-1})")
+
+ggplot() +
+  facet_grid(var_ ~ cycle_, scales = "free",
+             labeller = labeller(cycle_ = label_value, var_ = label_parsed),
+             space = "free_x") +
+  geom_line(data=weather_mod, 
+            aes(x = date, y = measurement,  colour = stat), size = 0.5) +
+  labs(x = "", y = "") +
+  scale_colour_manual(values = paletteer_d("RColorBrewer::Set1")[c(1, 3, 2, 4)],
+                      name = "Summary",
+                      breaks=c("max", "min", "mean", "sum"),
+                      labels=c("Daily maximum", 
+                               "Daily minimum", 
+                               "Daily average",
+                               "Daily sum")) + 
+  scale_x_date(date_breaks = "2 weeks", date_labels = "%d %b %y") +
+  theme(legend.position = "bottom") +
+  guides(col = guide_legend(override.aes = list(size = 1))) +
+  theme_vert +
+  theme(panel.background = element_blank())
+
+plot_name <- "weather"
+plot_file_name <- paste0('./paper/paperB-sbiagro2023/apresentacao/', plot_name,'.png')
+ggsave(plot_file_name,
+       width = 15, height = 12, units = "cm", family = "serif")
+
+
+# Presentation - Obs and simulations --------------------------------------
+
+simul_calib <- simulations %>%
+  filter(model == "tomgro",
+         # Calibrated model
+         calib == "cpsIV") %>%
+  select(-calib) %>%
+  mutate(filt_ = factor("cpsIV",
+                        levels = c("ukf", "gnvIV", "cpsIV"),
+                        labels = c("UKF", "OL, not calib.", "Sim. truth")))
+
+simul_NotCalib <- simulations %>%
+  filter(model == "tomgro",
+         # Not calibrated model
+         calib == "gnvIV") %>%
+  mutate(model = "gnvIV") %>%
+  select(-calib) %>%
+  mutate(filt_ = factor("gnvIV",
+                        levels = c("ukf", "gnvIV", "cpsIV"),
+                        labels = c("UKF", "OL, not calib.", "Sim. truth")))
+
+simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
+  filter(variable == "wf" | variable == "wm", das >= 30) %>%
+  mutate(variable_ = factor(variable,
+                            levels = c("wf", "wm"),
+                            labels = c("Wf", "Wm")))
+
+obs_plot <- obs_mod %>%
+  filter(variable == "wf" | variable == "wm",
+         config == 4 | config == 5 | config == 6) %>%
+  mutate(meas_var = variable,
+         config_ = if_else(config == 4 | config == 8, 10,
+                           if_else(config == 5 | config == 9, 30, 
+                                   if_else(config == 6 | config == 10, 50, 0))),
+         R_ = factor(config_,
+                     levels = c("10", "30", "50", "0"),
+                     labels = c("10%", "30%", "50%", "Other"),
+                     ordered = TRUE),
+         variable_ = factor(variable,
+                            levels = c("wf", "wm"),
+                            labels = c("Wf", "Wm"))) %>%
+  filter(!(variable == "wf" & measurement > 800), dat >= 30)
+
+ggplot() +
+  facet_grid(meas_var + R_  ~ exp, scales = "free",
+             labeller = labeller(meas_var = plots_meas_short,
+                                 exp = plots_exps,
+                                 variable = plots_st_1L)) + 
+  # Observations
+  geom_point(data = obs_plot, aes(dat, measurement),
+             size = 0.5, alpha = 0.1, color = "red") +
+  # Simulations
+  geom_line(data = simuls, aes(das, measurement,
+                               colour = filt_, linetype = variable_),
+            size = 1.2) +
+  labs(x = "Days after simulation started", 
+       y = "Mature fruit dry mass [g D.M./m² soil]",
+       colour = "") +
+  # scale_colour_brewer(palette = "Set1") +
+  scale_colour_manual(values = c("red", "dodgerblue3", "springgreen4"),
+                      breaks = c("UKF", "OL, not calib.", "Sim. truth")) +
+  guides(linetype=guide_legend(title = "")) +
+  theme_vert +
+  theme(panel.background = element_blank())
+
+plot_name <- "simul_obs"
+plot_file_name <- paste0('./paper/paperB-sbiagro2023/apresentacao/', plot_name,'.png')
+ggsave(plot_file_name,
+       width = 12, height = 15, units = "cm", family = "serif")
+
+
+# Presentation - Curves ---------------------------------------------------
+
+upd <- allStates %>%
+  filter(config == 4 | config == 5 | config == 6 | 
+           config == 8 | config == 9 | config == 10, filt == "ukf") %>%
+  mutate(filt_ = factor(filt,
+                        levels = c("ukf", "gnvIV", "cpsIV", "enkf"),
+                        labels = c("UKF", "OL, not calib.", "Sim. truth",
+                                   "EnKF")),
+         config_ = if_else(config == 4 | config == 8, 10,
+                           if_else(config == 5 | config == 9, 30, 
+                                   if_else(config == 6 | config == 10, 50, 0))),
+         R_ = factor(config_,
+                     levels = c("10", "30", "50", "0"),
+                     labels = c("10%", "30%", "50%", "Other"),
+                     ordered = TRUE),
+         variable_ = factor(variable,
+                            levels = c("wf", "wm"),
+                            labels = c("Wf", "Wm")))
+
+simul_calib <- simulations %>%
+  filter(model == "tomgro",
+         # Calibrated model
+         calib == "cpsIV") %>%
+  select(-calib) %>%
+  mutate(filt_ = factor("cpsIV",
+                        levels = c("ukf", "gnvIV", "cpsIV"),
+                        labels = c("UKF", "OL, not calib.", "Sim. truth")))
+
+simul_NotCalib <- simulations %>%
+  filter(model == "tomgro",
+         # Not calibrated model
+         calib == "gnvIV") %>%
+  mutate(model = "gnvIV") %>%
+  select(-calib) %>%
+  mutate(filt_ = factor("gnvIV",
+                        levels = c("ukf", "gnvIV", "cpsIV"),
+                        labels = c("UKF", "OL, not calib.", "Sim. truth")))
+
+simuls <- bind_rows(simul_calib, simul_NotCalib) %>%
+  filter(variable == "wf" | variable == "wm", das >= 30) %>%
+  mutate(variable_ = factor(variable,
+                            levels = c("wf", "wm"),
+                            labels = c("Wf", "Wm")))
+
+assim <- upd %>%
+  filter(variable == "wf" | variable == "wm", frequency == 1, das >= 30)
+
+assim_sum <- assim %>%
+  group_by(exp, meas_var, R_, filt_, variable_, das) %>%
+  summarise(measurement = mean(measurement)) %>%
+  filter(variable_ == "Wm", das >= 30)
+
+ggplot() +
+  facet_grid(meas_var + R_  ~ exp, scales = "free",
+             labeller = labeller(meas_var = plots_meas_short,
+                                 exp = plots_exps,
+                                 variable = plots_st_1L)) + 
+  # Simulations
+  geom_line(data = simuls, aes(das, measurement,
+                               colour = filt_, linetype = variable_),
+            size = 1.2) +
+  # Average upd Wm
+  geom_line(data = assim_sum, aes(das, measurement, linetype = variable_,
+                                  colour = filt_),
+            size = 1.2) +
+  labs(x = "Days after simulation started", 
+       y = "Mature fruit dry mass [g D.M./m² soil]",
+       colour = "") +
+  # scale_colour_brewer(palette = "Set1") +
+  scale_colour_manual(values = c("red", "dodgerblue3", "springgreen4"),
+                      breaks = c("UKF", "OL, not calib.", "Sim. truth")) +
+  guides(linetype=guide_legend(title = "")) +
+  theme_vert +
+  theme(panel.background = element_blank())
+
+plot_name <- "curves"
+plot_file_name <- paste0('./paper/paperB-sbiagro2023/apresentacao/', plot_name,'.png')
+ggsave(plot_file_name,
+       width = 12, height = 15, units = "cm", family = "serif")
 
 # # Fig - Basic Config - Controlled error ---------------------------------
 # errors_mod <- errors_filt_artif %>%
@@ -372,7 +601,7 @@ ggsave(plot_file_name,
 #                                    size = 8))
 # 
 # plot_name <- "v2_Fig1-controlled-rel_error_fixvsvar"
-# plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+# plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 # ggsave(plot_file_name,
 #        width = 14, height = 8, units = "cm",
 #        family = "serif")
@@ -444,7 +673,7 @@ ggsave(plot_file_name,
 #     theme(panel.background = element_rect(fill = "gray99"))
 #   
 #   plot_name <- paste0("v2_Rplot", config_it)
-#   plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+#   plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 #   ggsave(plot_file_name,
 #          width = 23, height = 16, units = "cm", family = "serif")
 #   
@@ -492,7 +721,7 @@ ggsave(plot_file_name,
 #   scale_fill_brewer(palette = "Set1", type = "")
 # 
 # plot_name <- "v2_v1"
-# plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+# plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 # ggsave(plot_file_name,
 #        width = 30, height = 16, units = "cm", family = "serif")
 # 
@@ -509,7 +738,7 @@ ggsave(plot_file_name,
 #   geom_histogram(aes(dif))
 # 
 # plot_name <- "v2_v2"
-# plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+# plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 # ggsave(plot_file_name,
 #        width = 30, height = 16, units = "cm", family = "serif")
 # 
@@ -528,7 +757,7 @@ ggsave(plot_file_name,
 #   scale_fill_brewer(palette = "Set1", type = "")
 # 
 # plot_name <- "v2_v3"
-# plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+# plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 # ggsave(plot_file_name,
 #        width = 30, height = 16, units = "cm", family = "serif")
 # 
@@ -548,7 +777,7 @@ ggsave(plot_file_name,
 #   scale_fill_brewer(palette = "Set1", type = "")
 # 
 # plot_name <- "v2_v4"
-# plot_file_name <- paste0('../paper/paperB-sbiagro2023/figures/', plot_name,'.png')
+# plot_file_name <- paste0('./paper/paperB-sbiagro2023/figures/', plot_name,'.png')
 # ggsave(plot_file_name,
 #        width = 30, height = 16, units = "cm", family = "serif")
 # 
