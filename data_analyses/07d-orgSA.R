@@ -114,7 +114,7 @@ write.csv(si_mod, "./tables/info_Si_org.csv",
 # }
 # 
 # all_si <- Reduce(bind_rows, all_si_l)
-# save(all_si, file = "../tables/results_SA/all_si_weather.RData")
+# save(all_si, file = "./tables/results_SA/all_si_weather.RData")
 
 
 # Case 0 - Curves ---------------------------------------------------------
@@ -179,7 +179,7 @@ write.csv(si_mod, "./tables/info_Si_org.csv",
 # }
 # 
 # all_results_plot_ext <- Reduce(bind_rows, all_results_plot_l)
-# save(all_results_plot_ext, file = "../tables/results_SA/all_curves_weather.RData")
+# save(all_results_plot_ext, file = "./tables/results_SA/all_curves_weather.RData")
 
 
 # Case 1 - Indices --------------------------------------------------------
@@ -215,7 +215,7 @@ write.csv(si_mod, "./tables/info_Si_org.csv",
 # }
 # 
 # all_si <- rbindlist(all_si_l, fill = TRUE)
-# save(all_si, file = "../tables/results_SA/all_si.RData")
+# save(all_si, file = "./tables/results_SA/all_si.RData")
 
 
 # # Case 1 - Outputs from extreme parameters --------------------------------
@@ -287,5 +287,5 @@ write.csv(si_mod, "./tables/info_Si_org.csv",
 # }
 # 
 # all_curves_params <- rbindlist(all_results_plot_l, fill = TRUE)
-# save(all_curves_params, file = "../tables/results_SA/all_curves_params.RData")
+# save(all_curves_params, file = "./tables/results_SA/all_curves_params.RData")
 

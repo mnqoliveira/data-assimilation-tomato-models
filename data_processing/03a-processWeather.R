@@ -39,7 +39,7 @@ weather_full <- pi_full %>%
 save(weather_full,
      file = "./data/weather/monitoring/weather_init.RData")
 
-# load("../data/weather/monitoring/weather_init.RData")
+# load("./data/weather/monitoring/weather_init.RData")
 
 # Since I may have many missing values between two dates in a sense that 
 # smoothing between them directly makes no sense. And since there are no 
@@ -77,7 +77,7 @@ weather_full_no_na <- x %>%
 save(weather_full_no_na,
      file = "./data/weather/monitoring/weather_fill.Rdata")
 #
-# load("../data/weather/monitoring/weather_fill.RData")
+# load("./data/weather/monitoring/weather_fill.RData")
 #
 # Include an artificial sensor for external radiation. Must be after imputation
 # as I don't want the values filled in the sequence used.
@@ -109,7 +109,7 @@ weather_full_no_na_ <- rbind(weather_full_no_na, proc_theor) %>%
 save(weather_full_no_na_,
      file = "./data/weather/monitoring/weather_fill_.RData")
 
-# load("../data/weather/monitoring/weather_fill_.RData")
+# load("./data/weather/monitoring/weather_fill_.RData")
 
 # Fill remaining NAs with impossible values so that they may be fixed
 # by the outlier smoothing function
@@ -127,7 +127,7 @@ weather_full_mod <- weather_full_no_na_ %>%
 save(weather_full_mod,
      file = "./data/weather/monitoring/weather_final.RData")
 
-# load("../data/weather/monitoring/weather_final.RData")
+# load("./data/weather/monitoring/weather_final.RData")
 
 weather_hourly <- weather_full_mod %>%
   agg_hourly() %>%
@@ -140,7 +140,8 @@ write.csv(weather_hourly,
           file = "./data/weather/monitoring/weather_hourly.csv",
           row.names=FALSE)
 
-#weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
+# weather_hourly <- read.csv("./data/weather/monitoring/weather_hourly.csv")
+#
 
 
 # Hourly weather dataset (TOMGRO) ------------------------------------------

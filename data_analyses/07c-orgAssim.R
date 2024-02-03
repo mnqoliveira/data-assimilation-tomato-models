@@ -92,7 +92,8 @@ for (it in 1:nrow(updState)) {
   upd_mod <- upd %>%
     #select(-starts_with("P"), -starts_with("R")) %>%
     gather(contains("est"), contains("upd"), "P_s", "P_m", "R",
-           "observations", "Gain", "Resid", "Cov_pred",
+           "observations", "Gain", "Resid", contains("System_unc"),
+           contains("cov_pred"),
            key = "variable", value = "measurement") %>%
     mutate(unit = if_else((variable == "est_s" | variable == "upd_s"), 
                           "state", "meas")) %>%

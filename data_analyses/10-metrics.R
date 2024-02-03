@@ -341,40 +341,6 @@ gain <- upd_states_out %>%
 
 
 # SA Case 1 ---------------------------------------------------------------
-# 
-# all_Si_Filt <- all_files_si %>%
-#   filter(case == 1)
-# 
-# all_si_l <- list()
-# 
-# for (it in 1:nrow(all_Si_Filt)){
-# 
-# 
-#   si <- read.csv(all_Si_Filt$path[it]) %>%
-#     mutate(path = all_Si_Filt$path[it])
-# 
-#   if (all_Si_Filt$model[it] == "simple"){
-#     si <- si %>%
-#       rename(w = tt_sum,
-#              wm = plant_yield,
-#              lai = f_solar)
-#   }
-# 
-#   si <- si %>%
-#     left_join(all_Si_Filt[it, ]) %>%
-#     mutate(cod = str_extract(str_extract(path, "path[:digit:]{3}"),
-#                              "[:digit:]{3}"),
-#            cod = as.numeric(cod)) %>%
-#     select(-path)
-# 
-#   all_si_l[[it]] <- si
-# 
-# 
-# }
-# 
-# all_si <- rbindlist(all_si_l, fill = TRUE)
-# save(all_si, file = "./tables/results_SA/all_si.RData")
-
 load("./tables/results_SA/all_si.RData")
 
 all_si_avg <- all_si %>%
@@ -394,68 +360,6 @@ write.csv(all_si_avg, file = "./tables/results_SA/case1_highest_indices.csv")
 
 
 # SA Case 0 ---------------------------------------------------------------
-# factors_filt <- outputs_extreme %>%
-#   filter(grepl("paramsMask", path_fac), case == 0) %>%
-#   select(-path_out) %>%
-#   distinct()
-# 
-# all_results_plot_l <- list()
-# for (it in 1:nrow(factors_filt)){
-# 
-#   # Carrego o arquivo e insiro o numero de linha referente a cada teste de
-#   # parametro. Mais do que isso, faco o mod
-#   # pra achar a pasta e monto o nome da pasta em que estao os resultados
-#   # no df de param filtrado e arrumado. Dai eu carrego numa lista e depois dou
-#   # um rbind? para todos os resultados que eu quero plotar, desde que uma coluna
-#   # tenha o id dos parametros.
-# 
-#   id_run <- factors_filt[it, "id"]
-#   factors_values <- read.csv(factors_filt$path_fac[it]) %>%
-#     mutate(id = id_run,
-#            it_fac = row_number()-1) %>%
-#     gather(-id, -it_fac, key = "param", value = "value")
-# 
-#   outputs_filt <- outputs_extreme %>%
-#     filter(outputs_extreme$id == id_run, grepl("paramsMask", path_fac)) %>%
-#     mutate(it_fac = str_extract(path_out, "it[[:digit:]]+"),
-#            it_fac = as.numeric(gsub("it", "", it_fac))) %>%
-#     arrange(it_fac) %>%
-#     select(-path_fac, -run, -n_samples, -n_splits, -sensor_type,
-#            -cont, -config, -comment)
-# 
-#   for (it2 in 1:nrow(outputs_filt)){
-# 
-#     temp <- read.csv(outputs_filt$path_out[it2])
-# 
-#     temp_ <- temp %>%
-#       mutate(das = row_number(),
-#              it_fac = outputs_filt$it_[it2],
-#              id = factors_filt$id[it]) %>%
-#       left_join(outputs_filt[it2, ]) %>%
-#       left_join(factors_values) %>%
-#       select(-path_out)
-# 
-#     if (factors_filt$model[it] == "simple"){
-# 
-#       temp_ <- temp_ %>%
-#         mutate(k = 0.58,
-#                lai = log(1 - f_solar)/-k) %>%
-#         rename(w = biomass,
-#                wm = plant_yield) %>%
-#         select(-f_solar, -k, -tt_sum)
-# 
-#     }
-# 
-#     id_full <- paste(it, it2, sep = "_")
-#     all_results_plot_l[[id_full]] <- temp_
-# 
-#   }
-# 
-# }
-# 
-# all_results_plot_ext <- Reduce(bind_rows, all_results_plot_l)
-# save(all_results_plot_ext, file = "./tables/results_SA/all_curves_weather.RData")
-
 load("./tables/results_SA/all_curves_weather.RData")
 
 ranges_unc_weather <- all_results_plot_ext %>%

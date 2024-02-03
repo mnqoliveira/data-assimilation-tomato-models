@@ -32,7 +32,7 @@ obs_tomgro <- list.files("./tables/results_simul/exp/",
   lapply(matrix, nrow=1) %>%
   lapply(data.frame)
 
-obs_tomgro_path <- list.files("../tables/results_simul/exp/", 
+obs_tomgro_path <- list.files("./tables/results_simul/exp/", 
                              pattern = "tomgro",
                              include.dirs = FALSE, full.names = TRUE)
 
@@ -61,7 +61,7 @@ errors_simul_mod <- errors_simul %>%
   filter(!is.na(error)) %>%
   filter(variable == "wf" | variable == "wm",
          model == "vanthoor" | model == "tomgro", 
-         sensor == "A" | is.na(sensor),
+         sensor == "A" | is.na(sensor), 
          calib == "cpsIV" | calib == "gnvIV", exp == "n07") %>%
   group_by(dat, model, exp, city, calib, variable) %>%
   mutate(se = error*error,
@@ -151,6 +151,7 @@ simul_vant <- Reduce(bind_rows, all_results) %>%
   # relative observation for the model, left as is, to be applied in the filter
   left_join(errors_tomgro) %>%
   left_join(errors_vanthoor) %>%
+  # wx_sd_ and wf_sd_md are relative errors
   mutate(wf_sd_ = if_else(dat == min(dat) | wf_sd == 0, 10^-4, wf_sd),
          wf_sd_ = zoo::na.locf(wf_sd_),
          wm_sd_ = if_else(dat == min(dat) | wm_sd == 0, 10^-4, wm_sd),
@@ -170,7 +171,7 @@ simul_vant <- Reduce(bind_rows, all_results) %>%
          wf_sd_d = if_else(is.na(wf_sd_d) | wf_sd_d == 0, 0.001, wf_sd_d),
          wm_sd_d = if_else(is.na(wm_sd_d) | wm_sd_d == 0, 0.001, wm_sd_d))
 
-write.csv(simul_vant, "../data/synthetic/obs_vanthoor.csv", 
+write.csv(simul_vant, "./data/synthetic/obs_vanthoor.csv", 
           row.names=FALSE)
 
 # Artificial observations - Tomgro + Perturbations ------------------------
