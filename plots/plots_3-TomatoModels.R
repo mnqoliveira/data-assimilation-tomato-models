@@ -22,13 +22,13 @@ library(lemon)
 # Source functions --------------------------------------------------------
 
 # Update results
-source("./data_analyses/07a-orgSimOut.R")
-source("./data_analyses/07b-orgObs_plot.R")
-source("./data_analyses/07d-orgSA.R")
+# source("./data_analyses/07a-orgSimOut.R")
+# source("./data_analyses/07b-orgObs_plot.R")
+# source("./data_analyses/07d-orgSA.R")
 
 # Path save ---------------------------------------------------------------
 
-path_fig <- "./paper/paper1-model/sub3_2024-XX-XX/figures/"
+path_fig <- "./"
 
 # Load data ---------------------------------------------------------------
 load("./data/plot_theme_horiz.RData")
@@ -103,7 +103,7 @@ plot_cities <- c("gnv" = "Gainesville",
                  "arA" = "Campinas",
                  "lc" = "Lake City", codes_gnv_1994, codes_cps)
 
-cod_unc <- read.csv("../tables/path_cod_unc.csv") %>%
+cod_unc <- read.csv("./tables/path_cod_unc.csv") %>%
   mutate(season = if_else(city == "cps",
                           factor(pdoy,
                                  levels = c(80, 172, 265, 356),
@@ -176,8 +176,6 @@ models_ens2 <- models %>%
 obs_mod <- obs %>%
   filter(variable %in% names(plot_states))
 
-
-
 # Figures 2 to 4: SIs params Wm -------------------------------------------
 
 # all_Si_Filt <- all_files_si %>%
@@ -212,7 +210,7 @@ obs_mod <- obs %>%
 # 
 # all_si1 <- rbindlist(all_si_l, fill = TRUE)
 
-load("D:/Dropbox/Pesquisa/Projetos/modeling/tables/results_SA/all_si.RData")
+load("./tables/results_SA/all_si.RData")
 all_si1 <- all_si
 
 all_si_plot <- all_si1 %>%
@@ -238,9 +236,11 @@ wm_si_plot <- all_si_plot %>%
   filter(type == "ST") %>%
   ungroup()
 
-plots <- wm_si_plot %>%
+plots <- vars_si_plot %>%
   select(model, id_plot) %>%
-  distinct
+  distinct %>%
+  mutate(id_plot_ = c(3, 1, 2)) %>%
+  arrange(id_plot_)
 
 it <- 3
 
@@ -273,6 +273,14 @@ for (it in 1:nrow(plots)){
     mutate(type = "Standard deviation [-]",
            lab = if_else(city == "Gainesville", "B", "A")) %>%
     filter(factors %in% unique(dataset_plot$factors))
+
+  dataset_sd_ <- dataset_sd %>%
+    select(type, city, lab) %>%
+    distinct()
+  
+  dataset_plot_ <- dataset_plot %>%
+    select(type, city, lab) %>%
+    distinct()
   
   ggplot() +
     facet_rep_grid(type ~ city,
@@ -285,9 +293,9 @@ for (it in 1:nrow(plots)){
                 ) +
     geom_point(data = dataset_sd, aes(x=dat, y=index_sd,
                    fill = factors), size = 3, colour = "black", shape=21) +
-    geom_text(data = dataset_sd, mapping = aes(x = Inf, y = Inf, label = lab),
+    geom_text(data = dataset_sd_, mapping = aes(x = Inf, y = Inf, label = lab),
               vjust = "inward", hjust = "inward", size = 5, family = "serif") + 
-    geom_text(data = dataset_plot, mapping = aes(x = Inf, y = Inf, label = lab),
+    geom_text(data = dataset_plot_, mapping = aes(x = Inf, y = Inf, label = lab),
               vjust = "inward", hjust = "inward", size = 5, family = "serif") + 
     scale_discrete_manual(values = paletteer_d("ggthemes::stata_s1color"),
                           aesthetics = c("fill"),
@@ -300,7 +308,7 @@ for (it in 1:nrow(plots)){
          y = "") +
     theme_horiz
   
-  num_plot <- 1 + plots$id_plot[it]
+  num_plot <- 1 + plots$id_plot_[it]
   plot_name <- paste0("fig", num_plot, "_case1_wm_", plots$model[it])
   
   namefile <- paste0(path_fig, plot_name,'.png')
@@ -318,7 +326,7 @@ for (it in 1:nrow(plots)){
 }
 
 # Figure 5 - Unc Yield Param ----------------------------------------------
-load("../tables/results_SA/all_curves_params.RData")
+load("./tables/results_SA/all_curves_params.RData")
 
 # Plot each exp separately
 dataset_plot <- all_curves_params %>%
@@ -406,7 +414,7 @@ ggsave(namefile,
 
 # Figures 6 and 7 - SIs Weather -------------------------------------------
 
-load("../tables/results_SA/all_si_weather.RData")
+load("./tables/results_SA/all_si_weather.RData")
 
 all_si_plot_case0 <- all_si %>%
   mutate(wm = na_if(wm, -99),
@@ -433,6 +441,7 @@ panel_IDs <- tomgro %>%
          label_ = paste0(variable_, city_exp_),
          x_ = x + 5,
          y_ = y - 0.1 * y) %>%
+  select(variable, exp, x_, y_, label_) %>%
   distinct()
 
 ggplot() +
@@ -658,14 +667,14 @@ ggplot() +
                      labels = plot_cities) +
   theme_horiz
 
-namefile <- paste0(path_fig, "fig9_a1_weather.png")
+namefile <- paste0(path_fig, "fig-a1_weather.png")
 ggsave(namefile,
        width = 20, height = 20, units = "cm",
        dpi = 320,
        device = "png"
 )
 
-namefile <- paste0(path_fig, "fig9_a1_weather.eps")
+namefile <- paste0(path_fig, "fig-a1_weather.eps")
 ggsave(namefile,
        width = 20, height = 20, units = "cm",
        family = "serif",
@@ -674,7 +683,6 @@ ggsave(namefile,
 )
 
 # Sup mat: SIs - All variables --------------------------------------------
-
 vars_si_plot <- all_si_plot %>%
   group_by(model, type) %>%
   mutate(id_plot = cur_group_id(),
@@ -687,7 +695,9 @@ vars_si_plot <- all_si_plot %>%
 
 plots <- vars_si_plot %>%
   select(model, id_plot) %>%
-  distinct
+  distinct %>%
+  mutate(id_plot_ = c(3, 1, 2)) %>%
+  arrange(id_plot_)
 
 it <- 1
 for (it in 1:nrow(plots)){
@@ -742,7 +752,8 @@ for (it in 1:nrow(plots)){
                                              keyheight = 0.7)) +
     theme_horiz
 
-  plot_name <- paste0("fig99-c1-3_case1_sup_",
+  num_plot <- plots$id_plot_[it]
+  plot_name <- paste0("fig-c", num_plot,"-case1_sup_",
                       dataset_plot$model[1])
   
   namefile <- paste0(path_fig, plot_name,'.png')
@@ -757,4 +768,107 @@ for (it in 1:nrow(plots)){
          dpi = 320, device = cairo_ps
   )
 
+}
+
+
+# Sup mat: S1 - All variables ---------------------------------------------
+
+load("./tables/results_SA/all_si.RData")
+
+all_si_plot <- all_si %>%
+  select(-n_splits, -sensor_type, -cont, 
+         -config, -comment, -run, -var_out, -n_samples,
+         -case, -exp) %>%
+  filter(!grepl("conf", index)) %>%
+  rename(type = index) %>%
+  gather(lai, w, wf, wm,
+         key = "variable", value = "index") %>%
+  filter(type == "S1")  %>%
+  left_join(cod_unc)
+
+vars_si_plot <- all_si_plot %>%
+  group_by(model, type) %>%
+  mutate(id_plot = cur_group_id(),
+         city = factor(city,
+                       levels = c("cps", "gnv"),
+                       labels = c("Campinas",
+                                  "Gainesville"))) %>%
+  ungroup() %>%
+  filter(type == "S1")
+
+plots <- vars_si_plot %>%
+  select(model, id_plot) %>%
+  distinct %>%
+  mutate(id_plot_ = c(3, 1, 2)) %>%
+  arrange(id_plot_)
+
+it <- 1
+for (it in 1:nrow(plots)){
+  
+  dataset_plot <- vars_si_plot %>%
+    filter(id_plot == plots$id_plot[it]) %>%
+    mutate(index = if_else(is.na(index) | is.nan(index), 0., index)) %>%
+    filter(index > 0.0, index <= 10,
+           !((dat < 40) & (variable == "wm" | variable == "wf"))
+           # factors != "N_b", factors != "N_FF", factors != "N_max",
+           # factors != "LAI_max", factors != "alpha_F",
+           # factors != "T_crit"
+    ) %>%
+    group_by(factors, variable, type, dat, city, model) %>%
+    mutate(index_avg = mean(index, na.rm = TRUE),
+           index_min = quantile(index, 0.1, na.rm = TRUE),
+           index_max = quantile(index, 0.9, na.rm = TRUE)) %>%
+    ungroup() %>%
+    filter(index_avg > 0.05) %>%
+    arrange(variable, factors) %>%
+    mutate(test1 = index_min + index_avg,
+           test2 = index_max - index_avg)
+  
+  labels <- dataset_plot %>%
+    group_by(variable, city) %>%
+    summarise(x_ = 5, y_ = 1.0) %>%
+    ungroup() %>%
+    mutate(variable_ = LETTERS[as.numeric(as.factor(variable))],
+           city_exp_ = as.numeric(as.factor(city)),
+           label_ = paste0(variable_, city_exp_))
+  
+  ggplot(dataset_plot) +
+    facet_rep_grid(variable ~ city,
+                   labeller = labeller(variable = plot_states_unitless),
+                   switch = "y") +
+    geom_line(data = dataset_plot,
+              aes(x=dat, y=index_avg,
+                  col = factors),
+              size = 1)   +
+    geom_point(data = dataset_plot,
+               aes(x=dat, y=index, color = factors), alpha = 0.5) +
+    geom_text(data=labels, aes(x_, y_, label = label_), family = "serif") +
+    labs(x = "Days after transplanting [days]",
+         y = "S1 [-]",
+         colour = "Parameters") +
+    ylim(0, 1) +
+    scale_discrete_manual(values = paletteer_d("ggthemes::stata_s1color"),
+                          aesthetics = c("colour", "fill"),
+                          name = "Parameters",
+                          guide=guide_legend(nrow = 2,
+                                             keywidth = 0.7,
+                                             keyheight = 0.7)) +
+    theme_horiz
+  
+  num_plot <- 3 + plots$id_plot_[it]
+  plot_name <- paste0("fig-c", num_plot, "-case1_sup_",
+                      dataset_plot$model[1])
+  
+  namefile <- paste0(path_fig, plot_name,'.png')
+  ggsave(namefile,
+         width = 20, height = 20, units = "cm", dpi = 320,
+         device = "png"
+  )
+  
+  namefile <- paste0(path_fig, plot_name,'.eps')
+  ggsave(namefile,
+         width = 20, height = 20, units = "cm", family = "serif", 
+         dpi = 320, device = cairo_ps
+  )
+  
 }

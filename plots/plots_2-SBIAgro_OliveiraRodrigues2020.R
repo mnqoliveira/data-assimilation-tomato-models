@@ -1,22 +1,18 @@
-"""
-
-Visualization used in
-
-@inproceedings{sbiagro,
- author = {Monique Oliveira and Luiz Rodrigues},
- title = {Monitoramento de plantas em casas de vegetação para assimilação de dados},
- booktitle = {Anais do XIII Congresso Brasileiro de Agroinformática},
- location = {Evento Online},
- year = {2021},
- keywords = {},
- issn = {0000-0000},
- pages = {215--224},
- publisher = {SBC},
- address = {Porto Alegre, RS, Brasil},
- url = {https://sol.sbc.org.br/index.php/sbiagro/article/view/18393}
-}
-
-"""
+#' Visualization used in
+#' 
+#' @inproceedings{sbiagro,
+#'  author = {Monique Oliveira and Luiz Rodrigues},
+#'  title = {Monitoramento de plantas em casas de vegetação para assimilação de dados},
+#'  booktitle = {Anais do XIII Congresso Brasileiro de Agroinformática},
+#'  location = {Evento Online},
+#'  year = {2021},
+#'  keywords = {},
+#'  issn = {0000-0000},
+#'  pages = {215--224},
+#'  publisher = {SBC},
+#'  address = {Porto Alegre, RS, Brasil},
+#'  url = {https://sol.sbc.org.br/index.php/sbiagro/article/view/18393}
+#' }
 
 rm(list = ls())
 options(stringsAsFactors = FALSE)
