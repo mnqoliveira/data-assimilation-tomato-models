@@ -236,15 +236,15 @@ wm_si_plot <- all_si_plot %>%
   filter(type == "ST") %>%
   ungroup()
 
-plots <- vars_si_plot %>%
+plots <- wm_si_plot %>%
   select(model, id_plot) %>%
   distinct %>%
   mutate(id_plot_ = c(3, 1, 2)) %>%
   arrange(id_plot_)
 
-it <- 3
+it <- 1
 
-for (it in 1:nrow(plots)){
+for (it in plots$id_plot_){
   
   dataset_plot <- wm_si_plot %>%
     filter(id_plot == plots$id_plot[it]) %>%
@@ -700,7 +700,7 @@ plots <- vars_si_plot %>%
   arrange(id_plot_)
 
 it <- 1
-for (it in 1:nrow(plots)){
+for (it in plots$id_plot_){
 
   dataset_plot <- vars_si_plot %>%
     filter(id_plot == plots$id_plot[it]) %>%
@@ -803,7 +803,7 @@ plots <- vars_si_plot %>%
   arrange(id_plot_)
 
 it <- 1
-for (it in 1:nrow(plots)){
+for (it in plots$id_plot_){
   
   dataset_plot <- vars_si_plot %>%
     filter(id_plot == plots$id_plot[it]) %>%
